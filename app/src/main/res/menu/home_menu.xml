@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Add new" android:id="@+id/addnew"/>
+
+    <item android:title="My Profile" android:id="@+id/myprofile" />
+
+    <item android:title="Import data" android:id="@+id/importexcel" />
+
+    <item android:title="Logout" android:id="@+id/logout"/>
+
+</menu>

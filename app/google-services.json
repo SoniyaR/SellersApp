@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "532198026185",
+    "firebase_url": "https://sellersapp-8737a.firebaseio.com",
+    "project_id": "sellersapp-8737a",
+    "storage_bucket": "sellersapp-8737a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:532198026185:android:0030dff2f43f8b08",
+        "android_client_info": {
+          "package_name": "com.soniya.sellersapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "532198026185-l9jkuo7c9n4ukell60o8ucf9me3dnria.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBa9alGkgs_LXGuzVN_5C3Hk0sq5M4RW-k"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
