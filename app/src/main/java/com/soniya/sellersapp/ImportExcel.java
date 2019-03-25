@@ -25,6 +25,8 @@ import com.google.android.gms.common.api.Api;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -121,17 +123,17 @@ public class ImportExcel extends AppCompatActivity {
 
            // List<HashMap<String, String>> hmlist = new ArrayList();
             String filePath = uri.getPath().split(":")[1].trim();
-
+            FileInputStream inputStream = null;
             try {
-                FileInputStream inputStream = new FileInputStream(filePath);
-
+                inputStream = new FileInputStream(filePath);
+                //OPCPackage opcPackage = OPCPackage.open(filePath);
 
                 Iterator<Row> rowIterator = null;
-                if(filePath.split(".")[1].equalsIgnoreCase("xlsx")) {
+                if(filePath.endsWith("xlsx")) {
                     XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
                     XSSFSheet sheet = workbook.getSheetAt(0);
                     rowIterator = sheet.iterator();
-                }else if(filePath.split(".")[1].equalsIgnoreCase("xls")){
+                }else if(filePath.endsWith("xls")){
                     HSSFWorkbook workbook = new HSSFWorkbook(inputStream);
                     HSSFSheet sheet = workbook.getSheetAt(0);
                     rowIterator = sheet.iterator();
@@ -203,7 +205,7 @@ public class ImportExcel extends AppCompatActivity {
                 inputStream.close();
 
                 //call upload data method of Firebasedatafactory
-                database.uploadImportData(hmList);
+                //database.uploadImportData(hmList);
 
             } catch (FileNotFoundException e) {
                 // TODO Auto-generated catch block
@@ -212,8 +214,18 @@ public class ImportExcel extends AppCompatActivity {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+            finally {
+                if(inputStream !=null) {
+                    try {
+                        inputStream.close();
+                    } catch (IOException e) {
+                        Log.i("soni-", "failed closing resources");
+                        e.printStackTrace();
+                    }
+                }
+            }
 
-            adapter.notifyDataSetChanged();
+           // adapter.notifyDataSetChanged();
 
         }
     }

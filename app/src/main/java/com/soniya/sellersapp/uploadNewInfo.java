@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
@@ -19,22 +20,28 @@ import com.parse.ParseObject;
 import com.parse.SaveCallback;
 
 import java.io.File;
+import java.util.HashMap;
 
 public class uploadNewInfo extends AppCompatActivity implements View.OnClickListener {
 
     TextView  editDescriptionView;
     TextView descriptionView;
     Button saveButton;
-    ImageView uploadButton;
+
     TextView titleText;
-    ParseFile img;
-    byte[] arr =null;
+    //ParseFile img;
+    //byte[] arr =null;
     TextView sellingpriceView;
+    HashMap<String, Object> infoHashmap = new HashMap<>();
+    TextView vehicleNum;
+    TextView location;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload_new_info);
+
+        infoHashmap.clear();
 
         titleText = (TextView) findViewById(R.id.titleTextView);
 
@@ -46,17 +53,18 @@ public class uploadNewInfo extends AppCompatActivity implements View.OnClickList
         editDescriptionView = (TextView) findViewById(R.id.editDescription);
         editDescriptionView.setVisibility(View.INVISIBLE);
 
+        vehicleNum = (TextView) findViewById(R.id.numberText);
+        location = (TextView) findViewById(R.id.locationText);
+
         saveButton = (Button) findViewById(R.id.saveButton);
         saveButton.setOnClickListener(this);
 
-        uploadButton = (ImageView) findViewById(R.id.uploadButton);
-        uploadButton.setOnClickListener(this);
 
-        Intent i = getIntent();
+        /*Intent i = getIntent();
         if(i != null && i.hasExtra("bitmapVal")){
             arr = i.getByteArrayExtra("bitmapVal");
 
-        }
+        }*/
 
     }
 
@@ -84,43 +92,41 @@ public class uploadNewInfo extends AppCompatActivity implements View.OnClickList
                 editDescriptionView.setVisibility(View.INVISIBLE);
 
                 //save editDescriptionView.gettext().toString()  to database
-                if(titleText.getText() != null && !titleText.getText().toString().isEmpty()
-                        && descriptionView.getText() != null && !descriptionView.getText().toString().isEmpty()
-                        && sellingpriceView.getText()!=null && !sellingpriceView.getText().toString().isEmpty()) {
 
-                    //set parsefile
-                    if(arr !=null && arr.length >0) {
-
-                        img = new ParseFile("IMG_"+ descriptionView.getText().toString() + ".png", arr);
-
-                        saveInfo(titleText.getText().toString(), img, descriptionView.getText().toString(), sellingpriceView.getText().toString());
-
-                    }else{
-                        Log.i("soni-","Please upload car image!");
-                    }
-
-
-                }
-                else{
                     if(titleText.getText().length() == 0 || titleText.getText().toString().isEmpty()){
                         titleText.setError("This field cannot be blank!");
                     }else if(descriptionView.getText().length() == 0 || descriptionView.getText().toString().isEmpty()){
                         descriptionView.setError("This field cannot be blank!");
                     }else if(sellingpriceView.getText().length() == 0 || sellingpriceView.getText().toString().isEmpty()){
                         sellingpriceView.setError("This field cannot be blank!");
+                    }else if(vehicleNum.getText().length() == 0 ){
+                        vehicleNum.setError("This field cannot be blank!");
+                    }else if(location.getText().length() == 0){
+                        location.setError("This field cannot be blank!");
+                    }else {
+                            //saveInfo(titleText.getText().toString(), img, descriptionView.getText().toString(), sellingpriceView.getText().toString());
+                            saveInfoFirebase(infoHashmap);
+
+                            Intent nextInfo = new Intent(getApplicationContext(), UploadNewInfo2.class);
+                            nextInfo.putExtra("infoHashmap", infoHashmap);
+                            startActivity(nextInfo);
+
                     }
-                    //Toast.makeText(this, "This field cannot be blank! ", Toast.LENGTH_SHORT).show();
-                }
+
+
+
 
                 break;
 
             case R.id.backgoundLayout:
             case R.id.titleView:
             case R.id.descriptionText:
+            case R.id.locationView:
+            case R.id.vehiclenum:
             case R.id.uploadImgText:
                 //hide keyboard
                 InputMethodManager ipMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                ipMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                ipMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
 
                 break;
 
@@ -131,13 +137,25 @@ public class uploadNewInfo extends AppCompatActivity implements View.OnClickList
 
     }
 
+    //vehicle_no	model_name	availability description	location	sellingprice
+    private void saveInfoFirebase(HashMap<String, Object> infoHashmap) {
+
+        infoHashmap.put("vehicle_no", vehicleNum.getText().toString());
+        infoHashmap.put("model_name", titleText.getText().toString());
+        infoHashmap.put("availability", "Available");
+        infoHashmap.put("description", descriptionView.getText().toString());
+        infoHashmap.put("location", location.getText().toString());
+        infoHashmap.put("sellingprice", sellingpriceView.getText().toString());
+
+    }
+
     private void selectPhoto() {
         Intent ii = new Intent(getApplicationContext(), SelectPhoto.class);
         startActivity(ii);
 
     }
 
-    public void saveInfo(String title, ParseFile carImage, String desc, String sellingprice){
+   /* public void saveInfo(String title, ParseFile carImage, String desc, String sellingprice){
 
         ParseObject infoObject = new ParseObject("carInformation");
         infoObject.put("title", title);
@@ -153,7 +171,7 @@ public class uploadNewInfo extends AppCompatActivity implements View.OnClickList
             }
         });
 
-    }
+    }*/
 
     public void saveImage(){
 

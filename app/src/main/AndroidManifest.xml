@@ -19,9 +19,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".SetupNewProfile"></activity>
-        <activity android:name=".ImportExcel" />
-        <activity android:name=".OrderDetails" />
+        <activity android:name=".UploadNewInfo2"></activity>
+        <activity android:name=".SetupNewProfile" />
+        <activity
+            android:name=".ImportExcel"
+            android:parentActivityName=".HomePage" />
+        <activity
+            android:name=".OrderDetails"
+            android:parentActivityName=".HomePage" />
         <activity
             android:name=".uploadNewInfo"
             android:parentActivityName=".HomePage">
@@ -45,7 +50,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SignupForm" />
+        <activity
+            android:name=".SignupForm"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".MyProfile"
+            android:parentActivityName=".HomePage" />
     </application>
 
 </manifest>

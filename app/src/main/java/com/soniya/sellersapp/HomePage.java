@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +22,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseACL;
@@ -47,6 +53,8 @@ public class HomePage extends AppCompatActivity {
 
     Bitmap carImage;
     FirebaseAdapter fbAdapter = new FirebaseAdapter();
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -112,10 +120,9 @@ public class HomePage extends AppCompatActivity {
         setContentView(R.layout.activity_home_page);
 
         setTitle("Active Orders");
-
+        //{model_name=qwe12_bb, sellingprice=90000, description=nnhh_ffgg, location=pune, availability=Available}
         String[] from = {"model_name", "sellingprice", "location", "carImage"};
         int[] to = {R.id.modelName, R.id.sellingprice, R.id.location, R.id.carImageView};
-
 
         carsList = (ListView) findViewById(R.id.listView);
         activeOrders.clear();
@@ -151,6 +158,7 @@ public class HomePage extends AppCompatActivity {
             finish();
         }
 
+
         carsList.setOnItemClickListener((parent, view, position, id) -> {
 
             Intent intent = new Intent(getApplicationContext(), OrderDetails.class);
@@ -168,7 +176,9 @@ public class HomePage extends AppCompatActivity {
 
         FirebaseDataFactory fbFactory = new FirebaseDataFactory();
         hmList = fbFactory.retrieveCarsList();
-
+        if(!hmList.isEmpty()){
+            Log.i("soni-retrievelist", "got the data");
+        }
         adapter.notifyDataSetChanged();
 
     }
