@@ -27,7 +27,6 @@ public class uploadNewInfo extends AppCompatActivity implements View.OnClickList
     TextView  editDescriptionView;
     TextView descriptionView;
     Button saveButton;
-
     TextView titleText;
     //ParseFile img;
     //byte[] arr =null;
@@ -50,7 +49,7 @@ public class uploadNewInfo extends AppCompatActivity implements View.OnClickList
 
         sellingpriceView = (TextView) findViewById(R.id.sellingpriceView);
 
-        editDescriptionView = (TextView) findViewById(R.id.editDescription);
+        editDescriptionView = (TextView) findViewById(R.id.descriptionView);
         editDescriptionView.setVisibility(View.INVISIBLE);
 
         vehicleNum = (TextView) findViewById(R.id.numberText);
@@ -120,7 +119,6 @@ public class uploadNewInfo extends AppCompatActivity implements View.OnClickList
 
             case R.id.backgoundLayout:
             case R.id.titleView:
-            case R.id.descriptionText:
             case R.id.locationView:
             case R.id.vehiclenum:
             case R.id.uploadImgText:

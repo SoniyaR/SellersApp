@@ -39,6 +39,7 @@ import com.parse.ParseUser;
 import java.util.AbstractQueue;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 public class HomePage extends AppCompatActivity {
@@ -54,7 +55,7 @@ public class HomePage extends AppCompatActivity {
     Bitmap carImage;
     FirebaseAdapter fbAdapter = new FirebaseAdapter();
 
-
+    DatabaseReference carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -71,7 +72,6 @@ public class HomePage extends AppCompatActivity {
 
         switch (item.getItemId())   {
             case R.id.addnew:
-
                 uploadNewOrder();
 
                 break;
@@ -86,19 +86,52 @@ public class HomePage extends AppCompatActivity {
                 break;
 
             case R.id.logout:
-
                 //ParseUser.logOut();
                 fbAdapter.logoutUser();
                 Intent i = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(i);
                 finish();
+                break;
 
+            case R.id.refreshList:
+                refreshList();
                 break;
 
             default: break;
         }
 
         return true;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.i("soni-in onstart", "");
+
+        carInfoReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                hmList.clear();
+                Log.i("soni-datachange", "in onstart");
+                for(DataSnapshot carinfo : dataSnapshot.getChildren())  {
+                    Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
+                    HashMap<String, Object> hm = new HashMap<String, Object>();
+                    while(it.hasNext()){
+                        DataSnapshot str = it.next();
+                        Log.i("soni-onstart",str.getValue().toString());
+                        hm.put(str.getKey(), str.getValue().toString());
+                    }
+                    hmList.add(hm);
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
     }
 
     private void uploadNewOrder() {
@@ -118,7 +151,7 @@ public class HomePage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
-
+        Log.i("soni-", "in oncreate");
         setTitle("Active Orders");
         //{model_name=qwe12_bb, sellingprice=90000, description=nnhh_ffgg, location=pune, availability=Available}
         String[] from = {"model_name", "sellingprice", "location", "carImage"};
@@ -146,9 +179,33 @@ public class HomePage extends AppCompatActivity {
             }
         });
 
+        carInfoReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                hmList.clear();
+                Log.i("soni-datachange", "in oncreate");
+                for(DataSnapshot carinfo : dataSnapshot.getChildren())  {
+                    Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
+                    HashMap<String, Object> hm = new HashMap<String, Object>();
+                    while(it.hasNext()){
+                        DataSnapshot str = it.next();
+                        Log.i("soni-create",str.getValue().toString());
+                        hm.put(str.getKey(), str.getValue().toString());
+                    }
+                    hmList.add(hm);
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
         if(fbAdapter.checkCurrentUser()){
             Toast.makeText(this, "Retrieving Cars List", Toast.LENGTH_SHORT).show();
-            retriveCarList();
+            //retriveCarList();
         }
         else  {
             //goto login screen
@@ -158,11 +215,10 @@ public class HomePage extends AppCompatActivity {
             finish();
         }
 
-
         carsList.setOnItemClickListener((parent, view, position, id) -> {
 
             Intent intent = new Intent(getApplicationContext(), OrderDetails.class);
-            intent.putExtra("hm", hmList.get(position).get("model_name").toString());
+            intent.putExtra("selectedHM", hmList.get(position));
             startActivity(intent);
 
         });
@@ -176,11 +232,12 @@ public class HomePage extends AppCompatActivity {
 
         FirebaseDataFactory fbFactory = new FirebaseDataFactory();
         hmList = fbFactory.retrieveCarsList();
-        if(!hmList.isEmpty()){
+        if(hmList.size() > 0){
             Log.i("soni-retrievelist", "got the data");
+            adapter.notifyDataSetChanged();
+        }else{
+            carsList.setAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, new String[]{"No Records found..."}));
         }
-        adapter.notifyDataSetChanged();
-
     }
 
 /*
@@ -237,5 +294,13 @@ public class HomePage extends AppCompatActivity {
             }
         }, 2000);
 
+    }
+
+
+    public void refreshList()   {
+        Log.i("soni-", "Sync icon clicked...");
+        hmList.clear();
+        retriveCarList();
+        adapter.notifyDataSetChanged();
     }
 }

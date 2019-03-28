@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/refreshList"
+        android:icon="@android:drawable/stat_notify_sync_noanim"
+        android:title="Refresh"
+        app:showAsAction="always"/>
 
     <item android:title="Add new" android:id="@+id/addnew"/>
 

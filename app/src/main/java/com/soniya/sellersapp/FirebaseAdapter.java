@@ -77,6 +77,19 @@ public class FirebaseAdapter {
         return false;
     }
 
+    public String getCurrentUser()  {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user !=null) {
+            Log.i("soni-",  user.getDisplayName()+ " " + user.getEmail() + " " + user.getUid());
+            if(user.getDisplayName()!=null && !user.getDisplayName().isEmpty()) {
+                return user.getDisplayName();
+            }else{
+                return user.getEmail().split("@")[0];
+            }
+        }
+        return "Not known";
+    }
+
     public boolean signupUser(Activity context, String email, String password)  {
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(context, new OnCompleteListener<AuthResult>() {
             @Override

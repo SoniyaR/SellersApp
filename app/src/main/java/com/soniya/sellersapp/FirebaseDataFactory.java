@@ -7,6 +7,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
@@ -17,12 +18,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class FirebaseDataFactory {
 
     private DatabaseReference db = FirebaseDatabase.getInstance().getReference();
     char space = ' ';
     char replacechar = '_';
+    DatabaseReference carInfoReference;
 
    /* public void addUserInfo(String emailId){
 
@@ -34,12 +37,12 @@ public class FirebaseDataFactory {
     public List<HashMap<String, Object>> retrieveCarsList ()    {
 
         List<HashMap<String, Object>> hmlist = new ArrayList<>();
-        DatabaseReference carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
+        carInfoReference = db.child("CarsInfo").child("MH02_RT_4532");
             carInfoReference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if(dataSnapshot.getValue() !=null) {
-                        //Log.i("soni-dataSnapshot", dataSnapshot.getValue().toString());
+                        Log.i("soni-dataSnapshot", dataSnapshot.getValue().toString());
 
                         for (DataSnapshot child : dataSnapshot.getChildren()) {
                             if (child.hasChildren() && child.getValue() != null) {
@@ -64,13 +67,22 @@ public class FirebaseDataFactory {
                 }
             });
 
-            if(hmlist.isEmpty()){
-                Log.i("soni-hmlistempty", "yes");
-                return null;
-            }else {
 
-                return hmlist;
+        /*Query query = carInfoReference.equalTo("MH02_RT_4532");
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                Log.i("soni-query",String.valueOf(dataSnapshot.hasChildren()));
             }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+*/
+        return hmlist;
 
     }
 
@@ -89,19 +101,31 @@ public class FirebaseDataFactory {
 
     public void uploadImportData(List<HashMap<String, Object>>hmlist)    {
 
-        DatabaseReference curr_ref =  db.child("CarsInfo");
-    //vehicle_no	model_name	availability description	location	sellingprice
+        DatabaseReference curr_ref =  db.child("CarsInfo").child(new FirebaseAdapter().getCurrentUser());
+        //vehicle_no	model_name	availability description	location	sellingprice
         for(HashMap<String, Object> hm : hmlist)    {
             String vehicleNum = hm.get("vehicle_no").toString().replace(space, replacechar);
-            //curr_ref.child("vehicle_no").setValue(vehicleNum);
+            String modelName = hm.get("model_name").toString().replace(space, replacechar);
+            String availability = hm.get("availability").toString().replace(space, replacechar);
+            String description = hm.get("description").toString().replace(space, replacechar);
+            String location = hm.get("location").toString().replace(space, replacechar);
+            String price = hm.get("sellingprice").toString().replace(space, replacechar);
+
+
             Log.i("soni-vehicleNum", vehicleNum);
-            curr_ref.child(vehicleNum).child("model_name").setValue(hm.get("model_name").toString().replace(space, replacechar));
+            /*curr_ref.child(vehicleNum).child("model_name").setValue(hm.get("model_name").toString().replace(space, replacechar));
             curr_ref.child(vehicleNum).child("availability").setValue(hm.get("availability").toString().replace(space, replacechar));
             curr_ref.child(vehicleNum).child("description").setValue(hm.get("description").toString().replace(space, replacechar));
             curr_ref.child(vehicleNum).child("location").setValue(hm.get("location").toString().replace(space, replacechar));
-            curr_ref.child(vehicleNum).child("sellingprice").setValue(hm.get("sellingprice").toString().replace(space, replacechar));
+            curr_ref.child(vehicleNum).child("sellingprice").setValue(hm.get("sellingprice").toString().replace(space, replacechar));*/
+
+            CarInfo carInfo = new CarInfo(vehicleNum, modelName, availability, location, price, description);
+            curr_ref.push().setValue(carInfo);
+            //TODO: add vehicle number in userInfo for the current user who uploaded this info, it will be array of strings for vehicleNum
 
         }
+        //Map<String, CarInfo> carMap = new HashMap<>();
     }
+
 
 }
