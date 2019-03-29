@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -72,8 +73,8 @@ public class HomePage extends AppCompatActivity {
 
         switch (item.getItemId())   {
             case R.id.addnew:
-                uploadNewOrder();
-
+                registerForContextMenu(findViewById(R.id.addnew));
+                //uploadNewOrder();
                 break;
 
             case R.id.myprofile:
@@ -134,12 +135,41 @@ public class HomePage extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        getMenuInflater().inflate(R.menu.selectimport_menu, menu);
+
+
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+
+        switch(item.getItemId())   {
+
+            case R.id.addInfo:
+                Log.i("soni-contextmenu", "single import selected");
+                uploadNewOrder();
+                return true;
+
+            case R.id.importfile:
+                Log.i("soni-contextmenu", "file import selected");
+                Intent importIntent = new Intent(getApplicationContext(), ImportExcel.class);
+                startActivity(importIntent);
+                return true;
+
+        }
+
+        return super.onContextItemSelected(item);
+
+    }
+
     private void uploadNewOrder() {
 
         Intent i = new Intent(getApplicationContext(), uploadNewInfo.class);
         startActivity(i);
-        finish();
-
     }
 
     private void gotoProfile()  {

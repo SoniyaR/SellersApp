@@ -19,7 +19,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".UploadNewInfo2"></activity>
+        <activity android:name=".UploadNewInfo2"
+            android:parentActivityName=".uploadNewInfo"></activity>
         <activity android:name=".SetupNewProfile" />
         <activity
             android:name=".ImportExcel"

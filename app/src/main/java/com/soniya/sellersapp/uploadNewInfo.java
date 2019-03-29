@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -174,5 +175,15 @@ public class uploadNewInfo extends AppCompatActivity implements View.OnClickList
     public void saveImage(){
 
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+       /* if(item.getItemId() == android.R.id.home)   {
+            Log.i("soni-back", " arrow pressed");
+            return true;
+        }*/
+        return super.onOptionsItemSelected(item);
     }
 }

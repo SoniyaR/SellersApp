@@ -14,6 +14,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -62,6 +65,32 @@ public class ImportExcel extends AppCompatActivity {
         }
     }
 */
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.fileimport_menu, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.excelImport)    {
+            Log.i("soni-importpage", "selected Excel");
+            browseClicked();
+            return true;
+        }else if(item.getItemId() == R.id.something)    {
+            Log.i("soni-importpage", "selected Something");
+            return true;
+        }else {
+            return super.onContextItemSelected(item);
+        }
+    }
+
+    public void onImportTextClicked(View view)  {
+        this.openContextMenu(view);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +100,9 @@ public class ImportExcel extends AppCompatActivity {
 
         importButton = (Button) findViewById(R.id.importExcelButton);
         importButton.setVisibility(View.VISIBLE);
+
+        TextView importTextView = findViewById(R.id.importFileTextView);
+        registerForContextMenu(importTextView);
 
         database = new FirebaseDataFactory();
 
@@ -227,10 +259,13 @@ public class ImportExcel extends AppCompatActivity {
 
            // adapter.notifyDataSetChanged();
 
+            //if all is good, go to homepage with new content uploaded
+            //else show error
+
         }
     }
 
-    public void browseClicked(View view){
+    public void browseClicked(){
 
         Log.i("soni-", "BROWSE clicked");
 

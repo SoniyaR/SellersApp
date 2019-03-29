@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Import Excel file" android:id="@+id/excelImport" />
+    <item android:title="Import something" android:id="@+id/something" />
+
+</menu>

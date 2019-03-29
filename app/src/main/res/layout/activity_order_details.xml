@@ -36,18 +36,19 @@
         app:layout_constraintTop_toBottomOf="@+id/imageView2" />
 
     <android.support.v7.widget.GridLayout
-        android:id="@+id/gridLayout2"
-        android:layout_width="395dp"
+        android:id="@+id/gridLayout"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        app:columnCount="2"
+        app:layout_constraintTop_toBottomOf="@+id/modelname"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:rowCount="1"
-        tools:layout_editor_absoluteY="276dp">
+        app:columnCount="2"
+        app:rowCount="1">
 
         <TextView
             android:id="@+id/availability"
@@ -58,7 +59,7 @@
             android:textSize="18sp"
             app:layout_column="0"
             app:layout_columnWeight="1"
-            app:layout_row="1" />
+            app:layout_row="0" />
 
         <TextView
             android:id="@+id/price"
@@ -87,7 +88,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.418"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/gridLayout2" />
+        app:layout_constraintTop_toBottomOf="@+id/gridLayout" />
 
     <TextView
         android:id="@+id/soldtext"
@@ -99,7 +100,8 @@
         android:textColor="@android:color/holo_orange_dark"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintBaseline_toBaselineOf="@+id/soldSwitch"
-        app:layout_constraintStart_toEndOf="@+id/soldSwitch" />
+        app:layout_constraintBottom_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/soldSwitch"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
