@@ -64,6 +64,7 @@ public class FirebaseDataFactory {
                     if(vehicleNumList.contains(carinfo.getKey())) {
                         Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
                         HashMap<String, Object> hm = new HashMap<String, Object>();
+                        hm.put("vehicle_no", carinfo.getKey().toString());
                         while (it.hasNext()) {
                             DataSnapshot ds = it.next();
                             //Log.i("soni-onstart",ds.getKey().toString() + " " + ds.getValue().toString());

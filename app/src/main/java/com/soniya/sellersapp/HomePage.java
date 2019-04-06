@@ -32,21 +32,19 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 public class HomePage extends AppCompatActivity {
-    //List<HashMap<String, String>> mapList = new ArrayList<HashMap<String, String>>();
 
     private boolean doubleBackToExitPressedOnce=false;
 
-    List<HashMap<String, Object>> hmList = new ArrayList<>();
+    List<HashMap<String, Object>> hmList;
     ListView carsList;
-    SimpleAdapter adapter;
-    ArrayList<String> activeOrders = new ArrayList<>();
+    SimpleAdapter simpleAdapter;
+    ArrayList<String> activeOrders ;
 
     char space = ' ';
     char replacechar = '_';
@@ -55,13 +53,16 @@ public class HomePage extends AppCompatActivity {
     FirebaseAdapter fbAdapter = new FirebaseAdapter();
     FirebaseDataFactory fbFactory = new FirebaseDataFactory();
 
-    DatabaseReference carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
-    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
+    DatabaseReference carInfoReference;
+    DatabaseReference userRef;
 
     StorageReference storageRef = FirebaseStorage.getInstance().getReference();
 
     String selVehicleNum = "";
     String uname = "";
+
+    String[] from = {"model_name", "sellingprice", "location", "carImage"};
+    int[] to = {R.id.modelName, R.id.sellingprice, R.id.location, R.id.carImageView};
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -115,15 +116,19 @@ public class HomePage extends AppCompatActivity {
         Log.i("soni-", "in oncreate");
         setTitle("Active Orders");
         //{model_name=qwe12_bb, sellingprice=90000, description=nnhh_ffgg, location=pune, availability=Available}
-        String[] from = {"model_name", "sellingprice", "location", "carImage"};
-        int[] to = {R.id.modelName, R.id.sellingprice, R.id.location, R.id.carImageView};
+
+        activeOrders = new ArrayList<>();
+        hmList = new ArrayList<>();
+
+        carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
+        userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
 
         carsList = (ListView) findViewById(R.id.listView);
-        adapter = new SimpleAdapter(this, hmList, R.layout.carslist_layout, from, to);
-        carsList.setAdapter(adapter);
+        simpleAdapter = new SimpleAdapter(this, hmList, R.layout.carslist_layout, from, to);
+        carsList.setAdapter(simpleAdapter);
         registerForContextMenu(carsList);
 
-        adapter.setViewBinder(new SimpleAdapter.ViewBinder() {
+        simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
             @Override
             public boolean setViewValue(View view, Object data, String textRepresentation) {
                 if(view instanceof ImageView && view.getId() == R.id.carImageView && data instanceof Bitmap){
@@ -140,41 +145,19 @@ public class HomePage extends AppCompatActivity {
             }
         });
 
-        /*carInfoReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                hmList.clear();
-                Log.i("soni-datachange", "in oncreate");
-                for(DataSnapshot carinfo : dataSnapshot.getChildren())  {
-                    Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
-                    HashMap<String, Object> hm = new HashMap<String, Object>();
-                    while(it.hasNext()){
-                        DataSnapshot str = it.next();
-                        Log.i("soni-create",str.getValue().toString());
-                        hm.put(str.getKey(), str.getValue().toString());
-                    }
-                    hmList.add(hm);
-                }
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });*/
-
         if(fbAdapter.checkCurrentUser()){
             uname = fbAdapter.getCurrentUser();
             Toast.makeText(this, "Retrieving Cars List", Toast.LENGTH_SHORT).show();
+            activeOrders.clear();
             userRef.child(uname).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     activeOrders.clear();
                     if(dataSnapshot !=null && dataSnapshot.hasChild("ownerof")) {
                         activeOrders = (ArrayList<String>) dataSnapshot.child("ownerof").getValue();
-                        //activeOrders = vehicleNumList;
                     }
+
+                    retriveCarList();
                 }
 
                 @Override
@@ -182,7 +165,6 @@ public class HomePage extends AppCompatActivity {
 
                 }
             });
-
         }
         else  {
             //goto login screen
@@ -206,11 +188,8 @@ public class HomePage extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         Log.i("soni-", "in onStart");
-        activeOrders.clear();
-        if(activeOrders.isEmpty())    {
-            Log.i("soni-homepage", "activeOrders list is empty");
-        }
 
+        /*
         carInfoReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -232,16 +211,21 @@ public class HomePage extends AppCompatActivity {
                             hm.put(ds.getKey().toString(), ds.getValue().toString().replace(replacechar, space));
                         }
                         hmList.add(hm);
+                        simpleAdapter.notifyDataSetChanged();
                     }
                 }
-                adapter.notifyDataSetChanged();
-        }
+                simpleAdapter.notifyDataSetChanged();
+            }
 
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-        }
-    });
+            }
+        });*/
+
+
+        //TODO fetch first image from storage for active orders (vehicle no.)
+
 
 }
 
@@ -343,25 +327,49 @@ public class HomePage extends AppCompatActivity {
 
     private void retriveCarList() {
 
-        /*ParseDatabaseFactory parseDatabaseFactory = new ParseDatabaseFactory();
-        hmList = parseDatabaseFactory.retriveCarList();*/
-
-        List<HashMap<String, Object>> tempHmList = fbFactory.retrieveCarsList(activeOrders);
-        if(tempHmList.size() > 0){
-            Log.i("soni-retrievelist", "got the data");
-            activeOrders.clear();
-            Iterator<HashMap<String, Object>> it = tempHmList.iterator();
-            while(it.hasNext()) {
-                HashMap<String, Object> hashMap = it.next();
-                String num = (String) hashMap.get("vehicle_no");
-                activeOrders.add(num);
-            }
-            hmList.clear();
-            hmList = tempHmList;
-            adapter.notifyDataSetChanged();
-        }else{
-            carsList.setAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, new String[]{"No Records found..."}));
+        if(activeOrders.isEmpty())    {
+            Log.i("soni-homepage", "activeOrders list is empty");
         }
+
+        carInfoReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                hmList.clear();
+                //vehicle_no	model_name	availability description	location	sellingprice
+
+                for(DataSnapshot carinfo : dataSnapshot.getChildren())  {
+                    //Log.i("soni-carinfo",carinfo.getKey().toString());
+
+                    if(activeOrders.contains(carinfo.getKey().toString()))   {
+
+                        Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
+                        HashMap<String, Object> hm = new HashMap<String, Object>();
+                        hm.put("vehicle_no", carinfo.getKey().toString());
+                        while(it.hasNext()) {
+                            DataSnapshot ds = it.next();
+
+                            hm.put(ds.getKey().toString(), ds.getValue().toString().replace(replacechar, space));
+                        }
+                        hmList.add(hm);
+                        //simpleAdapter.notifyDataSetChanged();
+                    }
+                }
+                Log.i("soni-", "datasnapshot loop completed");
+                simpleAdapter = new SimpleAdapter(getApplicationContext(), hmList, R.layout.carslist_layout, from, to);
+                carsList.setAdapter(simpleAdapter);
+                if(hmList.size()>0) {
+                    Log.i("soni-", "data fetched, adapter was set!");
+                }
+
+                //simpleAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
     }
 
 /*
@@ -425,6 +433,6 @@ public class HomePage extends AppCompatActivity {
         Log.i("soni-", "Sync icon clicked...");
         hmList.clear();
         retriveCarList();
-        adapter.notifyDataSetChanged();
+        simpleAdapter.notifyDataSetChanged();
     }
 }
