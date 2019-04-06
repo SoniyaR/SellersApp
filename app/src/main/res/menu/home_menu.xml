@@ -1,17 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <item android:title="Add New Data" android:id="@+id/addnew" app:showAsAction="always"/>
-
     <item
         android:id="@+id/refreshList"
         android:title="Refresh Page"/>
-
-    <item android:title="My Profile" android:id="@+id/myprofile" />
-
+    <item android:title="Add New Data" android:id="@+id/addnew" />
     <item android:title="Import file" android:id="@+id/importexcel" />
-
+    <item android:title="My Profile" android:id="@+id/myprofile" />
     <item android:title="Logout" android:id="@+id/logout"/>
 
 </menu>

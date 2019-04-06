@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,6 +17,11 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -42,6 +49,8 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
     Bitmap currentPP = null;
     TextView aboutmeTextView;
     String currentAboutme = "";
+
+    FirebaseAdapter fbAdapter = new FirebaseAdapter();
 
     TextView followingTextView;
 
@@ -73,7 +82,7 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
                 */
 
             case R.id.logout:
-                ParseUser.logOut();
+                fbAdapter.logoutUser();
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
@@ -96,7 +105,8 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
 
         setTitle("My Profile");
 
-        user = ParseUser.getCurrentUser().getUsername();
+        //user = ParseUser.getCurrentUser().getUsername();
+        user = fbAdapter.getCurrentUser();
 
         profilePictureView = (ImageView) findViewById(R.id.profilePicView) ;
         aboutmeTextView = (TextView) findViewById(R.id.aboutmeTextView);
@@ -105,14 +115,15 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
 
         followingTextView = (TextView) findViewById(R.id.followingCountView);
 
-        if(ParseUser.getCurrentUser() !=null && ParseUser.getCurrentUser().getUsername() != null){
+        if(user !=null){
             TextView myname = (TextView) findViewById(R.id.myname);
-            myname.setText(ParseUser.getCurrentUser().getUsername());
+            myname.setText(user);
         }
 
-        retrieveMyProfile();
+        //retrieveMyProfile(); //parse implementation
+        retrieveProfile(); //firebase implementation
 
-        String[] from = {"model_name", "sellingprice", "location", "carImage"};
+        /*String[] from = {"model_name", "sellingprice", "location", "carImage"};
         int[] to = {R.id.modelName, R.id.sellingprice, R.id.location, R.id.carImageView};
 
         adapter = new SimpleAdapter(this, hmlist, R.layout.carslist_layout, from, to);
@@ -136,6 +147,28 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
         feedListView.setAdapter(adapter);
 
         retrieveFeedContent();
+*/
+    }
+
+    private void retrieveProfile() {
+
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("userInfo").child(user);
+        userRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot != null)    {
+                    Log.i("soni-profile", dataSnapshot.getValue().toString());
+                    /*if(dataSnapshot.hasChild("location "))  {
+                        Log.i("soni-prof", dataSnapshot.child("location").getValue().toString());
+                    }*/
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
     }
 

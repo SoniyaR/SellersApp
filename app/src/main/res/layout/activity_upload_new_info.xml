@@ -60,7 +60,8 @@
         android:layout_marginRight="8dp"
         android:ems="10"
         android:hint="Ex. MH12KLJ123"
-        android:inputType="textPersonName"
+        android:inputType="textCapCharacters"
+        android:textAllCaps="true"
         app:layout_constraintBaseline_toBaselineOf="@+id/vehiclenum"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/vehiclenum" />
@@ -110,24 +111,27 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/locationView" />
 
+
     <EditText
         android:id="@+id/descriptionView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
         android:ems="10"
+        android:gravity="top"
         android:hint="Add description here..."
         android:inputType="textLongMessage|textMultiLine"
+        android:textColor="@android:color/black"
         android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/saveButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sellingpriceView" />
-
 
     <Button
         android:id="@+id/saveButton"

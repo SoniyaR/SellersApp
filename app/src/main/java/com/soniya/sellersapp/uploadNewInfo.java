@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputFilter;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,7 +26,7 @@ import java.util.HashMap;
 
 public class uploadNewInfo extends AppCompatActivity implements View.OnClickListener {
 
-    TextView  editDescriptionView;
+//    TextView  editDescriptionView;
     TextView descriptionView;
     Button saveButton;
     TextView titleText;
@@ -50,10 +51,11 @@ public class uploadNewInfo extends AppCompatActivity implements View.OnClickList
 
         sellingpriceView = (TextView) findViewById(R.id.sellingpriceView);
 
-        editDescriptionView = (TextView) findViewById(R.id.descriptionView);
-        editDescriptionView.setVisibility(View.INVISIBLE);
+//        editDescriptionView = (TextView) findViewById(R.id.descriptionView);
+//        editDescriptionView.setVisibility(View.INVISIBLE);
 
         vehicleNum = (TextView) findViewById(R.id.numberText);
+        vehicleNum.setFilters(new InputFilter[]{new InputFilter.AllCaps()});
         location = (TextView) findViewById(R.id.locationText);
 
         saveButton = (Button) findViewById(R.id.saveButton);
@@ -73,13 +75,13 @@ public class uploadNewInfo extends AppCompatActivity implements View.OnClickList
 
         switch(v.getId()){
 
-            case R.id.descriptionView:
-
-                descriptionView.setVisibility(View.INVISIBLE);
-                editDescriptionView.setText(descriptionView.getText());
-                editDescriptionView.setVisibility(View.VISIBLE);
-
-                break;
+//            case R.id.descriptionView:
+//
+//                descriptionView.setVisibility(View.INVISIBLE);
+//                editDescriptionView.setText(descriptionView.getText());
+//                editDescriptionView.setVisibility(View.VISIBLE);
+//
+//                break;
 
             case R.id.uploadButton:
                 selectPhoto();
@@ -87,9 +89,9 @@ public class uploadNewInfo extends AppCompatActivity implements View.OnClickList
 
             case R.id.saveButton:
 
-                descriptionView.setText(editDescriptionView.getText());
-                descriptionView.setVisibility(View.VISIBLE);
-                editDescriptionView.setVisibility(View.INVISIBLE);
+//                descriptionView.setText(editDescriptionView.getText());
+//                descriptionView.setVisibility(View.VISIBLE);
+//                editDescriptionView.setVisibility(View.INVISIBLE);
 
                 //save editDescriptionView.gettext().toString()  to database
 
@@ -112,10 +114,6 @@ public class uploadNewInfo extends AppCompatActivity implements View.OnClickList
                             startActivity(nextInfo);
 
                     }
-
-
-
-
                 break;
 
             case R.id.backgoundLayout:

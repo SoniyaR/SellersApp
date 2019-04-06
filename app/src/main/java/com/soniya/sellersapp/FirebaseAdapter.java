@@ -68,6 +68,9 @@ public class FirebaseAdapter {
         return signinUserSuccessful;
     }
 
+    /*
+    returns true if current user exists (i.e. logged in)
+     */
     public boolean checkCurrentUser(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user !=null) {
@@ -77,6 +80,9 @@ public class FirebaseAdapter {
         return false;
     }
 
+    /*
+    return current user (String)
+     */
     public String getCurrentUser()  {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user !=null) {

@@ -2,7 +2,6 @@ package com.soniya.sellersapp;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -13,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -22,22 +20,19 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseUser;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.parse.FindCallback;
-import com.parse.Parse;
-import com.parse.ParseACL;
-import com.parse.ParseException;
-import com.parse.ParseFile;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
-import com.parse.ParseUser;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
-import java.util.AbstractQueue;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -53,10 +48,20 @@ public class HomePage extends AppCompatActivity {
     SimpleAdapter adapter;
     ArrayList<String> activeOrders = new ArrayList<>();
 
+    char space = ' ';
+    char replacechar = '_';
+
     Bitmap carImage;
     FirebaseAdapter fbAdapter = new FirebaseAdapter();
+    FirebaseDataFactory fbFactory = new FirebaseDataFactory();
 
     DatabaseReference carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
+    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
+
+    StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+
+    String selVehicleNum = "";
+    String uname = "";
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -73,8 +78,7 @@ public class HomePage extends AppCompatActivity {
 
         switch (item.getItemId())   {
             case R.id.addnew:
-                registerForContextMenu(findViewById(R.id.addnew));
-                //uploadNewOrder();
+                uploadNewOrder();
                 break;
 
             case R.id.myprofile:
@@ -105,79 +109,6 @@ public class HomePage extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        Log.i("soni-in onstart", "");
-
-        carInfoReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                hmList.clear();
-                Log.i("soni-datachange", "in onstart");
-                for(DataSnapshot carinfo : dataSnapshot.getChildren())  {
-                    Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
-                    HashMap<String, Object> hm = new HashMap<String, Object>();
-                    while(it.hasNext()){
-                        DataSnapshot str = it.next();
-                        Log.i("soni-onstart",str.getValue().toString());
-                        hm.put(str.getKey(), str.getValue().toString());
-                    }
-                    hmList.add(hm);
-                }
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-
-        getMenuInflater().inflate(R.menu.selectimport_menu, menu);
-
-
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-
-        switch(item.getItemId())   {
-
-            case R.id.addInfo:
-                Log.i("soni-contextmenu", "single import selected");
-                uploadNewOrder();
-                return true;
-
-            case R.id.importfile:
-                Log.i("soni-contextmenu", "file import selected");
-                Intent importIntent = new Intent(getApplicationContext(), ImportExcel.class);
-                startActivity(importIntent);
-                return true;
-
-        }
-
-        return super.onContextItemSelected(item);
-
-    }
-
-    private void uploadNewOrder() {
-
-        Intent i = new Intent(getApplicationContext(), uploadNewInfo.class);
-        startActivity(i);
-    }
-
-    private void gotoProfile()  {
-        Intent intentProfile = new Intent(getApplicationContext(), MyProfile.class);
-        startActivity(intentProfile);
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
@@ -188,9 +119,9 @@ public class HomePage extends AppCompatActivity {
         int[] to = {R.id.modelName, R.id.sellingprice, R.id.location, R.id.carImageView};
 
         carsList = (ListView) findViewById(R.id.listView);
-        activeOrders.clear();
         adapter = new SimpleAdapter(this, hmList, R.layout.carslist_layout, from, to);
         carsList.setAdapter(adapter);
+        registerForContextMenu(carsList);
 
         adapter.setViewBinder(new SimpleAdapter.ViewBinder() {
             @Override
@@ -209,7 +140,7 @@ public class HomePage extends AppCompatActivity {
             }
         });
 
-        carInfoReference.addValueEventListener(new ValueEventListener() {
+        /*carInfoReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 hmList.clear();
@@ -231,11 +162,27 @@ public class HomePage extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        });*/
 
         if(fbAdapter.checkCurrentUser()){
+            uname = fbAdapter.getCurrentUser();
             Toast.makeText(this, "Retrieving Cars List", Toast.LENGTH_SHORT).show();
-            //retriveCarList();
+            userRef.child(uname).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    activeOrders.clear();
+                    if(dataSnapshot !=null && dataSnapshot.hasChild("ownerof")) {
+                        activeOrders = (ArrayList<String>) dataSnapshot.child("ownerof").getValue();
+                        //activeOrders = vehicleNumList;
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
         }
         else  {
             //goto login screen
@@ -255,15 +202,162 @@ public class HomePage extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.i("soni-", "in onStart");
+        activeOrders.clear();
+        if(activeOrders.isEmpty())    {
+            Log.i("soni-homepage", "activeOrders list is empty");
+        }
+
+        carInfoReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                //hmList.clear();
+                //vehicle_no	model_name	availability description	location	sellingprice
+
+                //Log.i("soni-dataSnapshot", dataSnapshot.getValue().toString());
+                for(DataSnapshot carinfo : dataSnapshot.getChildren())  {
+                    //Log.i("soni-carinfo",carinfo.getKey().toString());
+
+                    if(activeOrders.contains(carinfo.getKey().toString()))   {
+
+                        Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
+                        HashMap<String, Object> hm = new HashMap<String, Object>();
+                        hm.put("vehicle_no", carinfo.getKey().toString());
+                        while(it.hasNext()) {
+                            DataSnapshot ds = it.next();
+
+                            hm.put(ds.getKey().toString(), ds.getValue().toString().replace(replacechar, space));
+                        }
+                        hmList.add(hm);
+                    }
+                }
+                adapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    });
+
+}
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.action_menu, menu);
+        menu.setHeaderTitle("Select Action");
+        AdapterView.AdapterContextMenuInfo contextMenuInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        int selPosition = contextMenuInfo.position;
+        selVehicleNum = activeOrders.get(selPosition);
+        Log.i("soni-hp-veh", selVehicleNum);
+        Log.i("soni-hp-id", String.valueOf(v.getId()));
+
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+
+        switch(item.getItemId())   {
+
+            case R.id.deleteRecord:
+                Log.i("soni-contextmenu", "deleteRecord selected");
+                deleteRecord(selVehicleNum);
+                return true;
+
+            case R.id.editRecord:
+                Log.i("soni-contextmenu", "editRecord selected");
+                Intent editIntent = new Intent(getApplicationContext(), OrderDetails.class);
+                editIntent.putExtra("forEdit", true);
+                startActivity(editIntent);
+                return true;
+
+        }
+
+        return super.onContextItemSelected(item);
+
+    }
+
+    private void deleteRecord(String vehicleNum) {
+
+        if(!vehicleNum.isEmpty() && !vehicleNum.equalsIgnoreCase(""))   {
+            Log.i("soni-Record", vehicleNum + " deleted!");
+            carInfoReference.child(vehicleNum).removeValue();
+
+            //remove vehicle number from userinfo -> username-> ownerof list
+            userRef.child(uname).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    ArrayList<String> numList = (ArrayList<String>) dataSnapshot.child("ownerof").getValue();
+                    if(numList.size() > 0 && numList.contains(vehicleNum))    {
+                        numList.remove(vehicleNum);
+                        Log.i("soni-homepage", "deleterecord() ---> removed "+ vehicleNum + " from userinfo");
+                        userRef.child(uname).child("ownerof").setValue(numList);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+            removeImagesFromStorage(vehicleNum);
+        }
+    }
+
+    private void removeImagesFromStorage(String vehicleNum) {
+        StorageReference img_reference = storageRef.child(uname).child(vehicleNum);
+        img_reference.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.i("soni-homepage", "Images deleted from storage for vahicle "+ vehicleNum);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.i("soni-homepage", "Could not delete image(s) "+ e.getMessage());
+            }
+        })
+        ;
+
+    }
+
+    private void uploadNewOrder() {
+
+        Intent i = new Intent(getApplicationContext(), uploadNewInfo.class);
+        startActivity(i);
+    }
+
+    private void gotoProfile()  {
+        Intent intentProfile = new Intent(getApplicationContext(), MyProfile.class);
+        startActivity(intentProfile);
+    }
+
+
+
     private void retriveCarList() {
 
         /*ParseDatabaseFactory parseDatabaseFactory = new ParseDatabaseFactory();
         hmList = parseDatabaseFactory.retriveCarList();*/
 
-        FirebaseDataFactory fbFactory = new FirebaseDataFactory();
-        hmList = fbFactory.retrieveCarsList();
-        if(hmList.size() > 0){
+        List<HashMap<String, Object>> tempHmList = fbFactory.retrieveCarsList(activeOrders);
+        if(tempHmList.size() > 0){
             Log.i("soni-retrievelist", "got the data");
+            activeOrders.clear();
+            Iterator<HashMap<String, Object>> it = tempHmList.iterator();
+            while(it.hasNext()) {
+                HashMap<String, Object> hashMap = it.next();
+                String num = (String) hashMap.get("vehicle_no");
+                activeOrders.add(num);
+            }
+            hmList.clear();
+            hmList = tempHmList;
             adapter.notifyDataSetChanged();
         }else{
             carsList.setAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, new String[]{"No Records found..."}));

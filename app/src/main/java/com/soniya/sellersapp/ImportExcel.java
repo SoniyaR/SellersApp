@@ -71,6 +71,7 @@ public class ImportExcel extends AppCompatActivity {
         super.onCreateContextMenu(menu, v, menuInfo);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.fileimport_menu, menu);
+        menu.setHeaderTitle("Select Option");
     }
 
     @Override
