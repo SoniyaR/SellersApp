@@ -5,7 +5,7 @@
     android:id="@+id/backgoundLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".uploadNewInfo">
+    tools:context=".UploadNewInfo">
 
     <TextView
         android:id="@+id/titleView"

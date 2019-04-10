@@ -22,16 +22,16 @@
         <activity android:name=".DisplayImages"></activity>
         <activity
             android:name=".UploadNewInfo2"
-            android:parentActivityName=".uploadNewInfo" />
+            android:parentActivityName=".UploadNewInfo" />
         <activity android:name=".SetupNewProfile" />
         <activity
-            android:name=".ImportExcel"
+            android:name=".ImportNewInfo"
             android:parentActivityName=".HomePage" />
         <activity
             android:name=".OrderDetails"
             android:parentActivityName=".HomePage" />
         <activity
-            android:name=".uploadNewInfo"
+            android:name=".UploadNewInfo"
             android:parentActivityName=".HomePage">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

@@ -4,36 +4,22 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.parse.FindCallback;
-import com.parse.ParseException;
-import com.parse.ParseFile;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 
 public class SelectPhoto extends AppCompatActivity implements View.OnClickListener {
     Button confirm;
@@ -132,7 +118,7 @@ public class SelectPhoto extends AppCompatActivity implements View.OnClickListen
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
                 byte[] arr = outputStream.toByteArray();
 
-                Intent i= new Intent(getApplicationContext(), uploadNewInfo.class);
+                Intent i= new Intent(getApplicationContext(), UploadNewInfo.class);
                 i.putExtra("bitmapVal", arr);
                 i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(i);
@@ -158,7 +144,7 @@ public class SelectPhoto extends AppCompatActivity implements View.OnClickListen
                                     if(e==null )    {
                                         Toast.makeText(SelectPhoto.this, "Image shared!", Toast.LENGTH_SHORT).show();
                                         //addToGallery();
-                                        Intent i = new Intent(getApplicationContext(), uploadNewInfo.class);
+                                        Intent i = new Intent(getApplicationContext(), UploadNewInfo.class);
                                         //i.putExtra("imageSet", "yes");
                                         startActivity(i);
                                         //createImageFile(i);
@@ -179,7 +165,7 @@ public class SelectPhoto extends AppCompatActivity implements View.OnClickListen
                                             if(e==null )    {
                                                 Toast.makeText(SelectPhoto.this, "Image replaced!", Toast.LENGTH_SHORT).show();
                                                 //addToGallery();
-                                                Intent i = new Intent(getApplicationContext(), uploadNewInfo.class);
+                                                Intent i = new Intent(getApplicationContext(), UploadNewInfo.class);
                                                 startActivity(i);
                                             }
                                             else{

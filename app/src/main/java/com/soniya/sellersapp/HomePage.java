@@ -13,17 +13,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -78,7 +75,7 @@ public class HomePage extends AppCompatActivity {
         super.onOptionsItemSelected(item);
 
         switch (item.getItemId())   {
-            case R.id.addnew:
+            case R.id.addinfo:
                 uploadNewOrder();
                 break;
 
@@ -87,7 +84,7 @@ public class HomePage extends AppCompatActivity {
                 break;
 
             case R.id.importexcel:
-                Intent importIntent = new Intent(getApplicationContext(), ImportExcel.class);
+                Intent importIntent = new Intent(getApplicationContext(), ImportNewInfo.class);
                 startActivity(importIntent);
                 break;
 
@@ -148,13 +145,25 @@ public class HomePage extends AppCompatActivity {
         if(fbAdapter.checkCurrentUser()){
             uname = fbAdapter.getCurrentUser();
             Toast.makeText(this, "Retrieving Cars List", Toast.LENGTH_SHORT).show();
-            activeOrders.clear();
+            //activeOrders.clear();
             userRef.child(uname).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    activeOrders.clear();
+                    //activeOrders.clear();
                     if(dataSnapshot !=null && dataSnapshot.hasChild("ownerof")) {
                         activeOrders = (ArrayList<String>) dataSnapshot.child("ownerof").getValue();
+
+                        if(activeOrders.size() > 0 ){
+                            int index = -1;
+                            for(String order: activeOrders){
+                                if(order == null){
+                                    index = activeOrders.indexOf(order);
+                                }
+                            }
+                            if(index >= 0) {
+                                activeOrders.remove(index);
+                            }
+                        }
                     }
 
                     retriveCarList();
@@ -238,10 +247,11 @@ public class HomePage extends AppCompatActivity {
         menu.setHeaderTitle("Select Action");
         AdapterView.AdapterContextMenuInfo contextMenuInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
         int selPosition = contextMenuInfo.position;
-        selVehicleNum = activeOrders.get(selPosition);
-        Log.i("soni-hp-veh", selVehicleNum);
-        Log.i("soni-hp-id", String.valueOf(v.getId()));
-
+        selVehicleNum = hmList.get(selPosition).get("vehicle_no").toString();
+        if(selVehicleNum != null) {
+            Log.i("soni-hp-veh", selVehicleNum);
+            Log.i("soni-hp-id", String.valueOf(v.getId()));
+        }
     }
 
     @Override
@@ -269,7 +279,7 @@ public class HomePage extends AppCompatActivity {
 
     private void deleteRecord(String vehicleNum) {
 
-        if(!vehicleNum.isEmpty() && !vehicleNum.equalsIgnoreCase(""))   {
+        if(vehicleNum != null && !vehicleNum.isEmpty() && !vehicleNum.equalsIgnoreCase(""))   {
             Log.i("soni-Record", vehicleNum + " deleted!");
             carInfoReference.child(vehicleNum).removeValue();
 
@@ -311,19 +321,26 @@ public class HomePage extends AppCompatActivity {
         ;
 
     }
-
+    /*
+    method to call Upload New info in which Car info is entered manually by user
+     */
     private void uploadNewOrder() {
-
-        Intent i = new Intent(getApplicationContext(), uploadNewInfo.class);
+        Intent i = new Intent(getApplicationContext(), UploadNewInfo.class);
         startActivity(i);
     }
+
+    /*
+    to redirect to profile
+     */
 
     private void gotoProfile()  {
         Intent intentProfile = new Intent(getApplicationContext(), MyProfile.class);
         startActivity(intentProfile);
     }
 
-
+    /*
+    to retrieve cars list (active orders) for current user
+     */
 
     private void retriveCarList() {
 
@@ -344,12 +361,15 @@ public class HomePage extends AppCompatActivity {
 
                         Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
                         HashMap<String, Object> hm = new HashMap<String, Object>();
-                        hm.put("vehicle_no", carinfo.getKey().toString());
+                        hm.put("vehicle_no", carinfo.getKey());
                         while(it.hasNext()) {
                             DataSnapshot ds = it.next();
 
-                            hm.put(ds.getKey().toString(), ds.getValue().toString().replace(replacechar, space));
+                            hm.put(ds.getKey(), ds.getValue().toString().replace(replacechar, space));
                         }
+
+                        //StorageReference ref = storageRef.child(uname).child(carinfo.getKey().toString());
+
                         hmList.add(hm);
                         //simpleAdapter.notifyDataSetChanged();
                     }
@@ -369,6 +389,7 @@ public class HomePage extends AppCompatActivity {
 
             }
         });
+
 
     }
 

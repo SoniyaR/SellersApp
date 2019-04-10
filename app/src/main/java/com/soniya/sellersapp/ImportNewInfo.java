@@ -3,11 +3,7 @@ package com.soniya.sellersapp;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -19,17 +15,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.google.android.gms.common.api.Api;
-
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -38,14 +29,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class ImportExcel extends AppCompatActivity {
+public class ImportNewInfo extends AppCompatActivity {
 
     //private static final int REQUEST_CODE_DOC = 1;
     private static final int READ_REQUEST_CODE = 1;
@@ -53,7 +43,6 @@ public class ImportExcel extends AppCompatActivity {
     ListView carsList;
     SimpleAdapter adapter;
     ArrayList<String> activeOrders = new ArrayList<>();
-    Button importButton;
 
     FirebaseDataFactory database;
 
@@ -80,10 +69,12 @@ public class ImportExcel extends AppCompatActivity {
             Log.i("soni-importpage", "selected Excel");
             browseClicked();
             return true;
-        }else if(item.getItemId() == R.id.something)    {
-            Log.i("soni-importpage", "selected Something");
+        }/*else if(item.getItemId() == R.id.newInfoTextView)    {
+            Log.i("soni-importpage", "selected newInfo to add");
+            *//*Intent intent = new Intent(getApplicationContext(), UploadNewInfo.class);
+            startActivity(intent);*//*
             return true;
-        }else {
+        }*/else {
             return super.onContextItemSelected(item);
         }
     }
@@ -95,12 +86,9 @@ public class ImportExcel extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_import_excel);
+        setContentView(R.layout.activity_import_newinfo);
 
         setTitle("Import Excel File");
-
-        importButton = (Button) findViewById(R.id.importExcelButton);
-        importButton.setVisibility(View.VISIBLE);
 
         TextView importTextView = findViewById(R.id.importFileTextView);
         registerForContextMenu(importTextView);

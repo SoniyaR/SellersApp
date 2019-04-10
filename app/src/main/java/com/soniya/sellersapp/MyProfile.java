@@ -27,7 +27,6 @@ import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -68,7 +67,7 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
 
         switch(item.getItemId()){
             case R.id.newpost:
-                Intent i = new Intent(getApplicationContext(), uploadNewInfo.class);
+                Intent i = new Intent(getApplicationContext(), UploadNewInfo.class);
                 startActivity(i);
                 break;
 

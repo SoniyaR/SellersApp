@@ -4,8 +4,12 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.View;
 import android.widget.ProgressBar;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -14,6 +18,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,6 +30,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 public class FirebaseDataFactory {
 
@@ -41,6 +47,8 @@ public class FirebaseDataFactory {
         db.child("userInfo").child("Username").setValue(emailId);
 
     }*/
+
+    StorageReference img_ref = FirebaseStorage.getInstance().getReference().child(new FirebaseAdapter().getCurrentUser());
 
 
     public List<HashMap<String, Object>> retrieveCarsList (ArrayList<String> vehicleNumList)    {
@@ -126,17 +134,10 @@ public class FirebaseDataFactory {
 
     public void addNewProfileInfo(String emailId, String username, String location)   {
         DatabaseReference currentUserRef =  db.child("userInfo");
-
         currentUserRef.child(username).child("emailId").setValue(emailId);
         currentUserRef.child(username).child("location").setValue(location);
         currentUserRef.child(username).child("ownerof").setValue(new ArrayList<String>());
     }
-
-    public void searchUserInfo()    {
-
-
-    }
-
 
     public void uploadImportData(List<HashMap<String, Object>>hmlist)    {
 
@@ -153,26 +154,63 @@ public class FirebaseDataFactory {
 
             Log.i("soni-vehicleNum", vehicleNum);
 
-            updateUserInfo(vehicleNum);
-
             curr_ref.child(vehicleNum).child("model_name").setValue(hm.get("model_name").toString().replace(space, replacechar));
             curr_ref.child(vehicleNum).child("availability").setValue(hm.get("availability").toString().replace(space, replacechar));
             curr_ref.child(vehicleNum).child("description").setValue(hm.get("description").toString().replace(space, replacechar));
             curr_ref.child(vehicleNum).child("location").setValue(hm.get("location").toString().replace(space, replacechar));
             curr_ref.child(vehicleNum).child("sellingprice").setValue(hm.get("sellingprice").toString().replace(space, replacechar));
 
-            /*CarInfo carInfo = new CarInfo(vehicleNum, modelName, availability, location, price, description);
-            curr_ref.push().setValue(carInfo);*/
-            //TODO: add vehicle number in userInfo for the current user who uploaded this info, it will be array of strings for vehicleNum
+            // add vehicle number in userInfo for the current user who uploaded this info, it will be array of strings for vehicleNum
+            updateOwnerOf(vehicleNum);
+
+//            if(selectedUriList != null && selectedUriList.size() > 0) {
+//                for (Uri uri : selectedUriList) {
+//                    String filename = "";
+//                    String path = uri.getPath().toString();
+//                    StringTokenizer tokenizer = new StringTokenizer(path, "/");
+//                    while (tokenizer.hasMoreTokens()) {
+//                        filename = tokenizer.nextToken();
+//                    }
+//
+//                    Log.i("soni-filename", filename);
+//                    //uploadImage(uri, filename, vehicleNum);
+//                }
+//            }
 
         }
-        //Map<String, CarInfo> carMap = new HashMap<>();
+
     }
 
+//    public void uploadImage(Uri uri, String filename, String vehicleNum){
+//        //progressBar.setVisibility(View.VISIBLE);
+//        Log.i("soni-", "in uploadImage");
+//        UploadTask uploadTask = img_ref.child(vehicleNum).child("IMG_"+filename).putFile(uri);
+//        Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+//            @Override
+//            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+//
+//                if(!task.isSuccessful())    {
+//                    throw task.getException();
+//                }
+//                return img_ref.child("IMG_"+filename).getDownloadUrl();
+//            }
+//        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+//            @Override
+//            public void onComplete(@NonNull Task<Uri> task) {
+//                if(task.isSuccessful()) {
+//                    Uri uri = task.getResult();
+//                    Log.i("soni- uri ", String.valueOf(uri));
+//                    //updateUriList(vehicleNum, uri);
+//                }
+//            }
+//        });
+//
+//    }
 
 
-    private void updateUserInfo(String vehicleNum) {
 
+    private void updateOwnerOf(String vehicleNum) {
+        Log.i("soni-updateUserInfo", "curr user "+ new FirebaseAdapter().getCurrentUser());
         userInfoReference = db.child("userInfo").child(new FirebaseAdapter().getCurrentUser());
         userInfoReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -206,13 +244,59 @@ public class FirebaseDataFactory {
             }
         });
 
-
     }
 
-    public void updateCarInfo(String vehicleNum, HashMap<String, Object> hashMap) {
+    /*
+    while uploading images one by one to firebase storage, we collect the uri for the image
+    and that uri should be stored in database -> user -> vehiclenum -> image_uri_list
+
+     */
+    public void updateUriList(String vehicleNum, String uri){
+        DatabaseReference imgInfoRef = db.child("ImgInfo").child(vehicleNum);
+        Log.i("soni-", "in updateUriList " + vehicleNum);
+        //String uriStr = String.valueOf(uri);
+
+        imgInfoRef.setValue(uri);
+        imgInfoRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot !=null) {
+
+                    ArrayList<String> list = null;
+
+                    if (dataSnapshot.hasChild("image_uri_list")) {
+                        list = (ArrayList<String>) dataSnapshot.child("image_uri_list").getValue();
+                        if (!list.contains(uri)) {
+                            list.add(uri);
+                        }
+                    }
+                    else {
+                        Log.i("soni-", "dataSnapshot has NO child image_uri_list");
+                        list = new ArrayList<>();
+                        list.add(uri);
+                    }
+
+                    if (list != null) {
+                        imgInfoRef.child("image_uri_list").setValue(list);
+                        Log.i("soni-", "added/updated uri list for " + vehicleNum);
+                        list.clear();
+                    } else {
+                        Log.i("soni-factory", "uri list is null for " + vehicleNum);
+                    }
+
+                }else{
+                    Log.i("soni-", "dataSnapshot is null");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
 
     }
-
 
 
 }

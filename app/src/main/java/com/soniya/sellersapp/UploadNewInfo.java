@@ -24,7 +24,7 @@ import com.parse.SaveCallback;
 import java.io.File;
 import java.util.HashMap;
 
-public class uploadNewInfo extends AppCompatActivity implements View.OnClickListener {
+public class UploadNewInfo extends AppCompatActivity implements View.OnClickListener {
 
 //    TextView  editDescriptionView;
     TextView descriptionView;
@@ -163,7 +163,7 @@ public class uploadNewInfo extends AppCompatActivity implements View.OnClickList
             @Override
             public void done(ParseException e) {
                 if(e == null){
-                    Toast.makeText(uploadNewInfo.this, "info saved successfully!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(UploadNewInfo.this, "info saved successfully!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
