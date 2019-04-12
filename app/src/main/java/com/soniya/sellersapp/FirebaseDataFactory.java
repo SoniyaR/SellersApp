@@ -212,7 +212,7 @@ public class FirebaseDataFactory {
     private void updateOwnerOf(String vehicleNum) {
         Log.i("soni-updateUserInfo", "curr user "+ new FirebaseAdapter().getCurrentUser());
         userInfoReference = db.child("userInfo").child(new FirebaseAdapter().getCurrentUser());
-        userInfoReference.addValueEventListener(new ValueEventListener() {
+        userInfoReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot !=null) {
@@ -252,12 +252,12 @@ public class FirebaseDataFactory {
 
      */
     public void updateUriList(String vehicleNum, String uri){
-        DatabaseReference imgInfoRef = db.child("ImgInfo").child(vehicleNum);
+        DatabaseReference imgInfoRef = db.child("CarsInfo").child(vehicleNum);
         Log.i("soni-", "in updateUriList " + vehicleNum);
         //String uriStr = String.valueOf(uri);
 
-        imgInfoRef.setValue(uri);
-        imgInfoRef.addValueEventListener(new ValueEventListener() {
+        //imgInfoRef.setValue(uri);
+        imgInfoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot !=null) {
@@ -272,14 +272,14 @@ public class FirebaseDataFactory {
                     }
                     else {
                         Log.i("soni-", "dataSnapshot has NO child image_uri_list");
-                        list = new ArrayList<>();
+                        list = new ArrayList<String>();
                         list.add(uri);
                     }
 
                     if (list != null) {
                         imgInfoRef.child("image_uri_list").setValue(list);
                         Log.i("soni-", "added/updated uri list for " + vehicleNum);
-                        list.clear();
+                        //list.clear();
                     } else {
                         Log.i("soni-factory", "uri list is null for " + vehicleNum);
                     }
@@ -295,8 +295,5 @@ public class FirebaseDataFactory {
             }
         });
 
-
     }
-
-
 }

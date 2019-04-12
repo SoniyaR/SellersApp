@@ -108,7 +108,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         if(intent.getExtras()!=null && intent.getSerializableExtra("infoHashmap") !=null){
             recHashmap = (HashMap<String, Object>) intent.getSerializableExtra("infoHashmap");
             curr_vehicleNum = recHashmap.get("vehicle_no").toString();
-            img_ref = storageReference.child(new FirebaseAdapter().getCurrentUser()).child(curr_vehicleNum);
+            img_ref = storageReference.child(new FirebaseAdapter().getCurrentUser()).child(curr_vehicleNum.replace(space, replacechar));
         }
 
         if(!isImageSelected){

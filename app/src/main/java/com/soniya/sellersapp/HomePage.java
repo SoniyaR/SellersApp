@@ -2,8 +2,13 @@ package com.soniya.sellersapp;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,13 +24,21 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.Request;
+import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -33,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class HomePage extends AppCompatActivity {
 
@@ -60,6 +74,8 @@ public class HomePage extends AppCompatActivity {
 
     String[] from = {"model_name", "sellingprice", "location", "carImage"};
     int[] to = {R.id.modelName, R.id.sellingprice, R.id.location, R.id.carImageView};
+
+    ImageView tempImg;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -116,6 +132,8 @@ public class HomePage extends AppCompatActivity {
 
         activeOrders = new ArrayList<>();
         hmList = new ArrayList<>();
+
+        tempImg = findViewById(R.id.imgviw);
 
         carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
         userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
@@ -247,7 +265,7 @@ public class HomePage extends AppCompatActivity {
         menu.setHeaderTitle("Select Action");
         AdapterView.AdapterContextMenuInfo contextMenuInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
         int selPosition = contextMenuInfo.position;
-        selVehicleNum = hmList.get(selPosition).get("vehicle_no").toString();
+        selVehicleNum = hmList.get(selPosition).get("vehicle_no").toString().replace(space, replacechar);
         if(selVehicleNum != null) {
             Log.i("soni-hp-veh", selVehicleNum);
             Log.i("soni-hp-id", String.valueOf(v.getId()));
@@ -352,7 +370,7 @@ public class HomePage extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 hmList.clear();
-                //vehicle_no	model_name	availability description	location	sellingprice
+                //vehicle_no	model_name	availability description    location	sellingprice    image_uri_list
 
                 for(DataSnapshot carinfo : dataSnapshot.getChildren())  {
                     //Log.i("soni-carinfo",carinfo.getKey().toString());
@@ -361,12 +379,22 @@ public class HomePage extends AppCompatActivity {
 
                         Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
                         HashMap<String, Object> hm = new HashMap<String, Object>();
-                        hm.put("vehicle_no", carinfo.getKey());
+                        String vehiclenum = carinfo.getKey().replace(replacechar, space);
+                        hm.put("vehicle_no", vehiclenum);
                         while(it.hasNext()) {
                             DataSnapshot ds = it.next();
-
-                            hm.put(ds.getKey(), ds.getValue().toString().replace(replacechar, space));
+                            if(ds.getKey().equals("image_uri_list"))    {
+                                ArrayList<String> tempList = (ArrayList<String>) ds.getValue();
+                                hm.put(ds.getKey(), getImageFromUrl(tempList.get(0), carinfo.getKey()));
+                                Log.i("soni-", "got one img uri " + tempList.get(0));
+                            }else {
+                                hm.put(ds.getKey(), ds.getValue().toString().replace(replacechar, space));
+                            }
                         }
+                        //hm.put("carImage", loadWithGlide(carinfo.getKey()));
+
+//                        Glide.with(getApplicationContext()).load(storageRef.child(uname).child(carinfo.getKey()))
+//                                .into((ImageView)findViewById(R.id.carImageView));
 
                         //StorageReference ref = storageRef.child(uname).child(carinfo.getKey().toString());
 
@@ -392,41 +420,88 @@ public class HomePage extends AppCompatActivity {
 
 
     }
+    Bitmap imgBitmap = null;
 
-/*
-    private Bitmap getImageofVehicle(String model) {
-
-        Log.i("soni-model is", model);
-
-        ParseQuery<ParseObject> imgQuery = ParseQuery.getQuery("activeOrders");
-        imgQuery.whereEqualTo("username", recipient);
-        imgQuery.whereEqualTo("imagetype", "profile_pic");
-        imgQuery.findInBackground(new FindCallback<ParseObject>() {
+    private Bitmap getImageFromUrl(String uriStr, String vehiclenumber) {
+        Uri imgUri = Uri.parse(uriStr);
+        /*FileDownloadTask downloadTask = storageRef.child(uname).child(vehiclenumber).getFile(imgUri);
+        downloadTask.addOnCompleteListener(new OnCompleteListener<FileDownloadTask.TaskSnapshot>() {
             @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                if (e == null && objects != null && objects.size() > 0) {
-                    for (ParseObject obj : objects) {
-                        ParseFile f = (ParseFile) obj.get("image");
-                        try {
-                            byte[] fileData = f.getData();
-                            image = BitmapFactory.decodeByteArray(fileData, 0, fileData.length);
+            public void onComplete(@NonNull Task<FileDownloadTask.TaskSnapshot> task) {
+                if(task.isSuccessful()){
 
-                        } catch (ParseException e1) {
-                            e1.printStackTrace();
-                        }
-                    }
-                } else {
-                    image = BitmapFactory.decodeResource(getResources(), R.raw.noprofilepic);
                 }
             }
-        });
+        });*/
+        Log.i("soni-", "In getImagefromUrl");
 
-        carImage = BitmapFactory.decodeResource(getResources(), R.raw.nocarpicture);
+            Glide.with(getApplicationContext()).asBitmap().load(imgUri).into(tempImg);
 
-        return carImage;
+                    /*new Target<Bitmap>() {
+                @Override
+                public void onStart() {
 
+                }
+
+                @Override
+                public void onStop() {
+
+                }
+
+                @Override
+                public void onDestroy() {
+
+                }
+
+                @Override
+                public void onLoadStarted(@Nullable Drawable placeholder) {
+
+                }
+
+                @Override
+                public void onLoadFailed(@Nullable Drawable errorDrawable) {
+
+                }
+
+                @Override
+                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                    imgBitmap = resource;
+                }
+
+                @Override
+                public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                }
+
+                @Override
+                public void getSize(@NonNull SizeReadyCallback cb) {
+
+                }
+
+                @Override
+                public void removeCallback(@NonNull SizeReadyCallback cb) {
+
+                }
+
+                @Override
+                public void setRequest(@Nullable Request request) {
+
+                }
+
+                @Nullable
+                @Override
+                public Request getRequest() {
+                    return null;
+                }
+            });*/
+
+        //Bitmap thumbImg = ThumbnailUtils.extractThumbnail(BitmapFactory.;
+        if(imgBitmap != null )  {
+            return imgBitmap;
+        }
+        return (Bitmap) BitmapFactory.decodeResource(getResources(), R.drawable.nocarpicture);
     }
-    */
+
 
     @Override
     public void onBackPressed() {
@@ -456,4 +531,5 @@ public class HomePage extends AppCompatActivity {
         retriveCarList();
         simpleAdapter.notifyDataSetChanged();
     }
+
 }
