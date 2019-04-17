@@ -1,11 +1,13 @@
 package com.soniya.sellersapp;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,6 +18,8 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -99,8 +103,10 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         setContentView(R.layout.activity_upload_new_info2);
         prevButton = findViewById(R.id.prevButton);
         prevButton.setOnClickListener(this);
+        prevButton.setVisibility(View.INVISIBLE);
         nextButton = findViewById(R.id.nextButton);
         nextButton.setOnClickListener(this);
+        nextButton.setVisibility(View.INVISIBLE);
         saveAllButton = findViewById(R.id.saveAllButton);
         saveAllButton.setOnClickListener(this);
 
@@ -113,6 +119,8 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         uploadButton.setOnClickListener(this);
 
         selectedImages = findViewById(R.id.selectedImgVie);
+        selectedImages.setOnClickListener(this);
+        selectedImages.setVisibility(View.INVISIBLE);
 
         Intent intent = getIntent();
         if(intent.getExtras()!=null && intent.getSerializableExtra("infoHashmap") !=null){
@@ -252,14 +260,33 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            Intent intentImport = new Intent(Intent.ACTION_GET_CONTENT);
+            intentImport.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            intentImport.setType("image/*");
+            startActivityForResult(Intent.createChooser(intentImport, "Select Picture"), PICK_IMAGE);
+        }
+    }
+
+    @Override
     public void onClick(View v) {
 
         switch (v.getId())  {
             case R.id.uploadButton:
-                Intent intentImport = new Intent(Intent.ACTION_GET_CONTENT);
-                intentImport.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                intentImport.setType("image/*");
-                startActivityForResult(Intent.createChooser(intentImport, "Select Picture"), PICK_IMAGE);
+                //check permission
+
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    // Permission is not granted
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+                } else {
+                    Intent intentImport = new Intent(Intent.ACTION_GET_CONTENT);
+                    intentImport.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                    intentImport.setType("image/*");
+                    startActivityForResult(Intent.createChooser(intentImport, "Select Picture"), PICK_IMAGE);
+                }
                 break;
 
             case R.id.prevButton:
@@ -300,6 +327,16 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                 saveAllInformation(v);
                 break;
 
+
+            case R.id.selectedImgVie:
+                //open DisplayImages()
+                if(selectedUriList.size() > 0) {
+                    Intent displayIntent = new Intent(getApplicationContext(), DisplayImages.class);
+                    displayIntent.putExtra("urlList", selectedUriList);
+                    startActivity(displayIntent);
+                }
+                break;
+
         }
 
     }
@@ -309,6 +346,9 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         if(requestCode == PICK_IMAGE && resultCode== RESULT_OK )  {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 if(data.getClipData() !=null && data !=null) {
+                    selectedImages.setVisibility(View.VISIBLE);
+                    prevButton.setVisibility(View.VISIBLE);
+                    nextButton.setVisibility(View.VISIBLE);
                     int imgCount = data.getClipData().getItemCount();
                     if(imgCount < 6) {
                         for (int i = 0; i < imgCount; i++) {

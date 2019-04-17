@@ -1,9 +1,11 @@
 package com.soniya.sellersapp;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.support.v4.media.RatingCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -29,6 +31,7 @@ import java.util.List;
 public class OrderDetails extends AppCompatActivity implements View.OnClickListener {
 
     TextView model;
+    EditText modelEdit;
     TextView availability;
     TextView price;
     TextView vehicleNum;
@@ -57,6 +60,10 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.cardetail_menu, menu);
 
+        if(editmode)    {
+            menu.getItem(0).setTitle("Save");
+        }
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -80,6 +87,14 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
     }
 
     private void makeEditable() {
+
+        if(editmode)    {
+            descEdit.setVisibility(View.VISIBLE);
+            editDescription.setVisibility(View.INVISIBLE);
+            descEdit.setText(editDescription.getText().toString());
+
+        }
+
     }
 
     private void updateCarInfo() {
@@ -114,7 +129,12 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_order_details);
 
         model = (TextView) findViewById(R.id.modelname);
+        model.setOnClickListener(this);
+        modelEdit = findViewById(R.id.modeledit);
+        modelEdit.setVisibility(View.INVISIBLE);
+
         availability = (TextView) findViewById(R.id.availability);
+        availability.setOnClickListener(this);
         price = (TextView) findViewById(R.id.price);
         priceEdit = new EditText(this);
 
@@ -136,12 +156,14 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
         Intent intent = getIntent();
         if(intent.getExtras() != null && intent.hasExtra("selectedHM")) {
+
             hm = (HashMap<String, Object>) intent.getSerializableExtra("selectedHM");
             /*for(String key: hm.keySet()){
                 Log.i("soni-orderdetail", key);
             }*/
 
             model.setText(hm.get("model_name").toString());
+            modelEdit.setText(model.getText());
             availability.setText(hm.get("availability").toString());
             price.setText(hm.get("sellingprice").toString());
             editDescription.setText(hm.get("description").toString());
@@ -159,11 +181,13 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
             if(intent.hasExtra("forEdit") && intent.getBooleanExtra("forEdit", false)) {
                 editmode = true;
+                makeEditable();
             }
+
         }
 
         dialog = new AlertDialog.Builder(this).create();
-        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Save text", new DialogInterface.OnClickListener() {
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Save", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Log.i("soni-which OrdDetails", Integer.toString(which));
@@ -175,9 +199,9 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
         price.setOnClickListener(this);
 
-        if(availability.getText().toString().equalsIgnoreCase("Sold")) {
+        /*if(availability.getText().toString().equalsIgnoreCase("Sold")) {
 
-        }
+        }*/
 
 
     }
@@ -195,6 +219,12 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         
         switch (v.getId())  {
+
+            case R.id.modelname:
+
+
+                break;
+
             case R.id.soldButton:
                 availability.setText("Sold");
                 soldButton.setEnabled(false);
@@ -213,14 +243,9 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
                 break;
 
-            case R.id.editTextDesc:
+            case R.id.editDescription:
 
                 if(editmode)    {
-                    /*dialog.setView(descEdit);
-                    dialog.setTitle("Update Description");
-                    descEdit.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-                    descEdit.setText(editDescription.getText());
-                    dialog.show();*/
                     descEdit.setVisibility(View.VISIBLE);
                     editDescription.setVisibility(View.INVISIBLE);
                     descEdit.setText(editDescription.getText().toString());
@@ -231,6 +256,13 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
             case R.id.carImage:
                 //opens all images to show
                 displayCarImages();
+                break;
+
+
+            case R.id.availability:
+//                Dialog dialog = new Dialog(this);
+//                dialog.setContentView(android.R.layout.r);
+
                 break;
 
         }

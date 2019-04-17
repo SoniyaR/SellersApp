@@ -81,6 +81,8 @@ public class HomePage extends AppCompatActivity {
 
     SharedPreferences preferences;
 
+    int contextSelPosition = 0;
+
     //ImageView tempImg;
 
     @Override
@@ -296,8 +298,8 @@ public class HomePage extends AppCompatActivity {
         menuInflater.inflate(R.menu.action_menu, menu);
         menu.setHeaderTitle("Select Action");
         AdapterView.AdapterContextMenuInfo contextMenuInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        int selPosition = contextMenuInfo.position;
-        selVehicleNum = hmList.get(selPosition).get("vehicle_no").toString().replace(space, replacechar);
+        contextSelPosition = contextMenuInfo.position;
+        selVehicleNum = hmList.get(contextSelPosition).get("vehicle_no").toString().replace(space, replacechar);
         if(selVehicleNum != null) {
             Log.i("soni-hp-veh", selVehicleNum);
             Log.i("soni-hp-id", String.valueOf(v.getId()));
@@ -318,6 +320,7 @@ public class HomePage extends AppCompatActivity {
                 Log.i("soni-contextmenu", "editRecord selected");
                 Intent editIntent = new Intent(getApplicationContext(), OrderDetails.class);
                 editIntent.putExtra("forEdit", true);
+                editIntent.putExtra("selectedHM", hmList.get(contextSelPosition));
                 startActivity(editIntent);
                 return true;
 
