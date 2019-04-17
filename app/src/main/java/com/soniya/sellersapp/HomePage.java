@@ -1,6 +1,8 @@
 package com.soniya.sellersapp;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -18,7 +20,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -55,7 +59,7 @@ public class HomePage extends AppCompatActivity {
     List<HashMap<String, Object>> hmList;
     ListView carsList;
     SimpleAdapter simpleAdapter;
-    ArrayList<String> activeOrders ;
+    List activeOrders ;
 
     char space = ' ';
     char replacechar = '_';
@@ -75,7 +79,9 @@ public class HomePage extends AppCompatActivity {
     String[] from = {"model_name", "sellingprice", "location", "carImage"};
     int[] to = {R.id.modelName, R.id.sellingprice, R.id.location, R.id.carImageView};
 
-    ImageView tempImg;
+    SharedPreferences preferences;
+
+    //ImageView tempImg;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -130,10 +136,10 @@ public class HomePage extends AppCompatActivity {
         setTitle("Active Orders");
         //{model_name=qwe12_bb, sellingprice=90000, description=nnhh_ffgg, location=pune, availability=Available}
 
-        activeOrders = new ArrayList<>();
+        activeOrders = null;
         hmList = new ArrayList<>();
 
-        tempImg = findViewById(R.id.imgviw);
+        //tempImg = findViewById(R.id.imgviw);
 
         carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
         userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
@@ -142,6 +148,15 @@ public class HomePage extends AppCompatActivity {
         simpleAdapter = new SimpleAdapter(this, hmList, R.layout.carslist_layout, from, to);
         carsList.setAdapter(simpleAdapter);
         registerForContextMenu(carsList);
+
+        preferences = getSharedPreferences("com.soniya.sellersapp", Context.MODE_PRIVATE);
+        if(preferences.getString("key", "").isEmpty()) {
+            preferences.edit().putString("key", fbFactory.getOwnerofListKey()).commit();
+        }else{
+            preferences.edit().remove("key").commit();
+            preferences.edit().putString("key", fbFactory.getOwnerofListKey()).commit();
+        }
+
 
         simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
             @Override
@@ -164,27 +179,44 @@ public class HomePage extends AppCompatActivity {
             uname = fbAdapter.getCurrentUser();
             Toast.makeText(this, "Retrieving Cars List", Toast.LENGTH_SHORT).show();
             //activeOrders.clear();
-            userRef.child(uname).addValueEventListener(new ValueEventListener() {
+            userRef.child(uname).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     //activeOrders.clear();
                     if(dataSnapshot !=null && dataSnapshot.hasChild("ownerof")) {
-                        activeOrders = (ArrayList<String>) dataSnapshot.child("ownerof").getValue();
+                        if(dataSnapshot.child("ownerof").getValue() instanceof List) {
+                            activeOrders = (List<String>) dataSnapshot.child("ownerof").getValue();
 
-                        if(activeOrders.size() > 0 ){
-                            int index = -1;
-                            for(String order: activeOrders){
-                                if(order == null){
-                                    index = activeOrders.indexOf(order);
+                            if (activeOrders.size() > 0) {
+                                int index = -1;
+                                for (String order : (List<String>)activeOrders) {
+                                    if (order == null) {
+                                        index = activeOrders.indexOf(order);
+                                    }
+                                }
+                                if (index >= 0) {
+                                    activeOrders.remove(index);
                                 }
                             }
-                            if(index >= 0) {
-                                activeOrders.remove(index);
+                        }else if(dataSnapshot.child("ownerof").getValue() instanceof HashMap){
+                            HashMap<String, List<String>> hashMap = (HashMap<String, List<String>>) dataSnapshot.child("ownerof").getValue();
+                            Log.i("soni-", "it is a hashmap " + hashMap.keySet().toString() );
+                            if(hashMap.keySet().size() == 1)    {
+                                for(String hmkey : hashMap.keySet()) {
+                                    activeOrders = (ArrayList<String>) hashMap.get(hmkey);
+                                }
                             }
+                            Log.i("soni-homepage", preferences.getString("key", ""));
+                            //activeOrders = (List<String>) hashMap.values();
                         }
                     }
 
-                    retriveCarList();
+                    if(activeOrders !=null && activeOrders.size()>0) {
+                        retriveCarList();
+                    }   else    {
+                        ArrayAdapter arrayAdapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
+                        carsList.setAdapter(arrayAdapter);
+                    }
                 }
 
                 @Override
@@ -302,14 +334,30 @@ public class HomePage extends AppCompatActivity {
             carInfoReference.child(vehicleNum).removeValue();
 
             //remove vehicle number from userinfo -> username-> ownerof list
-            userRef.child(uname).addValueEventListener(new ValueEventListener() {
+            userRef.child(uname).child("ownerof").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    ArrayList<String> numList = (ArrayList<String>) dataSnapshot.child("ownerof").getValue();
-                    if(numList.size() > 0 && numList.contains(vehicleNum))    {
-                        numList.remove(vehicleNum);
-                        Log.i("soni-homepage", "deleterecord() ---> removed "+ vehicleNum + " from userinfo");
-                        userRef.child(uname).child("ownerof").setValue(numList);
+                    if (dataSnapshot.getValue() instanceof List) {
+                        List<String> numList = (ArrayList<String>) dataSnapshot.getValue();
+                        if (numList.size() > 0 && numList.contains(vehicleNum)) {
+                            numList.remove(vehicleNum);
+                            Log.i("soni-homepage", "deleterecord() ---> removed " + vehicleNum + " from userinfo");
+                            userRef.child(uname).child("ownerof").setValue(numList);
+                        }
+                    }
+                    else if(dataSnapshot.getValue() instanceof HashMap){
+                        HashMap<String, String> hashMap = (HashMap<String, String>) dataSnapshot.getValue();
+//                        if(hashMap.keySet().size() >0)  {
+//                            //String hmKey = hashMap.keySet().iterator().next();
+//                            //Log.i("soni-delete", "got key " + hmKey);
+//                            List<String> vals =new ArrayList<>();
+//                            for(String hmkey : hashMap.keySet()) {
+//                                vals = (ArrayList<String>) hashMap.get(hmkey);
+//                            }
+//                            vals.remove(vehicleNum);
+//                            hashMap.put(hmKey, vals);
+//                        }
+                        Log.i("soni-deleterecord ", "its hashmap");
                     }
                 }
 
@@ -362,62 +410,62 @@ public class HomePage extends AppCompatActivity {
 
     private void retriveCarList() {
 
-        if(activeOrders.isEmpty())    {
+        if(activeOrders == null || activeOrders.isEmpty())    {
             Log.i("soni-homepage", "activeOrders list is empty");
-        }
+        } else {
 
-        carInfoReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                hmList.clear();
-                //vehicle_no	model_name	availability description    location	sellingprice    image_uri_list
+            carInfoReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    hmList.clear();
+                    //vehicle_no	model_name	availability description    location	sellingprice    image_uri_list
 
-                for(DataSnapshot carinfo : dataSnapshot.getChildren())  {
-                    //Log.i("soni-carinfo",carinfo.getKey().toString());
+                    for (DataSnapshot carinfo : dataSnapshot.getChildren()) {
+                        //Log.i("soni-carinfo",carinfo.getKey().toString());
 
-                    if(activeOrders.contains(carinfo.getKey().toString()))   {
+                        if (activeOrders.contains(carinfo.getKey().toString())) {
 
-                        Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
-                        HashMap<String, Object> hm = new HashMap<String, Object>();
-                        String vehiclenum = carinfo.getKey().replace(replacechar, space);
-                        hm.put("vehicle_no", vehiclenum);
-                        while(it.hasNext()) {
-                            DataSnapshot ds = it.next();
-                            if(ds.getKey().equals("image_uri_list"))    {
-                                ArrayList<String> tempList = (ArrayList<String>) ds.getValue();
-                                hm.put(ds.getKey(), getImageFromUrl(tempList.get(0), carinfo.getKey()));
-                                Log.i("soni-", "got one img uri " + tempList.get(0));
-                            }else {
-                                hm.put(ds.getKey(), ds.getValue().toString().replace(replacechar, space));
+                            Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
+                            HashMap<String, Object> hm = new HashMap<String, Object>();
+                            String vehiclenum = carinfo.getKey().replace(replacechar, space);
+                            hm.put("vehicle_no", vehiclenum);
+                            while (it.hasNext()) {
+                                DataSnapshot ds = it.next();
+                                if (ds.getKey().equals("image_uri_list")) {
+                                    //ArrayList<String> tempList = (ArrayList<String>) ds.getValue();
+                                    //hm.put(ds.getKey(), getImageFromUrl(tempList.get(0), carinfo.getKey()));
+                                    //Log.i("soni-", "got one img uri " + tempList.get(0));
+                                } else {
+                                    hm.put(ds.getKey(), ds.getValue().toString().replace(replacechar, space));
+                                }
                             }
-                        }
-                        //hm.put("carImage", loadWithGlide(carinfo.getKey()));
+                            //hm.put("carImage", loadWithGlide(carinfo.getKey()));
 
 //                        Glide.with(getApplicationContext()).load(storageRef.child(uname).child(carinfo.getKey()))
 //                                .into((ImageView)findViewById(R.id.carImageView));
 
-                        //StorageReference ref = storageRef.child(uname).child(carinfo.getKey().toString());
+                            //StorageReference ref = storageRef.child(uname).child(carinfo.getKey().toString());
 
-                        hmList.add(hm);
-                        //simpleAdapter.notifyDataSetChanged();
+                            hmList.add(hm);
+                            //simpleAdapter.notifyDataSetChanged();
+                        }
                     }
+                    Log.i("soni-", "datasnapshot loop completed");
+                    simpleAdapter = new SimpleAdapter(getApplicationContext(), hmList, R.layout.carslist_layout, from, to);
+                    carsList.setAdapter(simpleAdapter);
+                    if (hmList.size() > 0) {
+                        Log.i("soni-", "data fetched, adapter was set!");
+                    }
+
+                    //simpleAdapter.notifyDataSetChanged();
                 }
-                Log.i("soni-", "datasnapshot loop completed");
-                simpleAdapter = new SimpleAdapter(getApplicationContext(), hmList, R.layout.carslist_layout, from, to);
-                carsList.setAdapter(simpleAdapter);
-                if(hmList.size()>0) {
-                    Log.i("soni-", "data fetched, adapter was set!");
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
                 }
-
-                //simpleAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
+            });
+        }
 
     }
     Bitmap imgBitmap = null;
@@ -435,9 +483,9 @@ public class HomePage extends AppCompatActivity {
         });*/
         Log.i("soni-", "In getImagefromUrl");
 
-            Glide.with(getApplicationContext()).asBitmap().load(imgUri).into(tempImg);
+       // Glide.with(getApplicationContext()).asBitmap().load(imgUri).into(tempImg);
 
-                    /*new Target<Bitmap>() {
+        /*new Target<Bitmap>() {
                 @Override
                 public void onStart() {
 
@@ -496,6 +544,7 @@ public class HomePage extends AppCompatActivity {
             });*/
 
         //Bitmap thumbImg = ThumbnailUtils.extractThumbnail(BitmapFactory.;
+
         if(imgBitmap != null )  {
             return imgBitmap;
         }

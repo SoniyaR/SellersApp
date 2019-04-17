@@ -7,23 +7,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 
 public class DisplayImageAdapter extends PagerAdapter {
 
     private Context mContext;
-    private ArrayList<String> arrayList;
+    private ArrayList<String> imageUrls;
 
-    DisplayImageAdapter(Context context, ArrayList<String> list)    {
-        mContext = context;
-        arrayList = list;
+    DisplayImageAdapter(Context context, ArrayList<String> urlList)    {
+        this.mContext = context;
+        this.imageUrls = urlList;
     }
     @Override
     public int getCount() {
-        if(arrayList !=null){
-            return arrayList.size();
-        }
-        return 0;
+        return imageUrls.size();
     }
 
     @Override
@@ -37,12 +36,17 @@ public class DisplayImageAdapter extends PagerAdapter {
         ImageView imageView = new ImageView(mContext);
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         //imageView.setImageResource();
-        container.addView(imageView, 0);
+        Glide.with(mContext)
+                .load(imageUrls.get(position))
+                .fitCenter()
+                .centerCrop()
+                .into(imageView);
+        container.addView(imageView);
         return imageView;
     }
 
     @Override
     public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-        container.removeView((ImageView)object);
+        container.removeView((View)object);
     }
 }

@@ -3,7 +3,10 @@ package com.soniya.sellersapp;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -80,9 +83,16 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     FirebaseDataFactory database = new FirebaseDataFactory();
     List<HashMap<String, Object>> hmList = new ArrayList<>();
 
+    List<String> ownerofList;
+//    SharedPreferences preferences;
+//    String prefKey = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+//        preferences = getSharedPreferences("com.soniya.sellersapp", Context.MODE_PRIVATE);
+//        prefKey= preferences.getString("key", "");
 
         isImageSelected = false;
         current_img_index = 0;
@@ -115,6 +125,10 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
             prevButton.setEnabled(false);
             nextButton.setEnabled(false);
         }
+        ownerofList = new ArrayList<>();
+
+        ownerofList=database.getOwnerofList();
+        //Log.i("soni-key is", preferences.getString("key", ""));
 
     }
 
@@ -125,7 +139,12 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
             //urisList.clear();
 
             hmList.add(recHashmap);
-            database.uploadImportData(hmList);
+
+            database.deleteOldOwnerofList();
+
+            //Log.i("soni- saveAllinfo", " key is " + prefKey);
+
+            database.uploadImportData(hmList, ownerofList);
 
             if(selectedUriList != null && selectedUriList.size() > 0) {
 
@@ -219,7 +238,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                 if(task.isSuccessful()) {
                     Uri uri = task.getResult();
                     //urisList.add(uri);
-                    Log.i("soni- uri ", String.valueOf(uri));
+                    //Log.i("soni- uri ", String.valueOf(uri));
                     //urisList.add(uri);
                     database.updateUriList(curr_vehicleNum.replace(space, replacechar), String.valueOf(uri));
 
@@ -336,57 +355,4 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         return mime.getExtensionFromMimeType(cR.getType(uri));
     }
 
-
-
-    private class AsyncRunner extends AsyncTask<String[], Void, String> {
-
-
-        @Override
-        protected String doInBackground(String[]... strings) {
-            if(strings.length == 2 && strings[0] !=null) {
-                Log.i("soni-", "in async task, " + strings[0] + "  " + strings[1]);
-                Uri uri = Uri.parse(String.valueOf(strings[0]));
-
-                //update Uri in carInfo -> vehicleNum -> image_uri_list
-
-                /*carInfoRef = FirebaseDatabase.getInstance().getReference().child("CarsInfo").child(String.valueOf(lists[1]));
-                Log.i("soni-", "in asynctask-> updateUriList");
-                carInfoRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if(dataSnapshot !=null) {
-                            //Log.i("soni-userinforef", dataSnapshot.getValue().toString());
-                            ArrayList<Uri> list = null;
-                            if (dataSnapshot.hasChild("image_uri_list")) {
-                                list = (ArrayList<Uri>) dataSnapshot.child("image_uri_list").getValue();
-                                if(!list.contains(uri)) {
-                                    list.add(uri);
-                                }
-                            } else {
-                                list = new ArrayList<>();
-                                list.add(uri);
-                            }
-                            if (list != null) {
-                                carInfoRef.child("image_uri_list").setValue(list);
-                            } else {
-                                Log.i("soni-factory", "uri list is null for " + String.valueOf(lists[1]) );
-                            }
-
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });*/
-
-            }
-            else{
-                Log.i("soni-", "problem with params to async task");
-            }
-            return null;
-        }
-
-    }
 }

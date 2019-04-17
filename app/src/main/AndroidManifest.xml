@@ -19,7 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".DisplayImages"></activity>
+        <activity android:name=".DisplayImages" />
         <activity
             android:name=".UploadNewInfo2"
             android:parentActivityName=".UploadNewInfo" />

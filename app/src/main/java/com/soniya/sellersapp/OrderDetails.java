@@ -2,6 +2,8 @@ package com.soniya.sellersapp;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,7 +20,11 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class OrderDetails extends AppCompatActivity implements View.OnClickListener {
 
@@ -31,11 +37,12 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
     boolean editmode=false;
     Button soldButton;
     EditText descEdit;
-    ImageView img;
-
+    ImageView imgView;
+    ArrayList<String> urlList = new ArrayList<>();
     TextView editDescription;
 
     HashMap<String, Object> hm = new HashMap<>();
+    List<Bitmap> carImagesList = new ArrayList<>();
 
 //    @Override
 //    public void onBackPressed() {
@@ -124,7 +131,8 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
         editDescription = (TextView) findViewById(R.id.editTextDesc);
         editDescription.setOnClickListener(this);
 
-        img = findViewById(R.id.carImage);
+        imgView = findViewById(R.id.carImage);
+        imgView.setOnClickListener(this);
 
         Intent intent = getIntent();
         if(intent.getExtras() != null && intent.hasExtra("selectedHM")) {
@@ -140,6 +148,14 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
             descEdit.setText(editDescription.getText());
             vehicleNum.setText(hm.get("vehicle_no").toString());
             //set images
+            if(hm.keySet().contains("image_uri_list")) {
+                urlList = (ArrayList<String>) hm.get("image_uri_list");
+
+                if(urlList.size() > 0)  {
+                    Glide.with(this).load(urlList.get(0)).into(imgView);
+                    loadImagesToList();
+                }
+            }
 
             if(intent.hasExtra("forEdit") && intent.getBooleanExtra("forEdit", false)) {
                 editmode = true;
@@ -163,6 +179,15 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
         }
 
+
+    }
+
+    private void loadImagesToList() {
+        //retrieve images from urls to list of bitmap
+        ArrayList<Uri> uriArrayList = new ArrayList<>();
+        for(String uri : urlList)   {
+            uriArrayList.add(Uri.parse(uri));
+        }
 
     }
 
@@ -214,7 +239,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
     private void displayCarImages() {
 //TODO
         Intent displayIntent = new Intent(getApplicationContext(), DisplayImages.class);
-        displayIntent.putExtra("vehicleNum", vehicleNum.getText().toString());
+        displayIntent.putExtra("urlList", urlList);
         startActivity(displayIntent);
 
     }
