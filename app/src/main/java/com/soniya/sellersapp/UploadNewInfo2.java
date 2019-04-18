@@ -109,6 +109,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         nextButton.setVisibility(View.INVISIBLE);
         saveAllButton = findViewById(R.id.saveAllButton);
         saveAllButton.setOnClickListener(this);
+        saveAllButton.setVisibility(View.INVISIBLE);
 
         selectedUriList.clear();
 
@@ -136,7 +137,6 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         ownerofList = new ArrayList<>();
 
         ownerofList=database.getOwnerofList();
-        //Log.i("soni-key is", preferences.getString("key", ""));
 
     }
 
@@ -148,9 +148,9 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
 
             hmList.add(recHashmap);
 
-            database.deleteOldOwnerofList();
-
-            //Log.i("soni- saveAllinfo", " key is " + prefKey);
+            if(ownerofList.size() > 0) {
+                database.deleteOldOwnerofList();
+            }
 
             database.uploadImportData(hmList, ownerofList);
 
@@ -171,6 +171,8 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                     }
                 }
 
+            }else{
+                Log.i("soni-176", "uploadinfo2 - No images to upload...");
             }
 
             Intent i = new Intent(getApplicationContext(), HomePage.class);
@@ -337,6 +339,11 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                 }
                 break;
 
+
+            case R.id.skipText:
+
+                break;
+
         }
 
     }
@@ -349,6 +356,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                     selectedImages.setVisibility(View.VISIBLE);
                     prevButton.setVisibility(View.VISIBLE);
                     nextButton.setVisibility(View.VISIBLE);
+                    saveAllButton.setVisibility(View.VISIBLE);
                     int imgCount = data.getClipData().getItemCount();
                     if(imgCount < 6) {
                         for (int i = 0; i < imgCount; i++) {

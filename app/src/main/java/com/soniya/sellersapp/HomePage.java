@@ -238,7 +238,7 @@ public class HomePage extends AppCompatActivity {
         carsList.setOnItemClickListener((parent, view, position, id) -> {
 
             Intent intent = new Intent(getApplicationContext(), OrderDetails.class);
-            intent.putExtra("selectedHM", hmList.get(position));
+            intent.putExtra("selVehicleNum", hmList.get(position).get("vehicle_no").toString());
             startActivity(intent);
 
         });
@@ -441,6 +441,10 @@ public class HomePage extends AppCompatActivity {
                                 } else {
                                     hm.put(ds.getKey(), ds.getValue().toString().replace(replacechar, space));
                                 }
+                            }
+
+                            if(!hm.keySet().contains("image_uri_list")) {
+                                hm.put("image_uri_list", BitmapFactory.decodeResource(getResources(), R.drawable.nocarpicture));
                             }
                             //hm.put("carImage", loadWithGlide(carinfo.getKey()));
 

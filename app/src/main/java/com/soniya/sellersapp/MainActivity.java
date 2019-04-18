@@ -17,6 +17,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 /*import com.parse.FindCallback;
@@ -41,6 +45,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView signupTextView;
     ConstraintLayout backLayout;
     ImageView logo;
+
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
     FirebaseAdapter fbAdapter = new FirebaseAdapter();
 
@@ -74,36 +80,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Map<String, String> vals = new HashedMap<>();
         vals.put("name", "Soniya");*/
 
-        //Parse server init
-        //this project parse server
-        //go to http://18.221.46.170/apps
-        //username: user
-        //password: S0l2b7fktR6J
-
-        /*Parse.initialize(new Parse.Configuration.Builder(getApplicationContext())
-                .applicationId("2d716d5fe71572035e9fbafc9c989ce3106774f0")
-                .clientKey("b105ed9250138585358def6a814dd139f83b9deb")
-                .server("http://18.221.46.170:80/parse")
-                .build()
-        );
-
-        //setting access control
-        ParseACL defaultACL = new ParseACL();
-        defaultACL.setPublicReadAccess(true);
-        defaultACL.setPublicWriteAccess(true);
-        ParseACL.setDefaultACL(defaultACL, true);*/
-
-       /* databaseReference.push().setValue(vals, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                if(databaseError == null){
-                    Log.i("soni-", "saved successful");
-
-                }else{
-                    Log.i("soni-", "error -- "+databaseError.getMessage());
-                }
-            }
-        });*/
 
         //Firebase test: Initialise database connectivity
        /* DatabaseAdapter databaseAdapter = new DatabaseAdapter(this.getApplicationContext());
@@ -163,15 +139,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }*/
 
                     //firebase login process
-                    if(fbAdapter.loginUser(user.getText().toString(), pass.getText().toString())){
+
+                    mAuth.signInWithEmailAndPassword(user.getText().toString(), pass.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if(task.isSuccessful()) {
+                                //signinUserSuccessful = true;
+                                //Toast.makeText(this, "Login with Email is Successful!", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(getApplicationContext(), HomePage.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                            }else{
+                                //signinUserSuccessful = false;
+                                if(task.getException() !=null && task.getException().getMessage()!=null) {
+                                    Log.i("soni-", task.getException().getMessage());
+                                }
+                            }
+                        }
+                    });
+                    /*if(fbAdapter.loginUser(user.getText().toString(), pass.getText().toString())){
                         Toast.makeText(this, "Login with Email is Successful!", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(getApplicationContext(), HomePage.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                     }else{
                         Log.i("soni-", fbAdapter.getErrorMessage());
-                        Toast.makeText(this, fbAdapter.getErrorMessage(), Toast.LENGTH_SHORT).show();
-                    }
+                        Toast.makeText(this, "error-" + fbAdapter.getErrorMessage(), Toast.LENGTH_SHORT).show();
+                    }*/
                 }
 
                 break;

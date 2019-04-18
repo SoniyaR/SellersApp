@@ -1,41 +1,23 @@
 package com.soniya.sellersapp;
 
-import android.content.ContentResolver;
-import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.view.View;
-import android.widget.ProgressBar;
 
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
 
 public class FirebaseDataFactory {
 
@@ -66,12 +48,12 @@ public class FirebaseDataFactory {
     StorageReference img_ref = FirebaseStorage.getInstance().getReference().child(new FirebaseAdapter().getCurrentUser());
 
 
-    public List<HashMap<String, Object>> retrieveCarsList (ArrayList<String> vehicleNumList)    {
+    public List<HashMap<String, Object>> retrieveCarsList (ArrayList<String> vehicleNumList) {
 
         carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
 
         //ArrayList<String> vehicleNumList = getOwnerof();
-        if(vehicleNumList.isEmpty())    {
+        if (vehicleNumList.isEmpty()) {
             Log.i("soni-fbFactory", "vehicleNumList is empty");
         }
 
@@ -81,10 +63,10 @@ public class FirebaseDataFactory {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 hmlist.clear();
                 //Log.i("soni-dataSnapshot", dataSnapshot.getValue().toString());
-                for(DataSnapshot carinfo : dataSnapshot.getChildren())  {
+                for (DataSnapshot carinfo : dataSnapshot.getChildren()) {
                     //Log.i("soni-carinfo",carinfo.getKey().toString());
                     //activeOrders.add(carinfo.getKey().toString());
-                    if(vehicleNumList.contains(carinfo.getKey())) {
+                    if (vehicleNumList.contains(carinfo.getKey())) {
                         Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
                         HashMap<String, Object> hm = new HashMap<String, Object>();
                         hm.put("vehicle_no", carinfo.getKey().toString());
@@ -98,23 +80,8 @@ public class FirebaseDataFactory {
                         }
                         hmlist.add(hm);
                     }
-            }
+                }
                 //adapter.notifyDataSetChanged();
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-        }
-    });
-
-
-        /*Query query = carInfoReference.equalTo("MH02_RT_4532");
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                Log.i("soni-query",String.valueOf(dataSnapshot.hasChildren()));
             }
 
             @Override
@@ -122,7 +89,7 @@ public class FirebaseDataFactory {
 
             }
         });
-*/
+
         return hmlist;
 
     }
@@ -203,19 +170,6 @@ public class FirebaseDataFactory {
             }
         });
 
-        /*cur_UserRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot !=null && dataSnapshot.hasChild("ownerof")) {
-                    vehicleNumbers = (ArrayList<String>) dataSnapshot.child("ownerof").getValue();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });*/
         return ownerofList;
     }
 
@@ -250,20 +204,6 @@ public class FirebaseDataFactory {
             // add vehicle number in userInfo for the current user who uploaded this info, it will be array of strings for vehicleNum
             ownerofList.add(vehicleNum);
             updateOwnerOf(ownerofList);
-
-//            if(selectedUriList != null && selectedUriList.size() > 0) {
-//                for (Uri uri : selectedUriList) {
-//                    String filename = "";
-//                    String path = uri.getPath().toString();
-//                    StringTokenizer tokenizer = new StringTokenizer(path, "/");
-//                    while (tokenizer.hasMoreTokens()) {
-//                        filename = tokenizer.nextToken();
-//                    }
-//
-//                    Log.i("soni-filename", filename);
-//                    //uploadImage(uri, filename, vehicleNum);
-//                }
-//            }
 
         }
 

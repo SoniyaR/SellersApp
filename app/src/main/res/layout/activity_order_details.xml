@@ -27,6 +27,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
+        android:padding="0dp"
         android:text="model"
         android:textColor="@android:color/black"
         android:textSize="20sp"
@@ -143,7 +144,6 @@
 
     <EditText
         android:id="@+id/modeledit"
-        android:text="TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -151,14 +151,14 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        tools:layout_editor_absoluteX="178dp"
-        tools:layout_editor_absoluteY="206dp"
+        android:padding="0dp"
+        android:text="modeledit"
         android:textColor="@android:color/black"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/carImage"/>
+        app:layout_constraintTop_toBottomOf="@+id/carImage" />
 
 
 </android.support.constraint.ConstraintLayout>
