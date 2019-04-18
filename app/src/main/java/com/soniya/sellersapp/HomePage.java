@@ -5,14 +5,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -22,27 +19,18 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.Request;
-import com.bumptech.glide.request.target.SizeReadyCallback;
-import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.request.transition.Transition;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -50,7 +38,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class HomePage extends AppCompatActivity {
 
@@ -79,7 +66,7 @@ public class HomePage extends AppCompatActivity {
     String[] from = {"model_name", "sellingprice", "location", "carImage"};
     int[] to = {R.id.modelName, R.id.sellingprice, R.id.location, R.id.carImageView};
 
-    SharedPreferences preferences;
+//    SharedPreferences preferences;
 
     int contextSelPosition = 0;
 
@@ -124,10 +111,19 @@ public class HomePage extends AppCompatActivity {
                 refreshList();
                 break;
 
+            case R.id.soldhistory:
+                showSoldHistory();
+                break;
+
             default: break;
         }
 
         return true;
+    }
+
+    private void showSoldHistory() {
+        Intent soldIntent = new Intent(getApplicationContext(), SoldHistory.class);
+        startActivity(soldIntent);
     }
 
     @Override
@@ -151,13 +147,13 @@ public class HomePage extends AppCompatActivity {
         carsList.setAdapter(simpleAdapter);
         registerForContextMenu(carsList);
 
-        preferences = getSharedPreferences("com.soniya.sellersapp", Context.MODE_PRIVATE);
+        /*preferences = getSharedPreferences("com.soniya.sellersapp", Context.MODE_PRIVATE);
         if(preferences.getString("key", "").isEmpty()) {
             preferences.edit().putString("key", fbFactory.getOwnerofListKey()).commit();
         }else{
             preferences.edit().remove("key").commit();
             preferences.edit().putString("key", fbFactory.getOwnerofListKey()).commit();
-        }
+        }*/
 
 
         simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
@@ -208,7 +204,7 @@ public class HomePage extends AppCompatActivity {
                                     activeOrders = (ArrayList<String>) hashMap.get(hmkey);
                                 }
                             }
-                            Log.i("soni-homepage", preferences.getString("key", ""));
+//                            Log.i("soni-homepage", preferences.getString("key", ""));
                             //activeOrders = (List<String>) hashMap.values();
                         }
                     }

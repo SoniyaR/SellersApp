@@ -235,7 +235,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                                 //load img to imgview
                                 if(urlList.size() > 0)  {
                                     Glide.with(getApplicationContext()).load(urlList.get(0)).into(imgView);
-                                    loadImagesToList();
+                                    //loadImagesToList();
                                 }
                             }
                             else{
@@ -301,6 +301,9 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
             public void onClick(DialogInterface dialog, int which) {
                 Log.i("soni-which OrdDetails", Integer.toString(which));
                 if(editmode) {
+                    if(!price.getText().toString().equals(priceEdit.getText().toString()))  {
+                        pricechanged = true;
+                    }
                     price.setText(priceEdit.getText());
                 }
             }
@@ -330,14 +333,14 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void loadImagesToList() {
+   /* private void loadImagesToList() {
         //retrieve images from urls to list of bitmap
         ArrayList<Uri> uriArrayList = new ArrayList<>();
         for(String uri : urlList)   {
             uriArrayList.add(Uri.parse(uri));
         }
 
-    }
+    }*/
 
     @Override
     public void onClick(View v) {
@@ -355,6 +358,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
             case R.id.soldButton:
                 availability.setText("Sold");
                 soldButton.setEnabled(false);
+                carInfoReference.child("availability").setValue("sold");
                 
                 break;
 
@@ -396,7 +400,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
     }
 
     private void displayCarImages() {
-//TODO
+        //TODO
         Intent displayIntent = new Intent(getApplicationContext(), DisplayImages.class);
         displayIntent.putExtra("urlList", urlList);
         startActivity(displayIntent);
