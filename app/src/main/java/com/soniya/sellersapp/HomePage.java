@@ -5,10 +5,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -24,6 +28,15 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.FutureTarget;
+import com.bumptech.glide.request.Request;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -33,11 +46,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class HomePage extends AppCompatActivity {
 
@@ -70,7 +87,9 @@ public class HomePage extends AppCompatActivity {
 
     int contextSelPosition = 0;
 
-    //ImageView tempImg;
+    ImageView tempImg;
+
+    HashMap<String, String> imgUriForRecord = new HashMap<>();
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -137,23 +156,15 @@ public class HomePage extends AppCompatActivity {
         activeOrders = null;
         hmList = new ArrayList<>();
 
-        //tempImg = findViewById(R.id.imgviw);
+        tempImg = new ImageView(this);
 
         carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
         userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
 
         carsList = (ListView) findViewById(R.id.listView);
-        simpleAdapter = new SimpleAdapter(this, hmList, R.layout.carslist_layout, from, to);
+        simpleAdapter = new CustomAdapter(this, hmList, R.layout.carslist_layout, from, to);
         carsList.setAdapter(simpleAdapter);
         registerForContextMenu(carsList);
-
-        /*preferences = getSharedPreferences("com.soniya.sellersapp", Context.MODE_PRIVATE);
-        if(preferences.getString("key", "").isEmpty()) {
-            preferences.edit().putString("key", fbFactory.getOwnerofListKey()).commit();
-        }else{
-            preferences.edit().remove("key").commit();
-            preferences.edit().putString("key", fbFactory.getOwnerofListKey()).commit();
-        }*/
 
 
         simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
@@ -161,17 +172,21 @@ public class HomePage extends AppCompatActivity {
             public boolean setViewValue(View view, Object data, String textRepresentation) {
                 if(view instanceof ImageView && view.getId() == R.id.carImageView && data instanceof Bitmap){
                     //R.id.userImageView
-
                     ImageView imgV = (ImageView) view;
                     imgV.setImageBitmap((Bitmap)data);
 
                 }else if(view instanceof TextView && data instanceof String){
                     TextView textV = (TextView) view;
                     textV.setText((String) data);
-                }
+                }/*else if(view instanceof ImageView && data instanceof String)   {
+                    ImageView imgView = (ImageView) view;
+                    //Glide.with(HomePage.this).asBitmap().override(100, 100).load(data).into(imgView);
+                    Picasso.with(HomePage.this).load(data.toString()).resize(100, 100).into(imgView);
+                }*/
                 return true;
             }
         });
+
 
         if(fbAdapter.checkCurrentUser()){
             uname = fbAdapter.getCurrentUser();
@@ -204,14 +219,13 @@ public class HomePage extends AppCompatActivity {
                                     activeOrders = (ArrayList<String>) hashMap.get(hmkey);
                                 }
                             }
-//                            Log.i("soni-homepage", preferences.getString("key", ""));
-                            //activeOrders = (List<String>) hashMap.values();
                         }
                     }
 
                     if(activeOrders !=null && activeOrders.size()>0) {
                         retriveCarList();
-                    }   else    {
+                    }
+                    else    {
                         ArrayAdapter arrayAdapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
                         carsList.setAdapter(arrayAdapter);
                     }
@@ -241,50 +255,6 @@ public class HomePage extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.i("soni-", "in onStart");
-
-        /*
-        carInfoReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                //hmList.clear();
-                //vehicle_no	model_name	availability description	location	sellingprice
-
-                //Log.i("soni-dataSnapshot", dataSnapshot.getValue().toString());
-                for(DataSnapshot carinfo : dataSnapshot.getChildren())  {
-                    //Log.i("soni-carinfo",carinfo.getKey().toString());
-
-                    if(activeOrders.contains(carinfo.getKey().toString()))   {
-
-                        Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
-                        HashMap<String, Object> hm = new HashMap<String, Object>();
-                        hm.put("vehicle_no", carinfo.getKey().toString());
-                        while(it.hasNext()) {
-                            DataSnapshot ds = it.next();
-
-                            hm.put(ds.getKey().toString(), ds.getValue().toString().replace(replacechar, space));
-                        }
-                        hmList.add(hm);
-                        simpleAdapter.notifyDataSetChanged();
-                    }
-                }
-                simpleAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });*/
-
-
-        //TODO fetch first image from storage for active orders (vehicle no.)
-
-
-}
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -326,6 +296,10 @@ public class HomePage extends AppCompatActivity {
 
     }
 
+    /*
+    method to delete the car record from database
+    identified by vehicle number
+     */
     private void deleteRecord(String vehicleNum) {
 
         if(vehicleNum != null && !vehicleNum.isEmpty() && !vehicleNum.equalsIgnoreCase(""))   {
@@ -346,7 +320,7 @@ public class HomePage extends AppCompatActivity {
                     }
                     else if(dataSnapshot.getValue() instanceof HashMap){
                         HashMap<String, String> hashMap = (HashMap<String, String>) dataSnapshot.getValue();
-//                        if(hashMap.keySet().size() >0)  {
+//                        if(hashMap.keySet().size() >0)    {
 //                            //String hmKey = hashMap.keySet().iterator().next();
 //                            //Log.i("soni-delete", "got key " + hmKey);
 //                            List<String> vals =new ArrayList<>();
@@ -431,23 +405,19 @@ public class HomePage extends AppCompatActivity {
                             while (it.hasNext()) {
                                 DataSnapshot ds = it.next();
                                 if (ds.getKey().equals("image_uri_list")) {
-                                    //ArrayList<String> tempList = (ArrayList<String>) ds.getValue();
-                                    //hm.put(ds.getKey(), getImageFromUrl(tempList.get(0), carinfo.getKey()));
-                                    //Log.i("soni-", "got one img uri " + tempList.get(0));
+                                    ArrayList<String> tempList = (ArrayList<String>) ds.getValue();
+                                    //imgUriForRecord.put(carinfo.getKey().toString(), tempList.get(0));
+                                    hm.put("carImage", tempList.get(0));
+                                    Log.i("soni-", "got one img uri " + tempList.get(0));
+
                                 } else {
                                     hm.put(ds.getKey(), ds.getValue().toString().replace(replacechar, space));
                                 }
                             }
 
-                            if(!hm.keySet().contains("image_uri_list")) {
-                                hm.put("image_uri_list", BitmapFactory.decodeResource(getResources(), R.drawable.nocarpicture));
+                            if(!hm.keySet().contains("carImage"))   {
+                                hm.put("carImage", BitmapFactory.decodeResource(getResources(), R.drawable.nocarpicture));
                             }
-                            //hm.put("carImage", loadWithGlide(carinfo.getKey()));
-
-//                        Glide.with(getApplicationContext()).load(storageRef.child(uname).child(carinfo.getKey()))
-//                                .into((ImageView)findViewById(R.id.carImageView));
-
-                            //StorageReference ref = storageRef.child(uname).child(carinfo.getKey().toString());
 
                             hmList.add(hm);
                             //simpleAdapter.notifyDataSetChanged();
@@ -456,9 +426,10 @@ public class HomePage extends AppCompatActivity {
                     Log.i("soni-", "datasnapshot loop completed");
                     simpleAdapter = new SimpleAdapter(getApplicationContext(), hmList, R.layout.carslist_layout, from, to);
                     carsList.setAdapter(simpleAdapter);
-                    if (hmList.size() > 0) {
-                        Log.i("soni-", "data fetched, adapter was set!");
-                    }
+//                    if (hmList.size() > 0 && imgUriForRecord.size() > 0) {
+//                        Log.i("soni-", "data fetched, adapter was set!");
+//                        //retrieveImages();
+//                    }
 
                     //simpleAdapter.notifyDataSetChanged();
                 }
@@ -471,10 +442,22 @@ public class HomePage extends AppCompatActivity {
         }
 
     }
+
+    private void retrieveImages() {
+
+        Log.i("soni-", "in retrieve images method");
+        for(int i = 0; i < activeOrders.size(); i++)    {
+            Log.i("soni-Glide", imgUriForRecord.get(activeOrders.get(i).toString()));
+            String vehicle = activeOrders.get(i).toString().replace(replacechar, space);
+
+        }
+    }
+
     Bitmap imgBitmap = null;
 
     private Bitmap getImageFromUrl(String uriStr, String vehiclenumber) {
         Uri imgUri = Uri.parse(uriStr);
+
         /*FileDownloadTask downloadTask = storageRef.child(uname).child(vehiclenumber).getFile(imgUri);
         downloadTask.addOnCompleteListener(new OnCompleteListener<FileDownloadTask.TaskSnapshot>() {
             @Override
@@ -485,68 +468,72 @@ public class HomePage extends AppCompatActivity {
             }
         });*/
         Log.i("soni-", "In getImagefromUrl");
+        Glide.with(getApplicationContext()).asBitmap().load(imgUri)
+        .into(new Target<Bitmap>() {
+            @Override
+            public void onLoadStarted(@Nullable Drawable placeholder) {
 
-       // Glide.with(getApplicationContext()).asBitmap().load(imgUri).into(tempImg);
+            }
 
-        /*new Target<Bitmap>() {
-                @Override
-                public void onStart() {
+            @Override
+            public void onLoadFailed(@Nullable Drawable errorDrawable) {
 
-                }
+            }
 
-                @Override
-                public void onStop() {
+            @Override
+            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                tempImg.setImageBitmap(resource);
+                Log.i("soni-", "target- onResourceReady ");
+            }
 
-                }
+            @Override
+            public void onLoadCleared(@Nullable Drawable placeholder) {
 
-                @Override
-                public void onDestroy() {
+            }
 
-                }
+            @Override
+            public void getSize(@NonNull SizeReadyCallback cb) {
 
-                @Override
-                public void onLoadStarted(@Nullable Drawable placeholder) {
+            }
 
-                }
+            @Override
+            public void removeCallback(@NonNull SizeReadyCallback cb) {
 
-                @Override
-                public void onLoadFailed(@Nullable Drawable errorDrawable) {
+            }
 
-                }
+            @Override
+            public void setRequest(@Nullable Request request) {
 
-                @Override
-                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                    imgBitmap = resource;
-                }
+            }
 
-                @Override
-                public void onLoadCleared(@Nullable Drawable placeholder) {
+            @Nullable
+            @Override
+            public Request getRequest() {
+                return null;
+            }
 
-                }
+            @Override
+            public void onStart() {
 
-                @Override
-                public void getSize(@NonNull SizeReadyCallback cb) {
+            }
 
-                }
+            @Override
+            public void onStop() {
 
-                @Override
-                public void removeCallback(@NonNull SizeReadyCallback cb) {
+            }
 
-                }
+            @Override
+            public void onDestroy() {
 
-                @Override
-                public void setRequest(@Nullable Request request) {
+            }
+        });
 
-                }
+        /*Drawable imgDrawable = tempImg.getDrawable();
+        BitmapDrawable bitmapDrawable = (BitmapDrawable)imgDrawable;
+        if(bitmapDrawable !=null)
+        imgBitmap = bitmapDrawable.getBitmap();*/
 
-                @Nullable
-                @Override
-                public Request getRequest() {
-                    return null;
-                }
-            });*/
-
-        //Bitmap thumbImg = ThumbnailUtils.extractThumbnail(BitmapFactory.;
+        //storageRef.child(uname).child(vehiclenumber).
 
         if(imgBitmap != null )  {
             return imgBitmap;

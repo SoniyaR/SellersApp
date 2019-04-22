@@ -157,6 +157,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_details);
+        setTitle("Car Information");
 
         model = (TextView) findViewById(R.id.modelname);
         model.setOnClickListener(this);
@@ -244,12 +245,12 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
                                     case "model_name":
 
-                                        model.setText(ds.getValue().toString());
+                                        model.setText(ds.getValue().toString().replace(replacechar, space));
 
                                         break;
 
                                     case "availability":
-                                        availability.setText(ds.getValue().toString());
+                                        availability.setText(ds.getValue().toString().replace(replacechar, space));
                                         break;
 
                                     case "sellingprice":
@@ -260,7 +261,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
                                     case "description":
 
-                                        editDescription.setText(ds.getValue().toString());
+                                        editDescription.setText(ds.getValue().toString().replace(replacechar, space));
                                         descEdit.setText(editDescription.getText());
 
                                         break;
@@ -402,6 +403,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
     private void displayCarImages() {
         //TODO
         Intent displayIntent = new Intent(getApplicationContext(), DisplayImages.class);
+        displayIntent.putExtra("modelname", model.getText().toString());
         displayIntent.putExtra("urlList", urlList);
         startActivity(displayIntent);
 
