@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -20,6 +21,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -48,7 +50,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
     boolean editmode=false;
     Button soldButton;
     EditText descEdit;
-    ImageView imgView;
+    //ImageView imgView;
     ArrayList<String> urlList = new ArrayList<>();
     TextView editDescription;
 
@@ -181,46 +183,18 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
         editDescription = (TextView) findViewById(R.id.editTextDesc);
         editDescription.setOnClickListener(this);
 
-        imgView = findViewById(R.id.carImage);
-        imgView.setOnClickListener(this);
+//        imgView = findViewById(R.id.carImage);
+//        imgView.setOnClickListener(this);
 
 
         Intent intent = getIntent();
-        /*if(intent.getExtras() != null && intent.hasExtra("selectedHM")) {
-
-            hm = (HashMap<String, Object>) intent.getSerializableExtra("selectedHM");
-            *//*for(String key: hm.keySet()){
-                Log.i("soni-orderdetail", key);
-            }*//*
-
-            model.setText(hm.get("model_name").toString());
-            modelEdit.setText(model.getText());
-            availability.setText(hm.get("availability").toString());
-            price.setText(hm.get("sellingprice").toString());
-            editDescription.setText(hm.get("description").toString());
-            descEdit.setText(editDescription.getText());
-            vehicleNum.setText(hm.get("vehicle_no").toString());
-            //set images
-            if(hm.keySet().contains("image_uri_list")) {
-                urlList = (ArrayList<String>) hm.get("image_uri_list");
-
-                if(urlList.size() > 0)  {
-                    Glide.with(this).load(urlList.get(0)).into(imgView);
-                    loadImagesToList();
-                }
-            }
-
-            if(intent.hasExtra("forEdit") && intent.getBooleanExtra("forEdit", false)) {
-                editmode = true;
-                makeEditable();
-            }
-
-        }*/
 
         if(intent.getExtras() != null && intent.hasExtra("selVehicleNum"))  {
-            vehicleNum.setText(intent.getStringExtra("selVehicleNum"));
             // call retrieve car info
             String vehicleNo = intent.getStringExtra("selVehicleNum").replace(space, replacechar);
+
+            vehicleNum.setText(vehicleNo);
+
             carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo").child(vehicleNo);
 
             carInfoReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -235,8 +209,8 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                                 urlList = (ArrayList<String>) ds.getValue();
                                 //load img to imgview
                                 if(urlList.size() > 0)  {
-                                    Glide.with(getApplicationContext()).load(urlList.get(0)).into(imgView);
-                                    //loadImagesToList();
+                                    //Glide.with(getApplicationContext()).load(urlList.get(0)).into(imgView);
+                                    loadImages();
                                 }
                             }
                             else{
@@ -327,10 +301,28 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
         price.setOnClickListener(this);
 
-        /*if(availability.getText().toString().equalsIgnoreCase("Sold")) {
 
-        }*/
 
+
+    }
+
+    private void loadImages() {
+
+        //trying below for sliding scroll view of images
+
+        LinearLayout gallery = findViewById(R.id.imgGallery);
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+
+        for(int i = 0; i < urlList.size(); i++)  {
+
+            View view = inflater.inflate(R.layout.imgitem, gallery, false);
+            ImageView imageView = view.findViewById(R.id.imageView);
+            imageView.setImageResource(R.mipmap.ic_launcher);
+            Glide.with(getApplicationContext()).load(urlList.get(i)).into(imageView);
+
+            gallery.addView(view);
+        }
 
     }
 
@@ -357,9 +349,25 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.soldButton:
-                availability.setText("Sold");
-                soldButton.setEnabled(false);
-                carInfoReference.child("availability").setValue("sold");
+                if(availability.getText().toString().equalsIgnoreCase("Available")) {
+                    availability.setText("Sold");
+                    soldButton.setEnabled(false);
+                    carInfoReference.child("availability").setValue("sold");
+                    updateAvailability();
+                }else{
+                    new AlertDialog.Builder(this)
+                            .setTitle("do you want to activate the order again?")
+                            .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    //make it available agn
+                                    availability.setText("Available");
+                                    updateAvailability();
+                                }
+                            })
+                    .setNegativeButton("no", null)
+                    .show();
+                }
                 
                 break;
 
@@ -385,11 +393,11 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
 
-            case R.id.carImage:
+            /*case R.id.carImage:
                 //opens all images to show
                 displayCarImages();
                 break;
-
+*/
 
             case R.id.availability:
 //                Dialog dialog = new Dialog(this);
@@ -398,6 +406,13 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                 break;
 
         }
+    }
+
+    private void updateAvailability() {
+
+        String newstatus = availability.getText().toString();
+        carInfoReference.child("availability").setValue(newstatus);
+
     }
 
     private void displayCarImages() {

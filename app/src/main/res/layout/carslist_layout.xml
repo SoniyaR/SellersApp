@@ -21,7 +21,6 @@
             android:layout_height="100dp"
             android:layout_gravity="center"
             android:layout_marginLeft="8dp"
-            android:adjustViewBounds="true"
             android:scaleType="fitCenter"
             android:src="@drawable/nocarpicture" />
 

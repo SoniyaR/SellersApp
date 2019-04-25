@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".OrderDetails">
 
-    <ImageView
+    <!--<ImageView
         android:id="@+id/carImage"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -19,7 +19,29 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@tools:sample/backgrounds/scenic[8]" />
+        tools:srcCompat="@tools:sample/backgrounds/scenic[8]" />-->
+
+
+    <HorizontalScrollView
+        android:id="@+id/horizontalScrollView"
+        android:layout_width="0dp"
+        android:layout_height="250dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:scrollbars="none"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:id="@+id/imgGallery"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
 
     <TextView
         android:id="@+id/modelname"
@@ -27,7 +49,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:padding="0dp"
@@ -37,7 +59,8 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/carImage" />
+        app:layout_constraintTop_toBottomOf="@+id/horizontalScrollView" />
+        <!--app:layout_constraintTop_toBottomOf="@+id/carImage"--> />
 
     <android.support.v7.widget.GridLayout
         android:id="@+id/gridLayout"
@@ -144,6 +167,7 @@
         android:textStyle="bold|italic"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
 
 
 </android.support.constraint.ConstraintLayout>

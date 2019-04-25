@@ -19,7 +19,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".SoldHistory"></activity>
+        <activity android:name=".SoldHistory"
+            android:parentActivityName=".HomePage"></activity>
         <activity android:name=".DisplayImages" />
         <activity
             android:name=".UploadNewInfo2"
@@ -27,10 +28,18 @@
         <activity android:name=".SetupNewProfile" />
         <activity
             android:name=".ImportNewInfo"
-            android:parentActivityName=".HomePage" />
+            android:parentActivityName=".HomePage" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".HomePage" />
+        </activity>
         <activity
             android:name=".OrderDetails"
-            android:parentActivityName=".HomePage" />
+            android:parentActivityName=".HomePage" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".HomePage" />
+        </activity>
         <activity
             android:name=".UploadNewInfo"
             android:parentActivityName=".HomePage">
@@ -59,7 +68,11 @@
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".MyProfile"
-            android:parentActivityName=".HomePage" />
+            android:parentActivityName=".HomePage" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".HomePage" />
+        </activity>
     </application>
 
 </manifest>
