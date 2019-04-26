@@ -41,6 +41,7 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload_new_info);
+        setTitle("Upload New Information");
 
         infoHashmap.clear();
 

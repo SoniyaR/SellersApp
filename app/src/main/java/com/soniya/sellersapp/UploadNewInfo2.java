@@ -98,6 +98,8 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
 //        preferences = getSharedPreferences("com.soniya.sellersapp", Context.MODE_PRIVATE);
 //        prefKey= preferences.getString("key", "");
 
+        setTitle("Upload New Information");
+
         isImageSelected = false;
         current_img_index = 0;
         setContentView(R.layout.activity_upload_new_info2);

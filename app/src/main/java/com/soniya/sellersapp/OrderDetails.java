@@ -4,7 +4,9 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.v4.media.RatingCompat;
 import android.support.v7.app.AlertDialog;
@@ -100,6 +102,9 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                 item.setTitle("Edit");
                 updateCarInfo();
             }
+        }
+        else if(item.getItemId() == android.R.id.home)  {
+            onBackPressed();
         }
 
         return true;
@@ -225,6 +230,12 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
                                     case "availability":
                                         availability.setText(ds.getValue().toString().replace(replacechar, space));
+                                        if(availability.getText().toString().equalsIgnoreCase("Sold"))  {
+                                            Log.i("soni-", "this model is sold!");
+                                            soldButton.setText("Sold");
+                                            soldButton.setBackgroundColor(Color.GRAY);
+                                            soldButton.setEnabled(false);
+                                        }
                                         break;
 
                                     case "sellingprice":
@@ -301,7 +312,12 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
         price.setOnClickListener(this);
 
-
+//        if(availability.getText().toString().equalsIgnoreCase("Sold"))  {
+//            Log.i("soni-", "this model is sold!");
+//            soldButton.setText("Sold");
+//            soldButton.setBackgroundColor(Color.GRAY);
+//            soldButton.setEnabled(false);
+//        }
 
 
     }
@@ -351,6 +367,8 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
             case R.id.soldButton:
                 if(availability.getText().toString().equalsIgnoreCase("Available")) {
                     availability.setText("Sold");
+                    soldButton.setText("Sold");
+                    soldButton.setBackgroundColor(Color.GRAY);
                     soldButton.setEnabled(false);
                     carInfoReference.child("availability").setValue("sold");
                     updateAvailability();
@@ -393,16 +411,9 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
 
-            /*case R.id.carImage:
+            case R.id.horizontalScrollView:
                 //opens all images to show
                 displayCarImages();
-                break;
-*/
-
-            case R.id.availability:
-//                Dialog dialog = new Dialog(this);
-//                dialog.setContentView(android.R.layout.r);
-
                 break;
 
         }
