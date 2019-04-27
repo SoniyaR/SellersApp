@@ -1,27 +1,20 @@
 package com.soniya.sellersapp;
 
 import android.Manifest;
-import android.app.ProgressDialog;
-import android.content.ClipData;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Paint;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Handler;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.webkit.MimeTypeMap;
@@ -33,14 +26,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -48,7 +35,6 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -60,11 +46,12 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     char replacechar = '_';
 
     HashMap<String, Object> recHashmap = null;
-    ImageView uploadButton;
+    Button uploadButton;
     ImageView selectedImages;
     public static final int PICK_IMAGE = 1;
     ArrayList<Uri> selectedUriList = new ArrayList<>();
     int current_img_index = 0;
+    TextView skipText;
 
     Button saveAllButton;
     boolean isImageSelected = false;
@@ -79,6 +66,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     StorageReference storageReference = FirebaseStorage.getInstance().getReference();
     StorageReference img_ref=null;
     String curr_vehicleNum="";
+    String curr_model = "";
 
     ProgressBar progressBar;
     //HashMap<String, List<Uri>> urisHashMap = new HashMap<>();
@@ -88,15 +76,10 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     List<HashMap<String, Object>> hmList = new ArrayList<>();
 
     List<String> ownerofList;
-//    SharedPreferences preferences;
-//    String prefKey = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-//        preferences = getSharedPreferences("com.soniya.sellersapp", Context.MODE_PRIVATE);
-//        prefKey= preferences.getString("key", "");
 
         setTitle("Upload New Information");
 
@@ -118,17 +101,22 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         progressBar = findViewById(R.id.progressBar);
         progressBar.setVisibility(View.INVISIBLE);
 
-        uploadButton = (ImageView) findViewById(R.id.uploadButton);
+        uploadButton = (Button) findViewById(R.id.uploadImgButton);
         uploadButton.setOnClickListener(this);
 
         selectedImages = findViewById(R.id.selectedImgVie);
         selectedImages.setOnClickListener(this);
         selectedImages.setVisibility(View.INVISIBLE);
 
+        skipText= findViewById(R.id.skipText);
+        skipText.setOnClickListener(this);
+        skipText.setPaintFlags(skipText.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
         Intent intent = getIntent();
         if(intent.getExtras()!=null && intent.getSerializableExtra("infoHashmap") !=null){
             recHashmap = (HashMap<String, Object>) intent.getSerializableExtra("infoHashmap");
             curr_vehicleNum = recHashmap.get("vehicle_no").toString();
+            curr_model = recHashmap.get("model_name").toString();
             img_ref = storageReference.child(new FirebaseAdapter().getCurrentUser()).child(curr_vehicleNum.replace(space, replacechar));
         }
 
@@ -141,6 +129,8 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         ownerofList=database.getOwnerofList();
 
     }
+
+    int index=0;
 
     public void saveAllInformation(View view)  {
         if(recHashmap !=null) {
@@ -159,6 +149,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
             if(selectedUriList != null && selectedUriList.size() > 0) {
 
                 if (img_ref != null) {
+                    index=0;
 
                     for (Uri uri : selectedUriList) {
                         String filename = "";
@@ -167,7 +158,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                         while (tokenizer.hasMoreTokens()) {
                             filename = tokenizer.nextToken();
                         }
-
+                        index++;
                         Log.i("soni-filename", filename);
                         uploadImage(uri, filename);
                     }
@@ -175,12 +166,11 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
 
             }else{
                 Log.i("soni-176", "uploadinfo2 - No images to upload...");
+                Intent i = new Intent(getApplicationContext(), HomePage.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                Toast.makeText(this, "New Record Added Successfully!", Toast.LENGTH_SHORT).show();
+                startActivity(i);
             }
-
-            Intent i = new Intent(getApplicationContext(), HomePage.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            Toast.makeText(this, "New Record Added Successfully!", Toast.LENGTH_SHORT).show();
-            startActivity(i);
 
         }else{
             Log.i("soni-", "something went wrong");
@@ -195,7 +185,6 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
             ---> img.jpg
             ---> img2.jpg
      */
-
 
     public void uploadImage(Uri uri, String filename){
         progressBar.setVisibility(View.VISIBLE);
@@ -235,13 +224,21 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
 
 
         UploadTask uploadTask = img_ref.child("IMG_"+filename).putFile(uri);
-        Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+        Task<Uri> uriTask = uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
+                        .getTotalByteCount()/**selectedUriList.size())*/);
+                progressBar.setProgress((int) progress);
+            }
+        }).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
             @Override
             public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
 
                 if(!task.isSuccessful())    {
                     throw task.getException();
                 }
+
                 return img_ref.child("IMG_"+filename).getDownloadUrl();
             }
         }).addOnCompleteListener(new OnCompleteListener<Uri>() {
@@ -254,9 +251,12 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                     //urisList.add(uri);
                     database.updateUriList(curr_vehicleNum.replace(space, replacechar), String.valueOf(uri));
 
-                    //urisHashMap.put(recHashmap.get("vehicle_no").toString(), urisList);
-//                    AsyncRunner asyncRunner = new AsyncRunner();
-//                    asyncRunner.execute(new String[]{String.valueOf(uri), vehicleNum});
+                    if(index == selectedUriList.size()){
+                        Intent i = new Intent(getApplicationContext(), HomePage.class);
+                        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        Toast.makeText(UploadNewInfo2.this, "New Record Added Successfully!", Toast.LENGTH_SHORT).show();
+                        startActivity(i);
+                    }
                 }
             }
         });
@@ -278,7 +278,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     public void onClick(View v) {
 
         switch (v.getId())  {
-            case R.id.uploadButton:
+            case R.id.uploadImgButton:
                 //check permission
 
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -337,13 +337,14 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                 if(selectedUriList.size() > 0) {
                     Intent displayIntent = new Intent(getApplicationContext(), DisplayImages.class);
                     displayIntent.putExtra("urlList", selectedUriList);
+                    displayIntent.putExtra("modelname", curr_model);
                     startActivity(displayIntent);
                 }
                 break;
 
 
             case R.id.skipText:
-
+                saveAllInformation(v);
                 break;
 
         }

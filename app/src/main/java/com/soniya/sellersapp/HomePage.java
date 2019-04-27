@@ -1,13 +1,9 @@
 package com.soniya.sellersapp;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,11 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.Request;
-import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
@@ -46,15 +38,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.Set;
 
 public class HomePage extends AppCompatActivity {
 
@@ -62,7 +51,7 @@ public class HomePage extends AppCompatActivity {
 
     List<HashMap<String, Object>> hmList;
     ListView carsList;
-    SimpleAdapter simpleAdapter;
+    CustomAdapter simpleAdapter;
     List activeOrders ;
 
     char space = ' ';
@@ -228,6 +217,7 @@ public class HomePage extends AppCompatActivity {
                     else    {
                         ArrayAdapter arrayAdapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
                         carsList.setAdapter(arrayAdapter);
+                        carsList.setOnItemClickListener(null);
                     }
                 }
 
@@ -302,6 +292,8 @@ public class HomePage extends AppCompatActivity {
      */
     private void deleteRecord(String vehicleNum) {
 
+        activeOrders.remove(vehicleNum);
+
         if(vehicleNum != null && !vehicleNum.isEmpty() && !vehicleNum.equalsIgnoreCase(""))   {
             Log.i("soni-Record", vehicleNum + " deleted!");
             carInfoReference.child(vehicleNum).removeValue();
@@ -319,7 +311,7 @@ public class HomePage extends AppCompatActivity {
                         }
                     }
                     else if(dataSnapshot.getValue() instanceof HashMap){
-                        HashMap<String, String> hashMap = (HashMap<String, String>) dataSnapshot.getValue();
+                        HashMap<String, List<String>> hashMap = (HashMap<String, List<String>>) dataSnapshot.getValue();
 //                        if(hashMap.keySet().size() >0)    {
 //                            //String hmKey = hashMap.keySet().iterator().next();
 //                            //Log.i("soni-delete", "got key " + hmKey);
@@ -330,6 +322,36 @@ public class HomePage extends AppCompatActivity {
 //                            vals.remove(vehicleNum);
 //                            hashMap.put(hmKey, vals);
 //                        }
+
+                        fbFactory.deleteOldOwnerofList();
+
+                        List<String> vehicleList =  new ArrayList<>();
+                        if(hashMap.keySet().size() == 1)    {
+                            Set<String> keyset = hashMap.keySet();
+                            for(String key: keyset) {
+                                vehicleList = hashMap.get(key);
+                            }
+                        }
+                        if(vehicleList.contains(null)){
+                            Log.i("soni-homepage", "vehicleList has null elements");
+                            while(vehicleList.remove(null));
+                        }
+                        if(vehicleList.contains(vehicleNum)) {
+                            List<String> tempList  = new ArrayList<>();
+                            for(String num: vehicleList)   {
+                                if(!num.equalsIgnoreCase(vehicleNum))   {
+                                    tempList.add(num);
+                                }
+                            }
+
+                            userRef.child(uname).child("ownerof").push().setValue(tempList).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.i("soni-", "updated ownerof list for deleteRecord");
+                                }
+                            });
+                        }
+
                         Log.i("soni-deleterecord ", "its hashmap");
                     }
                 }
@@ -345,7 +367,7 @@ public class HomePage extends AppCompatActivity {
     }
 
     private void removeImagesFromStorage(String vehicleNum) {
-        StorageReference img_reference = storageRef.child(uname).child(vehicleNum);
+        StorageReference img_reference = storageRef.child(uname).child(vehicleNum.replace(space, replacechar));
         img_reference.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
@@ -354,7 +376,7 @@ public class HomePage extends AppCompatActivity {
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Log.i("soni-homepage", "Could not delete image(s) "+ e.getMessage());
+                Log.i("soni-homepage", "Could not delete image(s) "+ e.getMessage() + " " + vehicleNum + uname);
             }
         })
         ;
@@ -408,7 +430,7 @@ public class HomePage extends AppCompatActivity {
                                     ArrayList<String> tempList = (ArrayList<String>) ds.getValue();
                                     //imgUriForRecord.put(carinfo.getKey().toString(), tempList.get(0));
                                     hm.put("carImage", tempList.get(0));
-                                    Log.i("soni-", "got one img uri " + tempList.get(0));
+                                    //Log.i("soni-", "got one img uri " + tempList.get(0));
 
                                 } else {
                                     hm.put(ds.getKey(), ds.getValue().toString().replace(replacechar, space));
@@ -424,7 +446,7 @@ public class HomePage extends AppCompatActivity {
                         }
                     }
                     Log.i("soni-", "datasnapshot loop completed");
-                    simpleAdapter = new SimpleAdapter(getApplicationContext(), hmList, R.layout.carslist_layout, from, to);
+                    simpleAdapter = new CustomAdapter(getApplicationContext(), hmList, R.layout.carslist_layout, from, to);
                     carsList.setAdapter(simpleAdapter);
 //                    if (hmList.size() > 0 && imgUriForRecord.size() > 0) {
 //                        Log.i("soni-", "data fetched, adapter was set!");

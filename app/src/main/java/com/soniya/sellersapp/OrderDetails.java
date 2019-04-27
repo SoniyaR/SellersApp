@@ -1,18 +1,13 @@
 package com.soniya.sellersapp;
 
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.net.Uri;
-import android.support.annotation.ColorInt;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.media.RatingCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,9 +17,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -54,9 +49,10 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
     EditText descEdit;
     //ImageView imgView;
     ArrayList<String> urlList = new ArrayList<>();
-    TextView editDescription;
+    TextView description;
 
     DatabaseReference carInfoReference;
+    LinearLayout gallery;
 
     char space = ' ';
     char replacechar = '_';
@@ -92,19 +88,68 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
 
-        if (item.getItemId() == R.id.editCarInfo){
-            if(!editmode) {
-                editmode = true;
-                //makeEditable();
-                item.setTitle("Save");
-            }else{
-                editmode = false;
-                item.setTitle("Edit");
-                updateCarInfo();
-            }
+        switch(item.getItemId())    {
+
+            case R.id.editCarInfo:
+
+                if(!editmode) {
+                    editmode = true;
+                    //makeEditable();
+                    item.setTitle("Save");
+                }else{
+                    editmode = false;
+                    item.setTitle("Edit");
+                    updateCarInfo();
+                }
+                break;
+
+            case android.R.id.home:
+
+                onBackPressed();
+                break;
+
+            case R.id.markAvailable:
+
+                new AlertDialog.Builder(this)
+                        .setTitle("do you want to activate the order again?")
+                        .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //make it available agn
+                                //availability.setText("Available");
+                                activateOrder();
+                            }
+                        })
+                        .setNegativeButton("no", null)
+                        .show();
+                break;
+
+
         }
-        else if(item.getItemId() == android.R.id.home)  {
-            onBackPressed();
+
+        return true;
+    }
+
+    private void activateOrder() {
+
+        if(availability.getText().toString().equalsIgnoreCase("Sold")) {
+            availability.setText("Available");
+            soldButton.setText("Available");
+            soldButton.setBackgroundResource(R.drawable.round_button);
+            soldButton.setEnabled(true);
+            carInfoReference.child("availability").setValue("Available");
+            updateAvailability();
+        }
+
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        if(soldButton.getText().toString().equalsIgnoreCase("Sold"))    {
+            menu.findItem(R.id.markAvailable).setEnabled(true);
+        }else{
+            menu.findItem(R.id.markAvailable).setEnabled(false);
         }
 
         return true;
@@ -114,8 +159,8 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
         if(editmode)    {
             descEdit.setVisibility(View.VISIBLE);
-            editDescription.setVisibility(View.INVISIBLE);
-            descEdit.setText(editDescription.getText().toString());
+            description.setVisibility(View.INVISIBLE);
+            descEdit.setText(description.getText().toString());
 
         }
 
@@ -130,11 +175,11 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
         //whatever is updated, goes to hashmap, and only that is updated in the node in db
 
         //description
-        if(!descEdit.getText().toString().equals(editDescription.getText().toString())) {
-            editDescription.setText(descEdit.getText());
-            editDescription.setVisibility(View.VISIBLE);
+        if(!descEdit.getText().toString().equals(description.getText().toString())) {
+            description.setText(descEdit.getText());
+            description.setVisibility(View.VISIBLE);
             descEdit.setVisibility(View.INVISIBLE);
-            carInfoReference.child("description").setValue(editDescription.getText().toString());
+            carInfoReference.child("description").setValue(description.getText().toString());
         }
 
         //model
@@ -185,12 +230,14 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
         soldButton = (Button) findViewById(R.id.soldButton);
         soldButton.setOnClickListener(this);
 
-        editDescription = (TextView) findViewById(R.id.editTextDesc);
-        editDescription.setOnClickListener(this);
+        description = (TextView) findViewById(R.id.editTextDesc);
+        description.setOnClickListener(this);
 
-//        imgView = findViewById(R.id.carImage);
-//        imgView.setOnClickListener(this);
+        HorizontalScrollView scrollView = findViewById(R.id.horizontalScrollView);
+        scrollView.setOnClickListener(this);
 
+        gallery = findViewById(R.id.imgGallery);
+        gallery.setOnClickListener(this);
 
         Intent intent = getIntent();
 
@@ -198,7 +245,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
             // call retrieve car info
             String vehicleNo = intent.getStringExtra("selVehicleNum").replace(space, replacechar);
 
-            vehicleNum.setText(vehicleNo);
+            vehicleNum.setText(intent.getStringExtra("selVehicleNum"));
 
             carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo").child(vehicleNo);
 
@@ -246,8 +293,8 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
                                     case "description":
 
-                                        editDescription.setText(ds.getValue().toString().replace(replacechar, space));
-                                        descEdit.setText(editDescription.getText());
+                                        description.setText(ds.getValue().toString().replace(replacechar, space));
+                                        descEdit.setText(description.getText());
 
                                         break;
                                 }
@@ -326,8 +373,6 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
         //trying below for sliding scroll view of images
 
-        LinearLayout gallery = findViewById(R.id.imgGallery);
-
         LayoutInflater inflater = LayoutInflater.from(this);
 
         for(int i = 0; i < urlList.size(); i++)  {
@@ -357,11 +402,13 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
         switch (v.getId())  {
 
             case R.id.modelname:
-                modeldialog.setView(modelEdit);
-                modeldialog.setTitle("Enter new model name");
-                modelEdit.setInputType(InputType.TYPE_CLASS_TEXT);
-                modelEdit.setText(model.getText());
-                modeldialog.show();
+                if(editmode) {
+                    modeldialog.setView(modelEdit);
+                    modeldialog.setTitle("Enter new model name");
+                    modelEdit.setInputType(InputType.TYPE_CLASS_TEXT);
+                    modelEdit.setText(model.getText());
+                    modeldialog.show();
+                }
                 break;
 
             case R.id.soldButton:
@@ -372,19 +419,6 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                     soldButton.setEnabled(false);
                     carInfoReference.child("availability").setValue("sold");
                     updateAvailability();
-                }else{
-                    new AlertDialog.Builder(this)
-                            .setTitle("do you want to activate the order again?")
-                            .setPositiveButton("yes", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    //make it available agn
-                                    availability.setText("Available");
-                                    updateAvailability();
-                                }
-                            })
-                    .setNegativeButton("no", null)
-                    .show();
                 }
                 
                 break;
@@ -405,13 +439,14 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
                 if(editmode)    {
                     descEdit.setVisibility(View.VISIBLE);
-                    editDescription.setVisibility(View.INVISIBLE);
-                    descEdit.setText(editDescription.getText().toString());
+                    description.setVisibility(View.INVISIBLE);
+                    descEdit.setText(description.getText().toString());
 
                 }
                 break;
 
             case R.id.horizontalScrollView:
+            case R.id.imgGallery:
                 //opens all images to show
                 displayCarImages();
                 break;
@@ -423,6 +458,8 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
         String newstatus = availability.getText().toString();
         carInfoReference.child("availability").setValue(newstatus);
+        FirebaseDataFactory dataFactory = new FirebaseDataFactory();
+        dataFactory.moveToSoldHistory(vehicleNum.getText().toString().replace(space, replacechar));
 
     }
 

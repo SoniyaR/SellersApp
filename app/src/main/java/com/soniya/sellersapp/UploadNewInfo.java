@@ -26,12 +26,9 @@ import java.util.HashMap;
 
 public class UploadNewInfo extends AppCompatActivity implements View.OnClickListener {
 
-//    TextView  editDescriptionView;
     TextView descriptionView;
     Button saveButton;
     TextView titleText;
-    //ParseFile img;
-    //byte[] arr =null;
     TextView sellingpriceView;
     HashMap<String, Object> infoHashmap = new HashMap<>();
     TextView vehicleNum;
@@ -98,9 +95,9 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
 
                     if(titleText.getText().length() == 0 || titleText.getText().toString().isEmpty()){
                         titleText.setError("This field cannot be blank!");
-                    }else if(descriptionView.getText().length() == 0 || descriptionView.getText().toString().isEmpty()){
+                    }/*else if(descriptionView.getText().length() == 0 || descriptionView.getText().toString().isEmpty()){
                         descriptionView.setError("This field cannot be blank!");
-                    }else if(sellingpriceView.getText().length() == 0 || sellingpriceView.getText().toString().isEmpty()){
+                    }*/else if(sellingpriceView.getText().length() == 0 || sellingpriceView.getText().toString().isEmpty()){
                         sellingpriceView.setError("This field cannot be blank!");
                     }else if(vehicleNum.getText().length() == 0 ){
                         vehicleNum.setError("This field cannot be blank!");
@@ -121,7 +118,7 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
             case R.id.titleView:
             case R.id.locationView:
             case R.id.vehiclenum:
-            case R.id.uploadImgText:
+            //case R.id.uploadImgText:
                 //hide keyboard
                 InputMethodManager ipMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                 ipMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -150,29 +147,6 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
     private void selectPhoto() {
         Intent ii = new Intent(getApplicationContext(), SelectPhoto.class);
         startActivity(ii);
-
-    }
-
-   /* public void saveInfo(String title, ParseFile carImage, String desc, String sellingprice){
-
-        ParseObject infoObject = new ParseObject("carInformation");
-        infoObject.put("title", title);
-        infoObject.put("Image", carImage);
-        infoObject.put("description", desc);
-        infoObject.put("sellingprice", sellingprice);
-        infoObject.saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if(e == null){
-                    Toast.makeText(UploadNewInfo.this, "info saved successfully!", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-    }*/
-
-    public void saveImage(){
-
 
     }
 

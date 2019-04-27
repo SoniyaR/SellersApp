@@ -33,7 +33,7 @@ public class CustomAdapter extends SimpleAdapter {
 
         View v = super.getView(position, convertView, parent);
 
-        Log.i("soni-", "in get view - customadapter");
+       // Log.i("soni-", "in get view - customadapter");
 
         if(v instanceof ImageView)  {
             ImageView imgView = (ImageView) v;

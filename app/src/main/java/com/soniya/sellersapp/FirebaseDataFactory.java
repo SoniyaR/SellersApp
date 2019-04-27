@@ -4,7 +4,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -50,7 +52,7 @@ public class FirebaseDataFactory {
 
     public List<HashMap<String, Object>> retrieveCarsList (ArrayList<String> vehicleNumList) {
 
-        carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
+        carInfoReference = db.child("CarsInfo");
 
         //ArrayList<String> vehicleNumList = getOwnerof();
         if (vehicleNumList.isEmpty()) {
@@ -202,9 +204,11 @@ public class FirebaseDataFactory {
             curr_ref.child(vehicleNum).child("sellingprice").setValue(hm.get("sellingprice").toString().replace(space, replacechar));
 
             // add vehicle number in userInfo for the current user who uploaded this info, it will be array of strings for vehicleNum
-            ownerofList.add(vehicleNum);
-            updateOwnerOf(ownerofList);
 
+            if(!ownerofList.contains(vehicleNum)) {
+                ownerofList.add(vehicleNum);
+                updateOwnerOf(ownerofList);
+            }
         }
 
     }
@@ -346,5 +350,62 @@ public class FirebaseDataFactory {
         });
 
 
+    }
+
+    /*
+    this method moves the record to sold history node
+    and deletes record from carinfo node
+     */
+    public void moveToSoldHistory(String vehicleNum) {
+
+        DatabaseReference fromRef = db.child("CarsInfo").child(vehicleNum);
+        DatabaseReference toRef = db.child("SoldHistory");
+
+        fromRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot != null){
+
+
+                    toRef.child(vehicleNum).setValue(dataSnapshot.getValue(), new OnCompleteListener() {
+                        @Override
+                        public void onComplete(@NonNull Task task) {
+                            Log.i("soni-", "record moved to history");
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    public void activateOrder(String vehicleNum)    {
+
+        DatabaseReference toRef = db.child("CarsInfo");
+        DatabaseReference fromRef = db.child("SoldHistory").child(vehicleNum);
+
+        fromRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot != null){
+                    toRef.child(vehicleNum).setValue(dataSnapshot.getValue(), new OnCompleteListener() {
+                        @Override
+                        public void onComplete(@NonNull Task task) {
+                            Log.i("soni-", "record moved to carinfo");
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 }

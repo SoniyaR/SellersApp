@@ -22,17 +22,24 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@drawable/uploadicon" />
 
-    <TextView
-        android:id="@+id/uploadImgText"
+    <Button
+        android:id="@+id/uploadImgButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/round_button"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:text="Upload Images"
-        android:textColor="@android:color/holo_blue_dark"
+        android:textAllCaps="false"
+        android:textColor="@android:color/background_light"
         android:textSize="18sp"
         android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -49,8 +56,9 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:text="Upload Images and Save Info"
+        android:textAllCaps="false"
         android:textColor="@android:color/background_light"
-        android:textSize="14sp"
+        android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/skipText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.559"
@@ -62,14 +70,14 @@
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="24dp"
         app:layout_constraintBottom_toTopOf="@+id/prevButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/uploadImgText"
+        app:layout_constraintTop_toBottomOf="@+id/uploadImgButton"
         app:srcCompat="@android:color/background_light" />
 
     <Button
@@ -120,7 +128,7 @@
         android:layout_marginBottom="16dp"
         android:text="Skip and Save"
         android:textColor="@android:color/black"
-        android:textSize="14sp"
+        android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
