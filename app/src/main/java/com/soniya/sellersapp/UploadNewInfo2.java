@@ -158,10 +158,11 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                         while (tokenizer.hasMoreTokens()) {
                             filename = tokenizer.nextToken();
                         }
-                        index++;
+
                         Log.i("soni-filename", filename);
                         uploadImage(uri, filename);
                     }
+
                 }
 
             }else{
@@ -189,40 +190,6 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     public void uploadImage(Uri uri, String filename){
         progressBar.setVisibility(View.VISIBLE);
 
-        /*img_ref.child("IMG_"+filename).putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                Log.i("soni-","Uploaded "+ img_ref.child("IMG_"+filename).getDownloadUrl());
-                Log.i("soni-", taskSnapshot.getMetadata().getReference().getDownloadUrl().toString());
-                urlsList.add(taskSnapshot.getMetadata().getReference().getDownloadUrl().toString());
-
-                Handler handler=new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        progressBar.setProgress(0);
-                    }
-                }, 1000);
-                progressBar.setVisibility(View.INVISIBLE);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                progressBar.setVisibility(View.INVISIBLE);
-                Log.i("soni-","Failed "+ e.getMessage());
-            }
-        }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                Toast.makeText(UploadNewInfo2.this, "Upload in Progress!", Toast.LENGTH_SHORT).show();
-                double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
-                        .getTotalByteCount());
-                progressBar.setProgress((int) progress);
-            }
-        });*/
-
-
         UploadTask uploadTask = img_ref.child("IMG_"+filename).putFile(uri);
         Task<Uri> uriTask = uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -246,6 +213,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
             public void onComplete(@NonNull Task<Uri> task) {
                 if(task.isSuccessful()) {
                     Uri uri = task.getResult();
+                    index++;
                     //urisList.add(uri);
                     //Log.i("soni- uri ", String.valueOf(uri));
                     //urisList.add(uri);
