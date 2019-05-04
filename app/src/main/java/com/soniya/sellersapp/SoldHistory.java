@@ -48,8 +48,8 @@ public class SoldHistory extends AppCompatActivity {
         setTitle("Sold History");
 
         soldList = (ListView) findViewById(R.id.soldList);
-        adapter = new CustomAdapter(this, hmList, R.layout.carslist_layout, from, to);
-        soldList.setAdapter(adapter);
+        //adapter = new CustomAdapter(this, hmList, R.layout.carslist_layout, from, to);
+        //soldList.setAdapter(adapter);
 
         userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
         soldOrders = new ArrayList<>();
@@ -137,8 +137,8 @@ public class SoldHistory extends AppCompatActivity {
                         }
                     }
                     Log.i("soni-", "datasnapshot sold history retrieved");
-                    adapter = new CustomAdapter(getApplicationContext(), hmList, R.layout.carslist_layout, from, to);
-                    soldList.setAdapter(adapter);
+//                    adapter = new CustomAdapter(getApplicationContext(), hmList, R.layout.carslist_layout, from, to);
+//                    soldList.setAdapter(adapter);
                 }
             }
 

@@ -81,10 +81,6 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
 //
 //                break;
 
-            case R.id.uploadButton:
-                selectPhoto();
-                break;
-
             case R.id.saveButton:
 
 //                descriptionView.setText(editDescriptionView.getText());

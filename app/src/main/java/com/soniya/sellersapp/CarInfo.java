@@ -1,14 +1,20 @@
 package com.soniya.sellersapp;
 
+import java.util.ArrayList;
+
 public class CarInfo {
 
     //vehicle_no	model_name	availability description	location	sellingprice
-    public String vehicle_no;
-    public String model_name;
-    public String availability;
-    public String description;
-    public String location;
-    public String sellingprice;
+    private String vehicle_no;
+    private String model_name;
+    private String availability;
+    private String description;
+    private String location;
+    private String sellingprice;
+    private String imgUrl;
+    private ArrayList<String> image_uri_list;
+
+    public  CarInfo() {}
 
     public CarInfo(String vehicle_no, String model_name, String availability, String location, String sellingprice, String description){
         this.availability = availability;
@@ -27,7 +33,24 @@ public class CarInfo {
         this.vehicle_no = vehicle_no;
     }
 
-    /*public String getVehicle_no() {
+    public String getImgUrl() {
+        return imgUrl;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
+    }
+
+
+    public ArrayList<String> getImage_uri_list() {
+        return image_uri_list;
+    }
+
+    public void setImage_uri_list(ArrayList<String> image_uri_list) {
+        this.image_uri_list = image_uri_list;
+    }
+
+    public String getVehicle_no() {
         return vehicle_no;
     }
 
@@ -73,5 +96,5 @@ public class CarInfo {
 
     public void setSellingprice(String sellingprice) {
         this.sellingprice = sellingprice;
-    }*/
+    }
 }

@@ -149,9 +149,17 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
 */
     }
 
+    public static String encodeString(String string) {
+        return string.replace(".", ",");
+    }
+
+    public static String decodeString(String string) {
+        return string.replace(",", ".");
+    }
+
     private void retrieveProfile() {
 
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("userInfo").child(user);
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("userInfo").child(encodeString(user));
         userRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -173,7 +181,7 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
 
     public void retrieveMyProfile(){
         ParseQuery<ParseObject> userinfo = ParseQuery.getQuery("userInfo");
-        userinfo.whereEqualTo("username", user);
+        userinfo.whereEqualTo("username", encodeString(user));
         userinfo.orderByDescending("updatedAt");
         userinfo.findInBackground(new FindCallback<ParseObject>() {
             @Override
@@ -217,7 +225,7 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
     public void retrieveFeedContent(){
 
         ParseQuery<ParseObject> feedObj = ParseQuery.getQuery("activeOrders");
-        feedObj.whereEqualTo("username", user);
+        feedObj.whereEqualTo("username", encodeString(user));
         feedObj.orderByDescending("createdAt");
         feedObj.findInBackground(new FindCallback<ParseObject>() {
             @Override

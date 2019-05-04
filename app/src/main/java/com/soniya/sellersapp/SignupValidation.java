@@ -1,5 +1,7 @@
 package com.soniya.sellersapp;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -7,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,10 +22,17 @@ public class SignupValidation extends ValidationHelper implements TextWatcher {
 
     String newPassword="";
 
+    Context context;
+
     public SignupValidation(EditText view)  {
 
         this.editTextView = view;
 
+    }
+
+    public SignupValidation(EditText view, Context context) {
+        this.editTextView = view;
+        this.context = context;
     }
 
     @Override
@@ -56,15 +66,18 @@ public class SignupValidation extends ValidationHelper implements TextWatcher {
             //Log.i("soni-", "its "+editTextView.getInputType() );
         //}
 
-        if(editTextView.getInputType() == InputType.TYPE_TEXT_VARIATION_PASSWORD && editTextView.getTag()!=null && editTextView.getTag().equals("repeatPassword")){
-            //Log.i("soni-", "its rep password");
-            //validateRepeatPassword();
+        if (editTextView.getInputType() == InputType.TYPE_TEXT_VARIATION_PASSWORD
+                && editTextView.getTag() != null && editTextView.getTag().equals("repeatPassword")) {
+            SharedPreferences pref = context.getSharedPreferences("com.soniya.sellersapp", Context.MODE_PRIVATE);
+            String curr_pwd = pref.getString("curr_pwd", "");
+           // Log.i("soni-validtn ", "saved pwd in pref = " + curr_pwd);
+            if(editTextView.getText().toString().equals(curr_pwd))  {
+                Toast.makeText(context, "Password matched!", Toast.LENGTH_SHORT).show();
+            }
 
         }
         else if(editTextView.getInputType() == InputType.TYPE_TEXT_VARIATION_PASSWORD)  {
-            //Log.i("soni-", "its password");
             newPassword = editTextView.getText().toString();
-            //Log.i("soni-newPassword", newPassword);
             validatePassword();
 
         }
@@ -117,15 +130,18 @@ public class SignupValidation extends ValidationHelper implements TextWatcher {
 
     private void validatePassword(){
         String pass = editTextView.getText().toString();
-        if(pass.length() >= 8 && isValidPassword(pass))    {
+
+        if(pass.length() < 8){
+            //passwordMsg = "Password should be at least 6 characters!";
+            editTextView.setError("Password should be at least 8 characters!");
+        }
+
+        if(pass.length() >= 8 && !isValidPassword(pass))    {
             //passwordMsg = "Password must contain at least 1 Upper case, 1 Lower case letter, 1 Symbol & 1 Number!";
             editTextView.setError("Password must contain at least 1Uppercase, 1Lowercase letter, 1Symbol & 1Number!");
         }
 
-        if(pass.length() < 8){
-            //passwordMsg = "Password should be at least 6 characters!";
-            editTextView.setError("Password should be at least 6 characters!");
-        }
+
 
     }
 

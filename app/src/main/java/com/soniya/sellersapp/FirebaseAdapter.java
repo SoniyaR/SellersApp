@@ -72,7 +72,7 @@ public class FirebaseAdapter {
     returns true if current user exists (i.e. logged in)
      */
     public boolean checkCurrentUser(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser user = mAuth.getCurrentUser();
         if(user !=null) {
             Log.i("soni-",  user.getDisplayName()+ " " + user.getEmail() + " " + user.getUid());
             return true;
@@ -84,7 +84,7 @@ public class FirebaseAdapter {
     return current user (String)
      */
     public String getCurrentUser()  {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser user = mAuth.getCurrentUser();
         if(user !=null) {
             Log.i("soni-",  user.getDisplayName()+ " " + user.getEmail() + " " + user.getUid());
             if(user.getDisplayName()!=null && !user.getDisplayName().isEmpty()) {
@@ -96,6 +96,10 @@ public class FirebaseAdapter {
         return "Not known";
     }
 
+    public FirebaseUser getFirebaseUser()
+    {
+        return mAuth.getCurrentUser();
+    }
     public boolean signupUser(Activity context, String email, String password)  {
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(context, new OnCompleteListener<AuthResult>() {
             @Override

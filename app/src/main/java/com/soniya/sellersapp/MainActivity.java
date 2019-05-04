@@ -19,10 +19,15 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 /*import com.parse.FindCallback;
 import com.parse.LogInCallback;
 import com.parse.Parse;
@@ -34,6 +39,7 @@ import com.parse.SignUpCallback;*/
 
 import org.apache.commons.collections4.map.HashedMap;
 
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -45,6 +51,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView signupTextView;
     ConstraintLayout backLayout;
     ImageView logo;
+
+    //in case of username login
+    String emailId = "";
 
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
@@ -101,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pass = (TextView) findViewById(R.id.passText);
         user.setText("");
         pass.setText("");
+        pass.setOnClickListener(this);
         loginButton = (Button) findViewById(R.id.loginButton);
         signupTextView = (TextView) findViewById(R.id.signupText);
         signupTextView.setOnClickListener(this);
@@ -140,23 +150,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     //firebase login process
 
-                    mAuth.signInWithEmailAndPassword(user.getText().toString(), pass.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if(task.isSuccessful()) {
-                                //signinUserSuccessful = true;
-                                //Toast.makeText(this, "Login with Email is Successful!", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(getApplicationContext(), HomePage.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(intent);
-                            }else{
-                                //signinUserSuccessful = false;
-                                if(task.getException() !=null && task.getException().getMessage()!=null) {
-                                    Log.i("soni-", task.getException().getMessage());
+                    if(user.getText().toString().contains("@") && emailId.isEmpty())   {
+                        Toast.makeText(this, "Username does not exist!", Toast.LENGTH_SHORT).show();
+                    }
+
+                    mAuth.signInWithEmailAndPassword(emailId, pass.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful()) {
+                                    //signinUserSuccessful = true;
+                                    //Toast.makeText(this, "Login with Email is Successful!", Toast.LENGTH_SHORT).show();
+                                    checkEmailVerified();
+
+                                } else {
+                                    //signinUserSuccessful = false;
+                                    if (task.getException() != null && task.getException().getMessage() != null) {
+                                        Log.i("soni-", task.getException().getMessage());
+                                        Toast.makeText(MainActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
                                 }
                             }
-                        }
-                    });
+                        });
                     /*if(fbAdapter.loginUser(user.getText().toString(), pass.getText().toString())){
                         Toast.makeText(this, "Login with Email is Successful!", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(getApplicationContext(), HomePage.class);
@@ -170,6 +184,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
 
+            case R.id.passText:
+                if(!user.getText().toString().contains("@")) {
+                    //username entered case
+                    emailId =  findEmailId(user.getText().toString());
+                }else{
+                    emailId = user.getText().toString();
+                }
+                break;
+
             case R.id.logoView:
 
             case R.id.backLayout:
@@ -181,6 +204,54 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             default:
                 break;
+        }
+    }
+
+    public static String encodeString(String string) {
+        return string.replace(".", ",");
+    }
+
+    public static String decodeString(String string) {
+        return string.replace(",", ".");
+    }
+
+    private String findEmailId(String username)   {
+        DatabaseReference userDB = FirebaseDatabase.getInstance().getReference().child("userInfo").child(encodeString(username));
+        userDB.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot != null && dataSnapshot.getValue()!=null)  {
+                    if(dataSnapshot.getValue() instanceof HashMap)  {
+
+                        HashMap<String, Object> hm = (HashMap<String, Object>) dataSnapshot.getValue();
+                        emailId = hm.get("emailId").toString();
+
+                        Log.i("soni-", "data is hashmap (username login process) " + emailId);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        return emailId;
+    }
+
+    private void checkEmailVerified() {
+
+        FirebaseUser user = mAuth.getCurrentUser();
+        if(user.isEmailVerified())  {
+            Toast.makeText(this, "Successfully Logged in!", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(getApplicationContext(), HomePage.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
+        else    {
+            Toast.makeText(this, "Email is not verified!", Toast.LENGTH_SHORT).show();
+            mAuth.signOut();
         }
     }
 }

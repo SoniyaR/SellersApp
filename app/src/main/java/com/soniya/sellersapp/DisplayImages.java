@@ -21,6 +21,16 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +40,9 @@ public class DisplayImages extends AppCompatActivity {
 
     ArrayList<String> urls = new ArrayList<>();
     public static final int PICK_IMAGE = 1;
+
+    String vehicleNum = "";
+    DatabaseReference updateUriRef = null;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -58,7 +71,7 @@ public class DisplayImages extends AppCompatActivity {
     }
 
     ArrayList<Uri> selectedUriList = new ArrayList<>();
-
+    int index = 0;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -77,8 +90,13 @@ public class DisplayImages extends AppCompatActivity {
                     }else{
                         Toast.makeText(this, "You can upload upto five pictures only!", Toast.LENGTH_SHORT).show();
                     }
-                    if(selectedUriList.size()>0) {
-                        UploadNewInfo2 uploadInfo= new UploadNewInfo2();
+
+                    updateUriRef = FirebaseDatabase.getInstance().getReference().child("InfoUpdates")
+                            .child(vehicleNum).child("image_uri_list");
+
+                    if(selectedUriList.size()>0 && !vehicleNum.equalsIgnoreCase("")) {
+
+                        index = 0;
                         for (Uri uri : selectedUriList) {
                             String filename = "";
                             String path = uri.getPath().toString();
@@ -87,14 +105,67 @@ public class DisplayImages extends AppCompatActivity {
                                 filename = tokenizer.nextToken();
                             }
 
-                            //Log.i("soni-new file", filename);
-
-                            uploadInfo.uploadImage(uri, filename);
+                            uploadImageFromDisplay(uri, filename);
                         }
+
+                    }
+                    else{
+                        Log.i("soni-", "Not able to upload more images");
+                        if(vehicleNum.isEmpty())    {
+                            Log.i("soni-", "vehicle number is empty");
+                        }
+                        if(selectedUriList.size()==0)   {
+                            Log.i("soni-", "Probably no images are selected");
+                        }
+
+                        Intent i = new Intent(getApplicationContext(), OrderDetails.class);
+                        i.putExtra("selVehicleNum", vehicleNum.replace("_", " "));
+                        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(i);
                     }
                 }
             }
         }
+    }
+
+    private void uploadImageFromDisplay(Uri uri, String filename) {
+
+        StorageReference img_ref= FirebaseStorage.getInstance().getReference()
+                .child(new FirebaseAdapter().getCurrentUser()).child(vehicleNum);
+        FirebaseDataFactory database = new FirebaseDataFactory();
+
+            UploadTask uploadTask = img_ref.child("IMG_"+filename).putFile(uri);
+            Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+
+                    if(!task.isSuccessful())    {
+                        throw task.getException();
+                    }
+
+                    return img_ref.child("IMG_"+filename).getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if(task.isSuccessful()) {
+                        Uri uri = task.getResult();
+                        index++;
+                        database.updateUriList(vehicleNum, String.valueOf(uri));
+                        //add this in InfoUpdate node
+                        updateUriRef.child("New").setValue(String.valueOf(uri));
+
+                        if(index == selectedUriList.size()){
+                            Intent i = new Intent(getApplicationContext(), OrderDetails.class);
+                            i.putExtra("selVehicleNum", vehicleNum.replace("_", " "));
+                            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            Toast.makeText(DisplayImages.this, "New Images Added Successfully!", Toast.LENGTH_SHORT).show();
+                            startActivity(i);
+                        }
+                    }
+                }
+            });
+
     }
 
     @Override
@@ -119,6 +190,10 @@ public class DisplayImages extends AppCompatActivity {
 
             if(intent.hasExtra("modelname"))    {
                 setTitle(intent.getStringExtra("modelname"));
+            }
+
+            if(intent.hasExtra("vehicle_no"))   {
+                vehicleNum = intent.getStringExtra("vehicle_no");
             }
         }
 

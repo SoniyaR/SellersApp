@@ -50,14 +50,14 @@ public class HomePage extends AppCompatActivity {
     private boolean doubleBackToExitPressedOnce=false;
 
     List<HashMap<String, Object>> hmList;
-    ListView carsList;
-    CustomAdapter simpleAdapter;
+    ListView carsListView;
+    CustomAdapter carListAdapter;
     List activeOrders ;
 
     char space = ' ';
     char replacechar = '_';
 
-    Bitmap carImage;
+    //Bitmap carImage;
     FirebaseAdapter fbAdapter = new FirebaseAdapter();
     FirebaseDataFactory fbFactory = new FirebaseDataFactory();
 
@@ -79,6 +79,16 @@ public class HomePage extends AppCompatActivity {
     ImageView tempImg;
 
     HashMap<String, String> imgUriForRecord = new HashMap<>();
+
+    public static String encodeString(String string) {
+        return string.replace(".", ",");
+    }
+
+    public static String decodeString(String string) {
+        return string.replace(",", ".");
+    }
+
+    ArrayList<CarInfo> carsArraylist;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -144,19 +154,22 @@ public class HomePage extends AppCompatActivity {
 
         activeOrders = null;
         hmList = new ArrayList<>();
+        carsArraylist = new ArrayList<>();
 
         tempImg = new ImageView(this);
 
         carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
         userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
 
-        carsList = (ListView) findViewById(R.id.listView);
-        simpleAdapter = new CustomAdapter(this, hmList, R.layout.carslist_layout, from, to);
-        carsList.setAdapter(simpleAdapter);
-        registerForContextMenu(carsList);
+        carsListView = (ListView) findViewById(R.id.listView);
+        //simpleAdapter = new CustomAdapter(this, hmList, R.layout.carslist_layout, from, to);
+        //carsListView.setAdapter(simpleAdapter);
 
+        carListAdapter = new CustomAdapter(this, carsArraylist, R.layout.carslist_layout);
+        carsListView.setAdapter(carListAdapter);
+        registerForContextMenu(carsListView);
 
-        simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
+       /* simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
             @Override
             public boolean setViewValue(View view, Object data, String textRepresentation) {
                 if(view instanceof ImageView && view.getId() == R.id.carImageView && data instanceof Bitmap){
@@ -167,21 +180,21 @@ public class HomePage extends AppCompatActivity {
                 }else if(view instanceof TextView && data instanceof String){
                     TextView textV = (TextView) view;
                     textV.setText((String) data);
-                }/*else if(view instanceof ImageView && data instanceof String)   {
+                }*//*else if(view instanceof ImageView && data instanceof String)   {
                     ImageView imgView = (ImageView) view;
                     //Glide.with(HomePage.this).asBitmap().override(100, 100).load(data).into(imgView);
                     Picasso.with(HomePage.this).load(data.toString()).resize(100, 100).into(imgView);
-                }*/
+                }*//*
                 return true;
             }
-        });
+        });*/
 
 
         if(fbAdapter.checkCurrentUser()){
             uname = fbAdapter.getCurrentUser();
             Toast.makeText(this, "Retrieving Cars List", Toast.LENGTH_SHORT).show();
             //activeOrders.clear();
-            userRef.child(uname).addListenerForSingleValueEvent(new ValueEventListener() {
+            userRef.child(encodeString(uname)).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     //activeOrders.clear();
@@ -216,8 +229,8 @@ public class HomePage extends AppCompatActivity {
                     }
                     else    {
                         ArrayAdapter arrayAdapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
-                        carsList.setAdapter(arrayAdapter);
-                        carsList.setOnItemClickListener(null);
+                        carsListView.setAdapter(arrayAdapter);
+                        carsListView.setOnItemClickListener(null);
                     }
                 }
 
@@ -235,7 +248,7 @@ public class HomePage extends AppCompatActivity {
             finish();
         }
 
-        carsList.setOnItemClickListener((parent, view, position, id) -> {
+        carsListView.setOnItemClickListener((parent, view, position, id) -> {
 
             Intent intent = new Intent(getApplicationContext(), OrderDetails.class);
             intent.putExtra("selVehicleNum", hmList.get(position).get("vehicle_no").toString());
@@ -286,6 +299,107 @@ public class HomePage extends AppCompatActivity {
 
     }
 
+
+    /*
+    to retrieve cars list (active orders) for current user
+     */
+
+    private void retriveCarList() {
+
+            DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference().child("CarsInfoDup");
+            tempRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if(dataSnapshot !=null && dataSnapshot.getValue() !=null) {
+                        carsArraylist.clear();
+                        for (DataSnapshot carinfo : dataSnapshot.getChildren()) {
+                            //Log.i("soni-carinfo",carinfo.getKey().toString());
+
+                            if (activeOrders.contains(carinfo.getKey().toString())) {
+                                CarInfo carInfoObj = (CarInfo) carinfo.getValue(CarInfo.class);
+
+                                if (carInfoObj != null) {
+                                    carsArraylist.add(carInfoObj);
+                                    Log.i("soni-", "retrieved carinfo object\n" + carInfoObj.getModel_name());
+                                }
+
+                            }
+                        }
+                    }else{
+                        Log.i("soni-", "no data found in CarsInfoDup");
+                    }
+
+                    carListAdapter = new CustomAdapter(getApplicationContext(), carsArraylist, R.layout.carslist_layout);
+                    carsListView.setAdapter(carListAdapter);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+            carInfoReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    hmList.clear();
+                    //vehicle_no	model_name	availability description    location	sellingprice    image_uri_list
+
+                    for (DataSnapshot carinfo : dataSnapshot.getChildren()) {
+                        //Log.i("soni-carinfo",carinfo.getKey().toString());
+
+                        if (activeOrders.contains(carinfo.getKey().toString())) {
+
+                            Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
+                            HashMap<String, Object> hm = new HashMap<String, Object>();
+                            String vehiclenum = carinfo.getKey().replace(replacechar, space);
+                            hm.put("vehicle_no", vehiclenum);
+                            while (it.hasNext()) {
+                                DataSnapshot ds = it.next();
+                                if (ds.getKey().equals("image_uri_list")) {
+                                    ArrayList<String> tempList = (ArrayList<String>) ds.getValue();
+                                    //imgUriForRecord.put(carinfo.getKey().toString(), tempList.get(0));
+                                    hm.put("carImage", tempList.get(0));
+                                    //Log.i("soni-", "got one img uri " + tempList.get(0));
+
+                                } else {
+                                    hm.put(ds.getKey(), ds.getValue().toString().replace(replacechar, space));
+                                }
+                            }
+
+                            if(!hm.keySet().contains("carImage"))   {
+                                hm.put("carImage", BitmapFactory.decodeResource(getResources(), R.drawable.nocarpicture));
+                            }
+
+                            hmList.add(hm);
+                            //simpleAdapter.notifyDataSetChanged();
+
+                        }
+                    }
+                    Log.i("soni-", "datasnapshot loop completed");
+//                    simpleAdapter = new CustomAdapter(getApplicationContext(), hmList, R.layout.carslist_layout, from, to);
+//                    carsList.setAdapter(simpleAdapter);
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+    }
+
+    /*private void retrieveImages() {
+
+        Log.i("soni-", "in retrieve images method");
+        for(int i = 0; i < activeOrders.size(); i++)    {
+            Log.i("soni-Glide", imgUriForRecord.get(activeOrders.get(i).toString()));
+            String vehicle = activeOrders.get(i).toString().replace(replacechar, space);
+
+        }
+    }*/
+
     /*
     method to delete the car record from database
     identified by vehicle number
@@ -299,7 +413,7 @@ public class HomePage extends AppCompatActivity {
             carInfoReference.child(vehicleNum).removeValue();
 
             //remove vehicle number from userinfo -> username-> ownerof list
-            userRef.child(uname).child("ownerof").addListenerForSingleValueEvent(new ValueEventListener() {
+            userRef.child(encodeString(uname)).child("ownerof").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.getValue() instanceof List) {
@@ -307,7 +421,7 @@ public class HomePage extends AppCompatActivity {
                         if (numList.size() > 0 && numList.contains(vehicleNum)) {
                             numList.remove(vehicleNum);
                             Log.i("soni-homepage", "deleterecord() ---> removed " + vehicleNum + " from userinfo");
-                            userRef.child(uname).child("ownerof").setValue(numList);
+                            userRef.child(encodeString(uname)).child("ownerof").setValue(numList);
                         }
                     }
                     else if(dataSnapshot.getValue() instanceof HashMap){
@@ -344,7 +458,7 @@ public class HomePage extends AppCompatActivity {
                                 }
                             }
 
-                            userRef.child(uname).child("ownerof").push().setValue(tempList).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            userRef.child(encodeString(uname)).child("ownerof").push().setValue(tempList).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     Log.i("soni-", "updated ownerof list for deleteRecord");
@@ -367,7 +481,7 @@ public class HomePage extends AppCompatActivity {
     }
 
     private void removeImagesFromStorage(String vehicleNum) {
-        StorageReference img_reference = storageRef.child(uname).child(vehicleNum.replace(space, replacechar));
+        StorageReference img_reference = storageRef.child(encodeString(uname)).child(vehicleNum.replace(space, replacechar));
         img_reference.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
@@ -381,186 +495,6 @@ public class HomePage extends AppCompatActivity {
         })
         ;
 
-    }
-    /*
-    method to call Upload New info in which Car info is entered manually by user
-     */
-    private void uploadNewOrder() {
-        Intent i = new Intent(getApplicationContext(), UploadNewInfo.class);
-        startActivity(i);
-    }
-
-    /*
-    to redirect to profile
-     */
-
-    private void gotoProfile()  {
-        Intent intentProfile = new Intent(getApplicationContext(), MyProfile.class);
-        startActivity(intentProfile);
-    }
-
-    /*
-    to retrieve cars list (active orders) for current user
-     */
-
-    private void retriveCarList() {
-
-        if(activeOrders == null || activeOrders.isEmpty())    {
-            Log.i("soni-homepage", "activeOrders list is empty");
-        } else {
-
-            carInfoReference.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    hmList.clear();
-                    //vehicle_no	model_name	availability description    location	sellingprice    image_uri_list
-
-                    for (DataSnapshot carinfo : dataSnapshot.getChildren()) {
-                        //Log.i("soni-carinfo",carinfo.getKey().toString());
-
-                        if (activeOrders.contains(carinfo.getKey().toString())) {
-
-                            Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
-                            HashMap<String, Object> hm = new HashMap<String, Object>();
-                            String vehiclenum = carinfo.getKey().replace(replacechar, space);
-                            hm.put("vehicle_no", vehiclenum);
-                            while (it.hasNext()) {
-                                DataSnapshot ds = it.next();
-                                if (ds.getKey().equals("image_uri_list")) {
-                                    ArrayList<String> tempList = (ArrayList<String>) ds.getValue();
-                                    //imgUriForRecord.put(carinfo.getKey().toString(), tempList.get(0));
-                                    hm.put("carImage", tempList.get(0));
-                                    //Log.i("soni-", "got one img uri " + tempList.get(0));
-
-                                } else {
-                                    hm.put(ds.getKey(), ds.getValue().toString().replace(replacechar, space));
-                                }
-                            }
-
-                            if(!hm.keySet().contains("carImage"))   {
-                                hm.put("carImage", BitmapFactory.decodeResource(getResources(), R.drawable.nocarpicture));
-                            }
-
-                            hmList.add(hm);
-                            //simpleAdapter.notifyDataSetChanged();
-                        }
-                    }
-                    Log.i("soni-", "datasnapshot loop completed");
-                    simpleAdapter = new CustomAdapter(getApplicationContext(), hmList, R.layout.carslist_layout, from, to);
-                    carsList.setAdapter(simpleAdapter);
-//                    if (hmList.size() > 0 && imgUriForRecord.size() > 0) {
-//                        Log.i("soni-", "data fetched, adapter was set!");
-//                        //retrieveImages();
-//                    }
-
-                    //simpleAdapter.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-        }
-
-    }
-
-    private void retrieveImages() {
-
-        Log.i("soni-", "in retrieve images method");
-        for(int i = 0; i < activeOrders.size(); i++)    {
-            Log.i("soni-Glide", imgUriForRecord.get(activeOrders.get(i).toString()));
-            String vehicle = activeOrders.get(i).toString().replace(replacechar, space);
-
-        }
-    }
-
-    Bitmap imgBitmap = null;
-
-    private Bitmap getImageFromUrl(String uriStr, String vehiclenumber) {
-        Uri imgUri = Uri.parse(uriStr);
-
-        /*FileDownloadTask downloadTask = storageRef.child(uname).child(vehiclenumber).getFile(imgUri);
-        downloadTask.addOnCompleteListener(new OnCompleteListener<FileDownloadTask.TaskSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<FileDownloadTask.TaskSnapshot> task) {
-                if(task.isSuccessful()){
-
-                }
-            }
-        });*/
-        Log.i("soni-", "In getImagefromUrl");
-        Glide.with(getApplicationContext()).asBitmap().load(imgUri)
-        .into(new Target<Bitmap>() {
-            @Override
-            public void onLoadStarted(@Nullable Drawable placeholder) {
-
-            }
-
-            @Override
-            public void onLoadFailed(@Nullable Drawable errorDrawable) {
-
-            }
-
-            @Override
-            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                tempImg.setImageBitmap(resource);
-                Log.i("soni-", "target- onResourceReady ");
-            }
-
-            @Override
-            public void onLoadCleared(@Nullable Drawable placeholder) {
-
-            }
-
-            @Override
-            public void getSize(@NonNull SizeReadyCallback cb) {
-
-            }
-
-            @Override
-            public void removeCallback(@NonNull SizeReadyCallback cb) {
-
-            }
-
-            @Override
-            public void setRequest(@Nullable Request request) {
-
-            }
-
-            @Nullable
-            @Override
-            public Request getRequest() {
-                return null;
-            }
-
-            @Override
-            public void onStart() {
-
-            }
-
-            @Override
-            public void onStop() {
-
-            }
-
-            @Override
-            public void onDestroy() {
-
-            }
-        });
-
-        /*Drawable imgDrawable = tempImg.getDrawable();
-        BitmapDrawable bitmapDrawable = (BitmapDrawable)imgDrawable;
-        if(bitmapDrawable !=null)
-        imgBitmap = bitmapDrawable.getBitmap();*/
-
-        //storageRef.child(uname).child(vehiclenumber).
-
-        if(imgBitmap != null )  {
-            return imgBitmap;
-        }
-        return (Bitmap) BitmapFactory.decodeResource(getResources(), R.drawable.nocarpicture);
     }
 
 
@@ -585,12 +519,33 @@ public class HomePage extends AppCompatActivity {
 
     }
 
+    /*
+        method to call Upload New info in which Car info is entered manually by user
+    */
+    private void uploadNewOrder() {
+        if (fbAdapter.getFirebaseUser().isEmailVerified()) {
+            Intent i = new Intent(getApplicationContext(), UploadNewInfo.class);
+            startActivity(i);
+        } else {
+            Log.i("soni-", "cant add data, email not verified");
+            Toast.makeText(this, "cant add data, email not verified", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /*
+    to redirect to profile
+     */
+
+    private void gotoProfile()  {
+        Intent intentProfile = new Intent(getApplicationContext(), MyProfile.class);
+        startActivity(intentProfile);
+    }
 
     public void refreshList()   {
         Log.i("soni-", "Sync icon clicked...");
         hmList.clear();
         retriveCarList();
-        simpleAdapter.notifyDataSetChanged();
+        carListAdapter.notifyDataSetChanged();
     }
 
 }

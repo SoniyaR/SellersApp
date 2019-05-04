@@ -2,6 +2,7 @@ package com.soniya.sellersapp;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,6 +31,7 @@ public class SignupForm extends AppCompatActivity {
     EditText passwordView;
     EditText repPassword;
     Button signupButton;
+    String curr_pwd = "";
 
     FirebaseAdapter fbAdapter = new FirebaseAdapter();
     FirebaseDataFactory database = new FirebaseDataFactory();
@@ -55,8 +57,16 @@ public class SignupForm extends AppCompatActivity {
         Log.i("soni-", "in signupform class");
         userEmailView.addTextChangedListener(new SignupValidation(userEmailView));
         passwordView.addTextChangedListener(new SignupValidation(passwordView));
-        repPassword.addTextChangedListener(new SignupValidation(repPassword));
+        repPassword.addTextChangedListener(new SignupValidation(repPassword, this));
 
+        repPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                curr_pwd = passwordView.getText().toString();
+                SharedPreferences preferences = getSharedPreferences("com.soniya.sellersapp", MODE_PRIVATE);
+                preferences.edit().putString("curr_pwd", curr_pwd).apply();
+            }
+        });
     }
 
     public void signupClicked(View view){
@@ -69,6 +79,8 @@ public class SignupForm extends AppCompatActivity {
                 && passwordText!=null  && !passwordText.toString().isEmpty() && !passwordText.toString().trim().equals(""))   {
                 if(repPassword.getText()!=null && repPassword.getText().toString().equals(passwordText.toString())) {
                     allgood = true;
+                }else{
+                    repPassword.setError("Password does not match!");
                 }
         }
         else if(emailText.toString().isEmpty() && emailText.toString().trim().equals("")){
@@ -84,44 +96,7 @@ public class SignupForm extends AppCompatActivity {
 
         if(allgood && validateSignup()) {
 
-            /*ParseDatabaseFactory db = new ParseDatabaseFactory();
-            if(db.signupUser(userView.getText().toString(), passwordView.getText().toString())){
-                Intent intent = new Intent(getApplicationContext(), HomePage.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-            }
-            else {
-                Log.i("soni-", "Signup Error"+ db.getErrorMessage());
-            }*/
-
-            //TODO Firebase signing up: can user asynctask listener
-
-            /*
-            //boolean signupSuccess = fbAdapter.signupUser(this, emailText.toString(), passwordText.toString());
-
-            Log.i("soni-signingup", emailText.toString()+ " " + passwordText.toString());
-
-            hold();
-
-            Log.i("soni-signingup", "after 6 secs "+signupSuccess);
-
-            if(fbAdapter.signupUser(this, emailText.toString(), passwordText.toString())    {
-                Log.i("soni-signup", "User signup with Email successful");
-                Intent intent = new Intent(getApplicationContext(), SetupNewProfile.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.putExtra("emailId", emailText.toString());
-                startActivity(intent);
-               // Toast.makeText(this, "User signup with Email successful", Toast.LENGTH_SHORT).show();
-                //goto homepage
-
-            }else{
-                Log.i("soni-errorsignup", fbAdapter.getErrorMessage());
-               // Toast.makeText(this,  fbAdapter.getErrorMessage(), Toast.LENGTH_LONG).show();
-                //Toast.makeText(this, fbAdapter.getErrorMessage(), Toast.LENGTH_SHORT).show();
-            }*/
-
-
-            Log.i("soni-signingup", emailText.toString()+ " " + passwordText.toString());
+            /*Log.i("soni-signingup", emailText.toString()+ " " + passwordText.toString());
             aAuth.createUserWithEmailAndPassword(emailText.toString(), passwordText.toString()).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
@@ -136,10 +111,17 @@ public class SignupForm extends AppCompatActivity {
                     }
 
                 }
-            });
+            });*/
+
+            Intent intent = new Intent(getApplicationContext(), SetupNewProfile.class);
+            //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.putExtra("emailId", emailText.toString());
+            intent.putExtra("password", passwordText.toString());
+            startActivity(intent);
 
         }else if(!validateSignup()){
-            Log.i("soni-", "error in the form");
+            Toast.makeText(this, "Error in one or more fields!", Toast.LENGTH_SHORT).show();
+            //Log.i("soni-", "error in the form");
         }
     }
 

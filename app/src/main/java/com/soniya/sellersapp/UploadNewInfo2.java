@@ -140,11 +140,15 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
 
             hmList.add(recHashmap);
 
-            if(ownerofList.size() > 0) {
+            /*if(ownerofList.size() > 0) {
                 database.deleteOldOwnerofList();
-            }
+            }*/
 
             database.uploadImportData(hmList, ownerofList);
+
+            //TODO testing method
+            CarInfo carinfoDup = formCarinfoObject(recHashmap);
+            database.uploadDataDuplicate(carinfoDup, curr_vehicleNum.replace(space, replacechar));
 
             if(selectedUriList != null && selectedUriList.size() > 0) {
 
@@ -167,6 +171,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
 
             }else{
                 Log.i("soni-176", "uploadinfo2 - No images to upload...");
+
                 Intent i = new Intent(getApplicationContext(), HomePage.class);
                 i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 Toast.makeText(this, "New Record Added Successfully!", Toast.LENGTH_SHORT).show();
@@ -176,6 +181,15 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         }else{
             Log.i("soni-", "something went wrong");
         }
+    }
+
+
+    //test method: to delete later
+    private CarInfo formCarinfoObject(HashMap<String, Object> recHashmap) {
+        //vehicle_no	model_name	availability description	location	sellingprice
+        return new CarInfo(recHashmap.get("vehicle_no").toString(), recHashmap.get("model_name").toString(), recHashmap.get("availability").toString(),
+                recHashmap.get("location").toString(), recHashmap.get("sellingprice").toString());
+
     }
 
     /*

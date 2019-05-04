@@ -29,7 +29,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -57,6 +59,8 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
     char space = ' ';
     char replacechar = '_';
 
+    DatabaseReference updateRef;
+
     HashMap<String, Object> hm = new HashMap<>();
     List<Bitmap> carImagesList = new ArrayList<>();
 
@@ -70,6 +74,9 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
     boolean modelchanged = false;
     boolean pricechanged = false;
     boolean statuschanged = false;
+
+    String oldPriceVal= "";
+    String oldModelVal= "";
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -168,28 +175,46 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
     private void updateCarInfo() {
 
+        //vehicle_no	model_name	availability description    location	sellingprice    image_uri_list
+
         //TODO update specific node with current vehicle number
 
         //FirebaseDataFactory factory = new FirebaseDataFactory();
         //vehicle_no	model_name	availability description	location	sellingprice
         //whatever is updated, goes to hashmap, and only that is updated in the node in db
 
+        String vehicle = vehicleNum.getText().toString().replace(space, replacechar);
+        Timestamp timestamp = new Timestamp(new Date().getTime());
+        String timeStampStr = timestamp.toString().replace(space, replacechar).substring(0, 18);
+        Log.i("soni-timestamp", timeStampStr);
+
         //description
         if(!descEdit.getText().toString().equals(description.getText().toString())) {
+
+            updateRef.child(vehicle).child("description").child(timeStampStr).child("Old").setValue(description.getText().toString());
+            updateRef.child(vehicle).child("description").child(timeStampStr).child("New").setValue(descEdit.getText().toString());
+
             description.setText(descEdit.getText());
             description.setVisibility(View.VISIBLE);
             descEdit.setVisibility(View.INVISIBLE);
+
             carInfoReference.child("description").setValue(description.getText().toString());
         }
 
         //model
         if(modelchanged)    {
+            updateRef.child(vehicle).child("model_name").child(timeStampStr).child("Old").setValue(oldModelVal);
+            updateRef.child(vehicle).child("model_name").child(timeStampStr).child("New").setValue(model.getText().toString());
             carInfoReference.child("model_name").setValue(model.getText().toString());
+            modelchanged = false;
         }
 
         //price
         if(pricechanged)    {
+            updateRef.child(vehicle).child("sellingprice").child(timeStampStr).child("Old").setValue(oldPriceVal);
+            updateRef.child(vehicle).child("sellingprice").child(timeStampStr).child("New").setValue(price.getText().toString());
             carInfoReference.child("sellingprice").setValue(price.getText().toString());
+            pricechanged = false;
         }
 
         //availability
@@ -238,6 +263,8 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
         gallery = findViewById(R.id.imgGallery);
         gallery.setOnClickListener(this);
+
+        updateRef = FirebaseDatabase.getInstance().getReference().child("InfoUpdates");
 
         Intent intent = getIntent();
 
@@ -337,6 +364,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                     if(!price.getText().toString().equals(priceEdit.getText().toString()))  {
                         pricechanged = true;
                     }
+                    oldPriceVal = price.getText().toString();
                     price.setText(priceEdit.getText());
                 }
             }
@@ -352,20 +380,13 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                     if(!modelEdit.getText().toString().equals(model.getText().toString()))  {
                         modelchanged = true;
                     }
+                    oldModelVal = model.getText().toString();
                     model.setText(modelEdit.getText());
                 }
             }
         });
 
         price.setOnClickListener(this);
-
-//        if(availability.getText().toString().equalsIgnoreCase("Sold"))  {
-//            Log.i("soni-", "this model is sold!");
-//            soldButton.setText("Sold");
-//            soldButton.setBackgroundColor(Color.GRAY);
-//            soldButton.setEnabled(false);
-//        }
-
 
     }
 
@@ -435,7 +456,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
                 break;
 
-            case R.id.editDescription:
+            case R.id.editTextDesc:
 
                 if(editmode)    {
                     descEdit.setVisibility(View.VISIBLE);
@@ -468,6 +489,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
         Intent displayIntent = new Intent(getApplicationContext(), DisplayImages.class);
         displayIntent.putExtra("modelname", model.getText().toString());
         displayIntent.putExtra("urlList", urlList);
+        displayIntent.putExtra("vehicle_no", vehicleNum.getText().toString().replace(space, replacechar));
         startActivity(displayIntent);
 
     }
