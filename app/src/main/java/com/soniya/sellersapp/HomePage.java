@@ -1,14 +1,9 @@
 package com.soniya.sellersapp;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -18,17 +13,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.Request;
-import com.bumptech.glide.request.target.SizeReadyCallback;
-import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -41,7 +28,6 @@ import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -49,7 +35,6 @@ public class HomePage extends AppCompatActivity {
 
     private boolean doubleBackToExitPressedOnce=false;
 
-    List<HashMap<String, Object>> hmList;
     ListView carsListView;
     CustomAdapter carListAdapter;
     List activeOrders ;
@@ -57,7 +42,6 @@ public class HomePage extends AppCompatActivity {
     char space = ' ';
     char replacechar = '_';
 
-    //Bitmap carImage;
     FirebaseAdapter fbAdapter = new FirebaseAdapter();
     FirebaseDataFactory fbFactory = new FirebaseDataFactory();
 
@@ -69,23 +53,10 @@ public class HomePage extends AppCompatActivity {
     String selVehicleNum = "";
     String uname = "";
 
-    String[] from = {"model_name", "sellingprice", "location", "carImage"};
-    int[] to = {R.id.modelName, R.id.sellingprice, R.id.location, R.id.carImageView};
-
-//    SharedPreferences preferences;
-
     int contextSelPosition = 0;
-
-    ImageView tempImg;
-
-    HashMap<String, String> imgUriForRecord = new HashMap<>();
 
     public static String encodeString(String string) {
         return string.replace(".", ",");
-    }
-
-    public static String decodeString(String string) {
-        return string.replace(",", ".");
     }
 
     ArrayList<CarInfo> carsArraylist;
@@ -153,42 +124,19 @@ public class HomePage extends AppCompatActivity {
         //{model_name=qwe12_bb, sellingprice=90000, description=nnhh_ffgg, location=pune, availability=Available}
 
         activeOrders = null;
-        hmList = new ArrayList<>();
+        //hmList = new ArrayList<>();
         carsArraylist = new ArrayList<>();
 
-        tempImg = new ImageView(this);
+        //tempImg = new ImageView(this);
 
         carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
         userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
 
         carsListView = (ListView) findViewById(R.id.listView);
-        //simpleAdapter = new CustomAdapter(this, hmList, R.layout.carslist_layout, from, to);
-        //carsListView.setAdapter(simpleAdapter);
 
         carListAdapter = new CustomAdapter(this, carsArraylist, R.layout.carslist_layout);
         carsListView.setAdapter(carListAdapter);
         registerForContextMenu(carsListView);
-
-       /* simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
-            @Override
-            public boolean setViewValue(View view, Object data, String textRepresentation) {
-                if(view instanceof ImageView && view.getId() == R.id.carImageView && data instanceof Bitmap){
-                    //R.id.userImageView
-                    ImageView imgV = (ImageView) view;
-                    imgV.setImageBitmap((Bitmap)data);
-
-                }else if(view instanceof TextView && data instanceof String){
-                    TextView textV = (TextView) view;
-                    textV.setText((String) data);
-                }*//*else if(view instanceof ImageView && data instanceof String)   {
-                    ImageView imgView = (ImageView) view;
-                    //Glide.with(HomePage.this).asBitmap().override(100, 100).load(data).into(imgView);
-                    Picasso.with(HomePage.this).load(data.toString()).resize(100, 100).into(imgView);
-                }*//*
-                return true;
-            }
-        });*/
-
 
         if(fbAdapter.checkCurrentUser()){
             uname = fbAdapter.getCurrentUser();
@@ -251,7 +199,7 @@ public class HomePage extends AppCompatActivity {
         carsListView.setOnItemClickListener((parent, view, position, id) -> {
 
             Intent intent = new Intent(getApplicationContext(), OrderDetails.class);
-            intent.putExtra("selVehicleNum", hmList.get(position).get("vehicle_no").toString());
+            intent.putExtra("selVehicleNum", carsArraylist.get(position).getVehicle_no());
             startActivity(intent);
 
         });
@@ -268,7 +216,7 @@ public class HomePage extends AppCompatActivity {
         menu.setHeaderTitle("Select Action");
         AdapterView.AdapterContextMenuInfo contextMenuInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
         contextSelPosition = contextMenuInfo.position;
-        selVehicleNum = hmList.get(contextSelPosition).get("vehicle_no").toString().replace(space, replacechar);
+        selVehicleNum = carsArraylist.get(contextSelPosition).getVehicle_no().replace(space, replacechar);
         if(selVehicleNum != null) {
             Log.i("soni-hp-veh", selVehicleNum);
             Log.i("soni-hp-id", String.valueOf(v.getId()));
@@ -289,7 +237,7 @@ public class HomePage extends AppCompatActivity {
                 Log.i("soni-contextmenu", "editRecord selected");
                 Intent editIntent = new Intent(getApplicationContext(), OrderDetails.class);
                 editIntent.putExtra("forEdit", true);
-                editIntent.putExtra("selectedHM", hmList.get(contextSelPosition));
+                editIntent.putExtra("selVehicleNum", carsArraylist.get(contextSelPosition).getVehicle_no());
                 startActivity(editIntent);
                 return true;
 
@@ -306,8 +254,8 @@ public class HomePage extends AppCompatActivity {
 
     private void retriveCarList() {
 
-            DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference().child("CarsInfoDup");
-            tempRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            //DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference().child("CarsInfoDup");
+            carInfoReference.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if(dataSnapshot !=null && dataSnapshot.getValue() !=null) {
@@ -339,7 +287,7 @@ public class HomePage extends AppCompatActivity {
                 }
             });
 
-            carInfoReference.addValueEventListener(new ValueEventListener() {
+            /*carInfoReference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     hmList.clear();
@@ -386,19 +334,9 @@ public class HomePage extends AppCompatActivity {
                 public void onCancelled(@NonNull DatabaseError databaseError) {
 
                 }
-            });
+            });*/
 
     }
-
-    /*private void retrieveImages() {
-
-        Log.i("soni-", "in retrieve images method");
-        for(int i = 0; i < activeOrders.size(); i++)    {
-            Log.i("soni-Glide", imgUriForRecord.get(activeOrders.get(i).toString()));
-            String vehicle = activeOrders.get(i).toString().replace(replacechar, space);
-
-        }
-    }*/
 
     /*
     method to delete the car record from database
@@ -426,16 +364,6 @@ public class HomePage extends AppCompatActivity {
                     }
                     else if(dataSnapshot.getValue() instanceof HashMap){
                         HashMap<String, List<String>> hashMap = (HashMap<String, List<String>>) dataSnapshot.getValue();
-//                        if(hashMap.keySet().size() >0)    {
-//                            //String hmKey = hashMap.keySet().iterator().next();
-//                            //Log.i("soni-delete", "got key " + hmKey);
-//                            List<String> vals =new ArrayList<>();
-//                            for(String hmkey : hashMap.keySet()) {
-//                                vals = (ArrayList<String>) hashMap.get(hmkey);
-//                            }
-//                            vals.remove(vehicleNum);
-//                            hashMap.put(hmKey, vals);
-//                        }
 
                         fbFactory.deleteOldOwnerofList();
 
@@ -543,7 +471,7 @@ public class HomePage extends AppCompatActivity {
 
     public void refreshList()   {
         Log.i("soni-", "Sync icon clicked...");
-        hmList.clear();
+        carsArraylist.clear();
         retriveCarList();
         carListAdapter.notifyDataSetChanged();
     }

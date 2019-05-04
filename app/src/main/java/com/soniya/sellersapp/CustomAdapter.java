@@ -9,12 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import org.apache.poi.ss.formula.functions.T;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +29,12 @@ public class CustomAdapter extends ArrayAdapter<CarInfo> {
         super(context, resource, carsList);
         this.context = context;
         this.carList = carsList;
+    }
+
+
+
+    public static String decodeString(String string) {
+        return string.replace(",", ".");
     }
 
     /*public CustomAdapter(Context context, List<HashMap<String, Object>> hmlist, int resource, String[] from, int[] to)  {
@@ -77,7 +81,7 @@ public class CustomAdapter extends ArrayAdapter<CarInfo> {
         Picasso.with(context).load(info.getImage_uri_list().get(0)).resize(100, 100).into(imgView);
 
         TextView model= (TextView) convertView.findViewById(R.id.modelName);
-        model.setText(info.getModel_name());
+        model.setText(decodeString(info.getModel_name()));
 
         TextView loc = (TextView) convertView.findViewById(R.id.location);
         loc.setText(info.getLocation());
