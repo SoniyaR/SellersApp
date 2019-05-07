@@ -1,9 +1,19 @@
 package com.soniya.sellersapp;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,16 +31,36 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
 public class SetupNewProfile extends AppCompatActivity implements View.OnClickListener {
 
     TextView newUsername;
-    TextView location;
+    TextView locationTextView;
     String currentEmailId = "";
     String currentPassword = "";
     TextView emailVerfi;
     Button nextButton;
     FirebaseAuth auth;
 
+    LocationManager locationManager;
+    LocationListener listener;
+    Location oldLocation;
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
+                oldLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                locationTextView.setText(new LocationAdapter(getApplicationContext(), oldLocation).getAddress());
+            }
+        }
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,19 +78,6 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
         nextButton.setOnClickListener(this);
         nextButton.setVisibility(View.INVISIBLE);
 
-        /*FirebaseAuth.AuthStateListener authStateListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = auth.getCurrentUser();
-                Log.i("soni-", "AuthState changed..");
-                if(user !=null) {
-                    sendVerificationMail();
-                }else{
-                    Log.i("soni-51", "user is signed out!");
-                }
-            }
-        };*/
-
         Intent intent = getIntent();
         if(intent.getExtras() !=null){
             if(intent.getStringExtra("emailId") !=null) {
@@ -72,16 +89,55 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
             }
         }
 
-        ConstraintLayout layout = (ConstraintLayout) findViewById(R.id.setprofLayout);
+        ConstraintLayout layout = findViewById(R.id.setprofLayout);
         layout.setOnClickListener(this);
 
-        newUsername = (TextView) findViewById(R.id.editUsername);
-        location = (TextView) findViewById(R.id.editLocation);
+        newUsername = findViewById(R.id.editUsername);
+        locationTextView = findViewById(R.id.editLocation);
 
         if(!currentEmailId.isEmpty() && currentEmailId.contains("@"))   {
             newUsername.setText(currentEmailId.split("@")[0]);
         }
 
+        //get current location and autofill in location
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        listener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                if(oldLocation == null || (oldLocation !=null &&
+                        (location.getLatitude() != oldLocation.getLatitude() || location.getLongitude() != oldLocation.getLongitude()))) {
+
+                    oldLocation = location;
+                    String locinfo = new LocationAdapter(getApplicationContext(), location).getAddress();
+                    Log.i("soni-", "in onLocationChanged - SetupProfile, " + locinfo);
+                    locationTextView.setText(locinfo);
+                }
+
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        } else  {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
+            oldLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            locationTextView.setText(new LocationAdapter(getApplicationContext(), oldLocation).getAddress());
+        }
 
     }
 
@@ -121,10 +177,10 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
             case R.id.nextButton:
                 if(auth.getCurrentUser() !=null) {
                     if (newUsername.getText() != null && !newUsername.getText().toString().isEmpty()
-                            && location.getText() != null && !location.getText().toString().isEmpty()) {
+                            && locationTextView.getText() != null && !locationTextView.getText().toString().isEmpty()) {
                         if (!currentEmailId.equals("") && !currentEmailId.isEmpty()) {
                             FirebaseDataFactory dataFactory = new FirebaseDataFactory();
-                            dataFactory.addNewProfileInfo(currentEmailId, newUsername.getText().toString(), location.getText().toString());
+                            dataFactory.addNewProfileInfo(currentEmailId, newUsername.getText().toString(), locationTextView.getText().toString());
 
                             if(auth.getCurrentUser().isEmailVerified()){
                                 Intent i = new Intent(getApplicationContext(), HomePage.class);
@@ -147,8 +203,8 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
                         } else {
                             Log.i("soni-", "Something went wrong! (In SetupNewProfile)");
                         }
-                    }else if(location.getText().toString().isEmpty()){
-                        location.setError("Location is mandatory.");
+                    }else if(locationTextView.getText().toString().isEmpty()){
+                        locationTextView.setError("Location is mandatory.");
                     }
                     else if(newUsername.getText().toString().isEmpty()){
                         newUsername.setError("Username is mandatory.");

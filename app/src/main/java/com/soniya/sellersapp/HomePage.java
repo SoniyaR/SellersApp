@@ -268,7 +268,7 @@ public class HomePage extends AppCompatActivity {
 
                                 if (carInfoObj != null) {
                                     carsArraylist.add(carInfoObj);
-                                    Log.i("soni-", "retrieved carinfo object\n" + carInfoObj.getModel_name());
+                                    //Log.i("soni-", "retrieved carinfo object\n" + carInfoObj.getModel_name());
                                 }
 
                             }
@@ -347,8 +347,8 @@ public class HomePage extends AppCompatActivity {
         activeOrders.remove(vehicleNum);
 
         if(vehicleNum != null && !vehicleNum.isEmpty() && !vehicleNum.equalsIgnoreCase(""))   {
-            Log.i("soni-Record", vehicleNum + " deleted!");
-            carInfoReference.child(vehicleNum).removeValue();
+
+            fbFactory.moveToSoldHistory(vehicleNum);
 
             //remove vehicle number from userinfo -> username-> ownerof list
             userRef.child(encodeString(uname)).child("ownerof").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -386,7 +386,7 @@ public class HomePage extends AppCompatActivity {
                                 }
                             }
 
-                            userRef.child(encodeString(uname)).child("ownerof").push().setValue(tempList).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            userRef.child(encodeString(uname)).child("ownerof").setValue(tempList).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     Log.i("soni-", "updated ownerof list for deleteRecord");
@@ -404,7 +404,8 @@ public class HomePage extends AppCompatActivity {
                 }
             });
 
-            removeImagesFromStorage(vehicleNum);
+            //removeImagesFromStorage(vehicleNum);
+            fbFactory.moveInfoUpdatestoHistory(vehicleNum);
         }
     }
 

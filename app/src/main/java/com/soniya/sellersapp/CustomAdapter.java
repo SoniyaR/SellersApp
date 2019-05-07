@@ -51,23 +51,6 @@ public class CustomAdapter extends ArrayAdapter<CarInfo> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        /*View v = super.getView(position, convertView, parent);
-
-       // Log.i("soni-", "in get view - customadapter");
-
-        if(v instanceof ImageView)  {
-            ImageView imgView = (ImageView) v;
-            //String url = getItem(position).toString();
-            Uri url = Uri.parse(urlList.get(position));
-
-            Log.i("soni-", "v is image view " + url);
-
-            Picasso.with(v.getContext()).load(url).resize(100, 100).into(imgView);
-        }
-
-        return v;*/
-
-
         if(convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.carslist_layout, null, true);

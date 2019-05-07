@@ -40,6 +40,11 @@ public class SoldHistory extends AppCompatActivity {
     char space = ' ';
     char replacechar = '_';
 
+
+    public static String encodeString(String string) {
+        return string.replace(".", ",");
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,7 +63,7 @@ public class SoldHistory extends AppCompatActivity {
             user = fbAdapter.getCurrentUser();
             Toast.makeText(this, "Retrieving Cars List", Toast.LENGTH_SHORT).show();
             //activeOrders.clear();
-            userRef.child(user).addListenerForSingleValueEvent(new ValueEventListener() {
+            userRef.child(encodeString(user)).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     //activeOrders.clear();

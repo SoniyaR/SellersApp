@@ -17,10 +17,10 @@
 
         <ImageView
             android:id="@+id/carImageView"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="center"
-            android:layout_marginLeft="8dp"
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            android:layout_gravity="center|fill"
+            android:layout_marginLeft="4dp"
             android:scaleType="fitCenter"
             android:src="@drawable/nocarpicture" />
 
@@ -29,7 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:layout_gravity="center"
-            android:layout_marginRight="8dp"
+            android:layout_marginRight="4dp"
             android:gravity="fill"
             android:orientation="vertical"
             android:paddingLeft="8dp">
@@ -39,7 +39,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
+                android:gravity="center|left"
+                android:padding="2dp"
                 android:text="name"
                 android:textColor="@android:color/black"
                 android:textSize="20sp" />
@@ -49,37 +50,50 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
+                android:gravity="center|left"
+                android:padding="2dp"
                 android:text="location"
                 android:textColor="@android:color/black"
                 android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/sellingprice"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_weight="1">
+                <ImageView
+                    android:id="@+id/rupeeImage"
+                    android:layout_width="10dp"
+                    android:layout_height="12dp"
+                    android:layout_gravity="center"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/rupee" />
+                <TextView
+                    android:id="@+id/sellingprice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center|left"
+                    android:padding="2dp"
+                    android:layout_marginLeft="4dp"
+                    android:text="selling price"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/availabilityText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:text="sometext"
-                android:textColor="@android:color/black"
-                android:textSize="16sp" />
+                android:gravity="center|right"
+                android:padding="4dp"
+                android:text="Available"
+                android:textColor="@color/colorPrimary"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
         </LinearLayout>
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/availabilityText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:padding="4dp"
-        android:text="Available"
-        android:textColor="@color/colorPrimary"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:layout_gravity="fill"/>
 
 </LinearLayout>

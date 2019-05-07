@@ -1,13 +1,11 @@
 package com.soniya.sellersapp;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,9 +29,9 @@ public class FirebaseDataFactory {
     DatabaseReference userInfoReference;
 
     DatabaseReference ownerInfoReference;
-    List<String> ownerofList = new ArrayList<>();
+    ArrayList<String> ownerofList = new ArrayList<>();
 
-    List<String> vehicleNumbers = new ArrayList<>();
+    ArrayList<String> vehicleNumbers = new ArrayList<>();
 
     String uname=null;
     String key = null;
@@ -106,49 +104,45 @@ public class FirebaseDataFactory {
 
     }
 
-    public List<String> getOwnerofList() {
+    public ArrayList<String> getOwnerofList() {
         vehicleNumbers.clear();
         ownerofList.clear();
-        DatabaseReference cur_UserRef =  db.child("userInfo").child(encodeString(uname)).child("ownerof");
-        cur_UserRef.addChildEventListener(new ChildEventListener() {
+        Log.i("soni-", "uname = " + encodeString(uname));
+        DatabaseReference cur_UserRef =  db.child("userInfo").child(encodeString(uname))/*.child("ownerof")*/;
+        cur_UserRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                if(dataSnapshot.getValue() instanceof List) {
-                    vehicleNumbers = (List<String>) dataSnapshot.getValue();
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot!=null && dataSnapshot.hasChild("ownerof")) {
 
-                    if (!vehicleNumbers.isEmpty()) {
-                        Log.i("soni-", "getOwnerofList - we have ownerofList vals");
-                        for (String num : vehicleNumbers) {
-                            ownerofList.add(num);
+                    if (dataSnapshot.child("ownerof").getValue() instanceof List) {
+                        vehicleNumbers = (ArrayList<String>) dataSnapshot.child("ownerof").getValue();
+
+                        if (!vehicleNumbers.isEmpty()) {
+                            Log.i("soni-", "getOwnerofList - we have ownerofList vals");
+                            for (String num : vehicleNumbers) {
+                                ownerofList.add(num);
+                            }
+
+                        } else {
+                            Log.i("soni-", "getOwnerofList - ownerofList is empty");
                         }
-
+                    } else if (dataSnapshot.child("ownerof").getValue() instanceof HashMap) {
+                        HashMap<String, String> hm = (HashMap<String, String>) dataSnapshot.child("ownerof").getValue();
+                        Set<String> keys = ((HashMap) hm).keySet();
+                        for (String key : keys) {
+                            vehicleNumbers.add(hm.get(key));
+                            ownerofList.add(hm.get(key));
+                        }
+                        Log.i("soni-", "getOwnerofList , its hashmap ownerlist size=" + String.valueOf(ownerofList.size()));
+                    } else if (dataSnapshot.child("ownerof").getValue() instanceof String) {
+                        Log.i("soni-", "ownerofList is a String");
+                        ownerofList.add(dataSnapshot.child("ownerof").getValue().toString());
                     } else {
-                        Log.i("soni-", "getOwnerofList - ownerofList is empty");
+                        Log.i("soni-", "not able to get ownerofList");
                     }
+                } else{
+                    Log.i("soni-", "dataSnapshot is null - factory 140");
                 }
-                else if(dataSnapshot.getValue() instanceof HashMap) {
-                    HashMap<String, String> hm = (HashMap<String, String>) dataSnapshot.getValue();
-                    Set<String> keys = ((HashMap) hm).keySet();
-                    for(String key: keys)   {
-                        vehicleNumbers.add(hm.get(key));
-                        ownerofList.add(hm.get(key));
-                    }
-                }
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
             }
 
             @Override
@@ -177,7 +171,9 @@ public class FirebaseDataFactory {
         //currentUserRef.child(username).child("ownerof").setValue(new ArrayList<String>());
     }
 
-    public void uploadImportData(List<HashMap<String, Object>>hmlist, List<String> ownerofList)    {
+
+    //old way of uploading data
+    /*public void uploadImportData(List<HashMap<String, Object>>hmlist, List<String> ownerofList)    {
 
         DatabaseReference curr_ref =  db.child("CarsInfo"); //.child(new FirebaseAdapter().getCurrentUser())
         //vehicle_no	model_name	availability description	location	sellingprice
@@ -206,51 +202,30 @@ public class FirebaseDataFactory {
             }
         }
 
-    }
+    }*/
 
-    //TODO test method for pushing carInfo object into db
-    public void uploadDataDuplicate(CarInfo carInfo, String number)    {
-        DatabaseReference curr_ref =  db.child("CarsInfoDup");
+    /*
+    method for pushing carInfo object into db
+     */
+    public void uploadData(CarInfo carInfo, String vehicleNum, ArrayList<String> ownerofList)    {
+        DatabaseReference curr_ref =  db.child("CarsInfo");
 
-        //vehicle_no	model_name	availability description	location	sellingprice
-        curr_ref.child(number).setValue(carInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
+        curr_ref.child(vehicleNum).setValue(carInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                Log.i("soni-", "duplicate record added with carinfo object to database");
+                Log.i("soni-", "Record added with carinfo object to database");
             }
         });
 
+        if(!ownerofList.contains(vehicleNum)) {
+            ownerofList.add(vehicleNum);
+            updateOwnerOf(ownerofList);
+        }
+
     }
 
-//    public void uploadImage(Uri uri, String filename, String vehicleNum){
-//        //progressBar.setVisibility(View.VISIBLE);
-//        Log.i("soni-", "in uploadImage");
-//        UploadTask uploadTask = img_ref.child(vehicleNum).child("IMG_"+filename).putFile(uri);
-//        Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-//            @Override
-//            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-//
-//                if(!task.isSuccessful())    {
-//                    throw task.getException();
-//                }
-//                return img_ref.child("IMG_"+filename).getDownloadUrl();
-//            }
-//        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-//            @Override
-//            public void onComplete(@NonNull Task<Uri> task) {
-//                if(task.isSuccessful()) {
-//                    Uri uri = task.getResult();
-//                    Log.i("soni- uri ", String.valueOf(uri));
-//                    //updateUriList(vehicleNum, uri);
-//                }
-//            }
-//        });
-//
-//    }
 
-
-
-    private void updateOwnerOf(List<String> ownerofList) {
+    private void updateOwnerOf(ArrayList<String> ownerofList) {
         String currUser = new FirebaseAdapter().getCurrentUser();
         Log.i("soni-updateUserInfo", "curr user "+  currUser);
         ownerInfoReference = db.child("userInfo").child(encodeString(currUser)).child("ownerof");
@@ -287,51 +262,14 @@ public class FirebaseDataFactory {
 
                     list = new ArrayList<String>();
                     list.add(uri);
-                    Log.i("soni-", "dataSnapshot has NO child image_uri_list");
+                    //Log.i("soni-", "dataSnapshot has NO child image_uri_list");
                 }
 
                 if (list != null) {
                     imgInfoRef.setValue(list);
-                    //Log.i("soni-", "added/updated uri list for " + vehicleNum);
-                    //list.clear();
-                } else {
-                    Log.i("soni-factory", "uri list is null for " + vehicleNum);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-        DatabaseReference imgInfoRefDup = db.child("CarsInfoDup").child(vehicleNum).child("image_uri_list");
-        imgInfoRefDup.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                ArrayList<String> list = null;
-
-                if(dataSnapshot !=null && dataSnapshot.getValue() !=null) {
-                    //Log.i("soni-", "dataSnapshot " + dataSnapshot.getValue().toString());
-
-                    list = (ArrayList<String>) dataSnapshot.getValue();
-                    if (!list.contains(uri)) {
-                        list.add(uri);
-                    }
 
                 } else {
-
-                    list = new ArrayList<String>();
-                    list.add(uri);
-                    Log.i("soni-", "dataSnapshot has NO child image_uri_list");
-                }
-
-                if (list != null) {
-                    imgInfoRefDup.setValue(list);
-                    //Log.i("soni-", "added/updated uri list for " + vehicleNum);
-                    //list.clear();
-                } else {
-                    Log.i("soni-factory", "uri list is null for " + vehicleNum);
+                    //Log.i("soni-factory", "uri list is null for " + vehicleNum);
                 }
             }
 
@@ -359,9 +297,13 @@ public class FirebaseDataFactory {
     and deletes record from carinfo node
      */
     public void moveToSoldHistory(String vehicleNum) {
+        if(vehicleNum.contains(" ")){
+            vehicleNum = vehicleNum.replace(" ", "_");
+        }
 
         DatabaseReference fromRef = db.child("CarsInfo").child(vehicleNum);
         DatabaseReference toRef = db.child("SoldHistory");
+        final String number = vehicleNum;
 
         fromRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -369,10 +311,12 @@ public class FirebaseDataFactory {
                 if(dataSnapshot != null){
 
 
-                    toRef.child(vehicleNum).setValue(dataSnapshot.getValue(), new OnCompleteListener() {
+                    toRef.child(number).setValue(dataSnapshot.getValue(), new OnCompleteListener() {
                         @Override
                         public void onComplete(@NonNull Task task) {
                             Log.i("soni-", "record moved to history");
+                            //remove from carsInfo node
+                            fromRef.removeValue();
                         }
                     });
                 }
@@ -387,18 +331,25 @@ public class FirebaseDataFactory {
     }
 
     public void activateOrder(String vehicleNum)    {
+        if(vehicleNum.contains(" ")){
+            vehicleNum = vehicleNum.replace(" ", "_");
+        }
 
         DatabaseReference toRef = db.child("CarsInfo");
         DatabaseReference fromRef = db.child("SoldHistory").child(vehicleNum);
+        final String number = vehicleNum;
 
         fromRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot != null){
-                    toRef.child(vehicleNum).setValue(dataSnapshot.getValue(), new OnCompleteListener() {
+                    toRef.child(number).setValue(dataSnapshot.getValue(), new OnCompleteListener() {
                         @Override
                         public void onComplete(@NonNull Task task) {
                             Log.i("soni-", "record moved to carinfo");
+                            //remove node from sold history
+                            fromRef.removeValue();
+                            activateInfoUpdates(number);
                         }
                     });
                 }
@@ -410,4 +361,69 @@ public class FirebaseDataFactory {
             }
         });
     }
+
+    public void moveInfoUpdatestoHistory(String vehicleNum) {
+        if(vehicleNum.contains(" ")){
+            vehicleNum = vehicleNum.replace(" ", "_");
+        }
+        final String number = vehicleNum;
+        DatabaseReference fromRef = db.child("InfoUpdates").child(vehicleNum);
+        DatabaseReference toRef = db.child("InfoUpdatesHistory");
+
+        fromRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot !=null && dataSnapshot.getValue() !=null)   {
+                    toRef.child(number).setValue(dataSnapshot.getValue(), new OnCompleteListener() {
+                        @Override
+                        public void onComplete(@NonNull Task task) {
+                            fromRef.removeValue();
+                            Log.i("soni-", "infoupdate for "+ number + " moved to history");
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    public void activateInfoUpdates(String vehicleNum){
+        if(vehicleNum.contains(" ")){
+            vehicleNum = vehicleNum.replace(" ", "_");
+        }
+        final String number = vehicleNum;
+        DatabaseReference toRef = db.child("InfoUpdates");
+        DatabaseReference fromRef = db.child("InfoUpdatesHistory").child(vehicleNum);
+
+        fromRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot !=null && dataSnapshot.getValue() !=null)   {
+                    toRef.child(number).setValue(dataSnapshot.getValue(), new OnCompleteListener() {
+                        @Override
+                        public void onComplete(@NonNull Task task) {
+                            fromRef.removeValue();
+                            Log.i("soni-", "infoupdates of " + number + " restored");
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+
+    /*public void restoreImages(){
+        //TODO
+    }*/
 }

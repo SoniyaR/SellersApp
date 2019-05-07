@@ -69,13 +69,11 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     String curr_model = "";
 
     ProgressBar progressBar;
-    //HashMap<String, List<Uri>> urisHashMap = new HashMap<>();
-    //List<Uri> urisList = new ArrayList<>();
 
     FirebaseDataFactory database = new FirebaseDataFactory();
     List<HashMap<String, Object>> hmList = new ArrayList<>();
 
-    List<String> ownerofList;
+    ArrayList<String> ownerofList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +99,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         progressBar = findViewById(R.id.progressBar);
         progressBar.setVisibility(View.INVISIBLE);
 
-        uploadButton = (Button) findViewById(R.id.uploadImgButton);
+        uploadButton = findViewById(R.id.uploadImgButton);
         uploadButton.setOnClickListener(this);
 
         selectedImages = findViewById(R.id.selectedImgVie);
@@ -136,19 +134,11 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         if(recHashmap !=null) {
 
             hmList.clear();
-            //urisList.clear();
 
             hmList.add(recHashmap);
 
-            /*if(ownerofList.size() > 0) {
-                database.deleteOldOwnerofList();
-            }*/
-
-            database.uploadImportData(hmList, ownerofList);
-
-            //TODO testing method
             CarInfo carinfoDup = formCarinfoObject(recHashmap);
-            database.uploadDataDuplicate(carinfoDup, curr_vehicleNum.replace(space, replacechar));
+            database.uploadData(carinfoDup, curr_vehicleNum.replace(space, replacechar), ownerofList);
 
             if(selectedUriList != null && selectedUriList.size() > 0) {
 
@@ -163,7 +153,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                             filename = tokenizer.nextToken();
                         }
 
-                        Log.i("soni-filename", filename);
+                        //Log.i("soni-filename", filename);
                         uploadImage(uri, filename);
                     }
 
@@ -187,8 +177,25 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     //test method: to delete later
     private CarInfo formCarinfoObject(HashMap<String, Object> recHashmap) {
         //vehicle_no	model_name	availability description	location	sellingprice
-        return new CarInfo(recHashmap.get("vehicle_no").toString(), recHashmap.get("model_name").toString(), recHashmap.get("availability").toString(),
-                recHashmap.get("location").toString(), recHashmap.get("sellingprice").toString());
+        CarInfo info = new CarInfo();
+        String vehicleNum = recHashmap.get("vehicle_no").toString().replace(space, replacechar);
+        String modelName = recHashmap.get("model_name").toString().replace(space, replacechar);
+        String availability = recHashmap.get("availability").toString().replace(space, replacechar);
+        String description = recHashmap.get("description").toString().replace(space, replacechar);
+        String location = recHashmap.get("location").toString().replace(space, replacechar);
+        String price = recHashmap.get("sellingprice").toString().replace(space, replacechar);
+
+        /*return new CarInfo(vehicleNum, modelName, availability,
+                location, price, description);*/
+
+        info.setVehicle_no(vehicleNum);
+        info.setModel_name(modelName);
+        info.setAvailability(availability);
+        info.setDescription(description);
+        info.setLocation(location);
+        info.setSellingprice(price);
+
+        return info;
 
     }
 
@@ -228,9 +235,6 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                 if(task.isSuccessful()) {
                     Uri uri = task.getResult();
                     index++;
-                    //urisList.add(uri);
-                    //Log.i("soni- uri ", String.valueOf(uri));
-                    //urisList.add(uri);
                     database.updateUriList(curr_vehicleNum.replace(space, replacechar), String.valueOf(uri));
 
                     if(index == selectedUriList.size()){
@@ -363,7 +367,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                             nextButton.setEnabled(true);
                         }
 
-                        //test code
+                       /* //test code
                         for (Uri uri : selectedUriList) {
                             String filename = "";
                             String path = uri.getPath().toString();
@@ -372,20 +376,18 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                                 filename = tokenizer.nextToken();
                             }
 
-                            Log.i("soni-filename", filename);
-                        }
+                            //Log.i("soni-filename", filename);
+                        }*/
                     }
-                    //Log.i("soni-activityRes", "selected some img " + data.getClipData().getDescription().toString());
-                    //selectedImages.setImageResource();
                 }
             }
         }
     }
-
+/*
     private String getFileExtension(Uri uri)    {
         ContentResolver cR = getContentResolver();
         MimeTypeMap mime = MimeTypeMap.getSingleton();
         return mime.getExtensionFromMimeType(cR.getType(uri));
-    }
+    }*/
 
 }

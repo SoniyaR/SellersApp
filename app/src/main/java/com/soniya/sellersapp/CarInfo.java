@@ -24,14 +24,14 @@ public class CarInfo {
         this.sellingprice = sellingprice;
         this.vehicle_no = vehicle_no;
     }
-
+/*
     public CarInfo(String vehicle_no, String model_name, String availability, String location, String sellingprice){
         this.availability = availability;
         this.location = location;
         this.model_name = model_name;
         this.sellingprice = sellingprice;
         this.vehicle_no = vehicle_no;
-    }
+    }*/
 
     public String getImgUrl() {
         return imgUrl;
