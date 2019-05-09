@@ -3,10 +3,8 @@ package com.soniya.sellersapp;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.InputType;
@@ -19,9 +17,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 
@@ -55,9 +50,9 @@ public class SignupForm extends AppCompatActivity {
         //signupButton.
 
         Log.i("soni-", "in signupform class");
-        userEmailView.addTextChangedListener(new SignupValidation(userEmailView));
-        passwordView.addTextChangedListener(new SignupValidation(passwordView));
-        repPassword.addTextChangedListener(new SignupValidation(repPassword, this));
+        userEmailView.addTextChangedListener(new TextValidation(userEmailView));
+        passwordView.addTextChangedListener(new TextValidation(passwordView));
+        repPassword.addTextChangedListener(new TextValidation(repPassword, this));
 
         repPassword.setOnClickListener(new View.OnClickListener() {
             @Override

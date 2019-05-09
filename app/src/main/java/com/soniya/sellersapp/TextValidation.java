@@ -7,6 +7,7 @@ import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,7 +15,7 @@ import android.widget.Toast;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SignupValidation extends ValidationHelper implements TextWatcher {
+public class TextValidation extends ValidationHelper implements TextWatcher {
 
     EditText editTextView = null;
 
@@ -24,13 +25,13 @@ public class SignupValidation extends ValidationHelper implements TextWatcher {
 
     Context context;
 
-    public SignupValidation(EditText view)  {
+    public TextValidation(EditText view)  {
 
         this.editTextView = view;
 
     }
 
-    public SignupValidation(EditText view, Context context) {
+    public TextValidation(EditText view, Context context) {
         this.editTextView = view;
         this.context = context;
     }
@@ -45,7 +46,8 @@ public class SignupValidation extends ValidationHelper implements TextWatcher {
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        validate();
+
+            validate();
     }
 
     @Override
@@ -62,11 +64,9 @@ public class SignupValidation extends ValidationHelper implements TextWatcher {
 
     public void validate() {
 
-        //if(editTextView.getText().hashCode() == s.hashCode()){
-            //Log.i("soni-", "its "+editTextView.getInputType() );
-        //}
 
-        if (editTextView.getInputType() == InputType.TYPE_TEXT_VARIATION_PASSWORD
+
+        if (editTextView != null && editTextView.getInputType() == InputType.TYPE_TEXT_VARIATION_PASSWORD
                 && editTextView.getTag() != null && editTextView.getTag().equals("repeatPassword")) {
             SharedPreferences pref = context.getSharedPreferences("com.soniya.sellersapp", Context.MODE_PRIVATE);
             String curr_pwd = pref.getString("curr_pwd", "");
@@ -76,21 +76,11 @@ public class SignupValidation extends ValidationHelper implements TextWatcher {
             }
 
         }
-        else if(editTextView.getInputType() == InputType.TYPE_TEXT_VARIATION_PASSWORD)  {
+        else if(editTextView != null && editTextView.getInputType() == InputType.TYPE_TEXT_VARIATION_PASSWORD)  {
             newPassword = editTextView.getText().toString();
             validatePassword();
 
         }
-
-        /*else if(editTextView.getInputType() == InputType.TYPE_TEXT_VARIATION_PERSON_NAME){
-            //Log.i("soni-", "its username");
-            validateUsername();
-
-            //should call db to get uname and match to avoid duplicate username
-            //isUsernameAvailable();
-
-        }
-*/
 
     }
 

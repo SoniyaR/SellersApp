@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -17,28 +15,36 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.model.TypeFilter;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
+import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
-
 public class SetupNewProfile extends AppCompatActivity implements View.OnClickListener {
 
     TextView newUsername;
-    TextView locationTextView;
+    AutoCompleteTextView locationTextView;
     String currentEmailId = "";
     String currentPassword = "";
     TextView emailVerfi;
@@ -48,6 +54,14 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
     LocationManager locationManager;
     LocationListener listener;
     Location oldLocation;
+    PlacesClient placesClient;
+    String query;
+
+    AutocompleteSessionToken token;
+    RectangularBounds bounds;
+
+    FindAutocompletePredictionsRequest.Builder requestBuilder;
+    FindAutocompletePredictionsRequest request;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -95,11 +109,70 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
         newUsername = findViewById(R.id.editUsername);
         locationTextView = findViewById(R.id.editLocation);
 
+// Initialize Places.
+        Places.initialize(getApplicationContext(), "AIzaSyAoaTpL3mpT9gBtJB1DlUF9NYoAR90ssB4");
+
+// Create a new Places client instance.
+        placesClient = Places.createClient(this);
+
+        query = "";
+
+        // Create a new token for the autocomplete session. Pass this to FindAutocompletePredictionsRequest,
+        // and once again when the user makes a selection (for example when calling fetchPlace()).
+        token = AutocompleteSessionToken.newInstance();
+        // Create a RectangularBounds object.
+        bounds = RectangularBounds.newInstance(
+                new LatLng(22.337804, 69.150373),
+                new LatLng(9.651869, 78.786150));
+
+        requestBuilder = FindAutocompletePredictionsRequest.builder()
+                // Call either setLocationBias() OR setLocationRestriction().
+                .setLocationBias(bounds)
+                //.setLocationRestriction(bounds)
+                //.setCountry("in")
+                .setTypeFilter(TypeFilter.ADDRESS)
+                .setSessionToken(token);
+
+        //get current location and autofill in location
+
+        locationTextView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                query = "";
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                query = locationTextView.getText().toString();
+                //Log.i("soni-query=", query);
+                // Use the builder to create a FindAutocompletePredictionsRequest.
+
+                request = requestBuilder.setQuery(query).build();
+
+                placesClient.findAutocompletePredictions(request).addOnSuccessListener((response) -> {
+                    for (AutocompletePrediction prediction : response.getAutocompletePredictions()) {
+                        Log.i("soni-", prediction.getPlaceId());
+                        Log.i("soni-", prediction.getPrimaryText(null).toString());
+                    }
+                }).addOnFailureListener((exception) -> {
+                    if (exception instanceof ApiException) {
+                        ApiException apiException = (ApiException) exception;
+                        Log.i("soni-", "Place not found: " + apiException.getStatusCode());
+                    }
+                });
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
         if(!currentEmailId.isEmpty() && currentEmailId.contains("@"))   {
             newUsername.setText(currentEmailId.split("@")[0]);
         }
 
-        //get current location and autofill in location
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         listener = new LocationListener() {
             @Override
@@ -218,7 +291,10 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
                 break;
 
             case R.id.location:
-                //find current location
+                //find location suggestions
+
+
+
 
                 break;
 
