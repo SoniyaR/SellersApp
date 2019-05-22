@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "532198026185-c40404l8i9lj89v2qgvjhvrnpd63cuqr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.soniya.sellersapp",
+            "certificate_hash": "a53018d42d8ac7e4ada4dd88e5f683bd1c312043"
+          }
+        },
+        {
           "client_id": "532198026185-l9jkuo7c9n4ukell60o8ucf9me3dnria.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -25,15 +33,13 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
+          "other_platform_oauth_client": [
+            {
+              "client_id": "532198026185-l9jkuo7c9n4ukell60o8ucf9me3dnria.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

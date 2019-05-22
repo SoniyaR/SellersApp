@@ -54,14 +54,14 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
     LocationManager locationManager;
     LocationListener listener;
     Location oldLocation;
-    PlacesClient placesClient;
+    /*PlacesClient placesClient;
     String query;
 
     AutocompleteSessionToken token;
     RectangularBounds bounds;
 
     FindAutocompletePredictionsRequest.Builder requestBuilder;
-    FindAutocompletePredictionsRequest request;
+    FindAutocompletePredictionsRequest request;*/
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -113,7 +113,7 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
         Places.initialize(getApplicationContext(), "AIzaSyAoaTpL3mpT9gBtJB1DlUF9NYoAR90ssB4");
 
 // Create a new Places client instance.
-        placesClient = Places.createClient(this);
+       /* placesClient = Places.createClient(this);
 
         query = "";
 
@@ -132,18 +132,18 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
                 //.setCountry("in")
                 .setTypeFilter(TypeFilter.ADDRESS)
                 .setSessionToken(token);
-
+*/
         //get current location and autofill in location
 
         locationTextView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                query = "";
+                //query = "";
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                query = locationTextView.getText().toString();
+                /*query = locationTextView.getText().toString();
                 //Log.i("soni-query=", query);
                 // Use the builder to create a FindAutocompletePredictionsRequest.
 
@@ -159,7 +159,7 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
                         ApiException apiException = (ApiException) exception;
                         Log.i("soni-", "Place not found: " + apiException.getStatusCode());
                     }
-                });
+                });*/
 
             }
 

@@ -154,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Toast.makeText(this, "Username does not exist!", Toast.LENGTH_SHORT).show();
                     }
 
+
                     mAuth.signInWithEmailAndPassword(emailId, pass.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -187,6 +188,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.passText:
                 if(!user.getText().toString().contains("@")) {
                     //username entered case
+                    Log.i("soni-", "its not mail id");
                     emailId =  findEmailId(user.getText().toString());
                 }else{
                     emailId = user.getText().toString();
