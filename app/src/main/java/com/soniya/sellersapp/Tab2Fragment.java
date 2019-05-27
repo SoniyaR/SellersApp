@@ -35,18 +35,20 @@ public class Tab2Fragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.i("soni-tab2frag", "onCreateView");
+
         View rootView = inflater.inflate(R.layout.fragment_two, container, false);
         carsListView = rootView.findViewById(R.id.tab2listView);
         registerForContextMenu(carsListView);
+        //carsArraylist.clear();
 
         if(getArguments()!=null) {
-            Log.i("soni-", "we have carsarraylist tab2frag");
+
             carsArraylist = (ArrayList<CarInfo>) getArguments().getSerializable("carsArrayList");
         }
 
         if(carsArraylist !=null && carsArraylist.size()>0) {
-
+            otherCarslist.clear();
+            Log.i("soni-", "we have carsarraylist tab2frag , size = " + carsArraylist.size());
             CustomAdapter carListAdapter = new CustomAdapter(Tab2Fragment.this.getActivity(), carsArraylist, R.layout.carslist_layout);
             carsListView.setAdapter(carListAdapter);
             carListAdapter.notifyDataSetChanged();
@@ -59,15 +61,15 @@ public class Tab2Fragment extends Fragment {
                         activeOrders = data;
 
                         for (CarInfo carInfo : carsArraylist) {
-                            Log.i("soni-", carInfo.getVehicle_no());
+                            //Log.i("soni-", carInfo.getVehicle_no());
                             if (!activeOrders.contains(carInfo.getVehicle_no())) {
                                 otherCarslist.add(carInfo);
                             }
                         }
 
                         if (otherCarslist != null && otherCarslist.size() > 0) {
-                            Log.i("soni-", "we have othercarslist ");
-                            CustomAdapter carListAdapter = new CustomAdapter(Tab2Fragment.this.getActivity(), carsArraylist, R.layout.carslist_layout);
+                            Log.i("soni-", "we have othercarslist tab2frag");
+                            CustomAdapter carListAdapter = new CustomAdapter(Tab2Fragment.this.getActivity(), otherCarslist, R.layout.carslist_layout);
                             carsListView.setAdapter(carListAdapter);
                         }
                     } else {
@@ -134,9 +136,4 @@ public class Tab2Fragment extends Fragment {
 
     }
 
-    /*@Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        Log.i("soni-tab2frag", "onViewCreated method");
-        super.onViewCreated(view, savedInstanceState);
-    }*/
 }

@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -62,6 +63,10 @@ public class HomePage extends AppCompatActivity {
     String uname = "";
 
     int contextSelPosition = 0;
+
+    Fragment tab1frag;
+    Fragment tab2frag;
+    Bundle tabbundle = new Bundle();
 
     public static String encodeString(String string) {
         return string.replace(".", ",");
@@ -134,14 +139,19 @@ public class HomePage extends AppCompatActivity {
 
         if (isOnline()) {
 
+            tab1frag = new Tab1Fragment();
+            tab2frag = new Tab2Fragment();
+
             activeOrders = null;
             carsArraylist = new ArrayList<>();
 
             carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
             userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
 
-            viewPager = findViewById(R.id.viewPager);
+            viewPager = findViewById(R.id.viewPagerHome);
             tabLayout = findViewById(R.id.tabLayout);
+
+
 //            adapter = new TabAdapter(getSupportFragmentManager());
 
 //        adapter.addFragment(tab1frag, "My Orders");
@@ -149,6 +159,34 @@ public class HomePage extends AppCompatActivity {
 
 //        viewPager.setAdapter(adapter);
 //        tabLayout.setupWithViewPager(viewPager);
+
+            tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+                @Override
+                public void onTabSelected(TabLayout.Tab tab) {
+                    //Log.i("soni-", "tab selected " + String.valueOf(tab.getPosition()));
+                    switch(tab.getPosition())   {
+                        case 0:
+                            replaceFragment(tab1frag);
+                            break;
+
+                        case 1:
+                            replaceFragment(tab2frag);
+                            break;
+
+                    }
+
+                }
+
+                @Override
+                public void onTabUnselected(TabLayout.Tab tab) {
+                }
+
+                @Override
+                public void onTabReselected(TabLayout.Tab tab) {
+
+                }
+            });
+
 
             if (fbAdapter.checkCurrentUser()) {
 
@@ -163,34 +201,13 @@ public class HomePage extends AppCompatActivity {
 
                             adapter = new TabAdapter(getSupportFragmentManager(), carsArraylist);
 
-                            Fragment tab1frag = new Tab1Fragment();
-                            Fragment tab2frag = new Tab2Fragment();
-                            adapter.removeAllFragments();
+                            replaceFragment(tab1frag);
+
+                            //tabbundle.putSerializable("carsArrayList", carsArraylist);
+
 
                             adapter.addFragment(tab1frag, "My Orders");
                             adapter.addFragment(tab2frag, "Other Orders");
-
-                            /*FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-
-
-                            Bundle tab1bundle = new Bundle();
-                            tab1bundle.putSerializable("carsArrayList", carsArraylist);
-
-                            tab1frag.setArguments(tab1bundle);
-                            fragmentTransaction.replace(R.id.viewPager, tab1frag);
-                            fragmentTransaction.addToBackStack(null);
-                            fragmentTransaction.commit();
-
-                            Bundle tab2bundle = new Bundle();
-                            tab2bundle.putSerializable("carsArrayList", carsArraylist);
-
-                            Log.i("soni-", "setting arguments- homepage");
-
-                            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                            tab2frag.setArguments(tab2bundle);
-                            ft.replace(R.id.viewPager, tab2frag);
-                            //ft.addToBackStack(null);
-                            ft.commit();*/
 
                             viewPager.setAdapter(adapter);
                             tabLayout.setupWithViewPager(viewPager);
@@ -201,6 +218,11 @@ public class HomePage extends AppCompatActivity {
                     @Override
                     public void onProgress() {
                         //Toast.makeText(this, "Retrieving Cars List", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onRetrieveFailed() {
+                        Log.i("soni-", "homepage- carinfo retrieve is failed");
                     }
                 });
 
@@ -229,7 +251,7 @@ public class HomePage extends AppCompatActivity {
                 Log.i("soni-", "homepage-alertdialog exc - "+ e.getMessage());
             }
         }
-
+/*
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i1) {
@@ -245,7 +267,20 @@ public class HomePage extends AppCompatActivity {
             public void onPageScrollStateChanged(int i) {
 
             }
-        });
+        });*/
+    }
+
+    private void replaceFragment(Fragment fragment) {
+
+        tabbundle.putSerializable("carsArrayList", carsArraylist);
+
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        fragment.setArguments(tabbundle);
+        ft.replace(R.id.viewPagerHome, fragment);
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        Log.i("soni-hompage", "replace fragment");
+        ft.commit();
     }
 
     /*

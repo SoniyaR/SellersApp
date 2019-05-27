@@ -47,8 +47,7 @@ public class Tab1Fragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_one, container, false);
-
-        Log.i("soni-tab1frag", "onCreateView ");
+        //carsArraylist.clear();
 
         carsListView = rootView.findViewById(R.id.tab1listView);
         registerForContextMenu(carsListView);
@@ -59,7 +58,8 @@ public class Tab1Fragment extends Fragment {
 
 
         if(carsArraylist!=null && carsArraylist.size()>0) {
-            Log.i("soni-", "we have carsarraylist tab1frag");
+            myCarslist.clear();
+            Log.i("soni-", "we have carsarraylist tab1frag , size = " + carsArraylist.size());
             CarInfo carInfoInstance = new CarInfo();
             carInfoInstance.setCarNumbersListener(new CarInfo.CarNumbersListener() {
                 @Override

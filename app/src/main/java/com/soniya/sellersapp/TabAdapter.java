@@ -21,17 +21,12 @@ public class TabAdapter extends FragmentStatePagerAdapter {
     TabAdapter(FragmentManager fm, ArrayList<CarInfo> carsArraylist) {
         super(fm);
         mFragmentList.clear();
-        carsList.clear();
-        carsList.addAll(carsArraylist);
     }
 
     @Override
     public Fragment getItem(int i) {
         Fragment fragment = mFragmentList.get(i);
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("carsArraylist", carsList);
-        fragment.setArguments(bundle);
-       return fragment;
+        return fragment;
     }
 
     @Override
@@ -42,9 +37,6 @@ public class TabAdapter extends FragmentStatePagerAdapter {
     public void addFragment(Fragment fragment, String title) {
         mFragmentList.add(fragment);
         mFragmentTitleList.add(title);
-    }
-    public void removeAllFragments(){
-        mFragmentList.clear();
     }
 
     @Nullable

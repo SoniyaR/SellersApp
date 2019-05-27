@@ -37,6 +37,7 @@ public class CarInfo implements Serializable {
     public interface CarInfoListener    {
         public void onDataRetrieved(ArrayList<CarInfo> data);
         public void onProgress();
+        public void onRetrieveFailed();
     }
 
     public interface CarNumbersListener {
@@ -51,13 +52,11 @@ public class CarInfo implements Serializable {
         carInfoReference = FirebaseDatabase.getInstance().getReference();
         fbadapter = new FirebaseAdapter();
         uname = fbadapter.getCurrentUser();
-       // this.myVehicleNumbers = retrieveMyVehicleNumbers();
         this.carInfoListener = null;
         this.carNumbersListener = null;
     }
     public void setCarInfoListener(CarInfoListener listener)    {
         carInfoListener = listener;
-
         retriveCarList();
     }
 
@@ -159,6 +158,7 @@ public class CarInfo implements Serializable {
      */
 
     private void retriveCarList() {
+        Log.i("soni-", "retriveCarList method");
 
         ArrayList<CarInfo> carsArraylist = new ArrayList<>();
 
@@ -170,27 +170,28 @@ public class CarInfo implements Serializable {
                     for (DataSnapshot carinfo : dataSnapshot.getChildren()) {
 
                         //if (activeOrders.contains(carinfo.getKey().toString())) {
-                        CarInfo carInfoObj = (CarInfo) carinfo.getValue(CarInfo.class);
+                        CarInfo carInfoObj = carinfo.getValue(CarInfo.class);
                         String vehicleNum = carinfo.getKey();
                         carInfoObj.setVehicle_no(vehicleNum);
+                        carInfoListener.onProgress();
 
-                        if(carInfoListener !=null){
-                            carInfoListener.onProgress();
-                        }
                         if (carInfoObj != null) {
                             carsArraylist.add(carInfoObj);
                         }
-
-                        //}
+                    }
+                    if(carInfoListener !=null && carsArraylist != null && carsArraylist.size()>0){
+                        Log.i("soni-", "Carinfo Data retrieved..");
+                        carInfoListener.onDataRetrieved(carsArraylist);
                     }
 
                 }else{
+                    if(carInfoListener !=null) {
+                        carInfoListener.onRetrieveFailed();
+                    }
                     Log.i("soni-", "no data found in CarsInfoDup");
                 }
 
-                if(carInfoListener !=null){
-                    carInfoListener.onDataRetrieved(carsArraylist);
-                }
+
             }
 
             @Override
@@ -205,6 +206,8 @@ public class CarInfo implements Serializable {
     }
 
     public List retrieveMyVehicleNumbers()   {
+
+        Log.i("soni-", "retrieveMyVehicleNumbers method");
 
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference();
         activeOrders = null;
