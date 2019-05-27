@@ -76,7 +76,6 @@ public class FirebaseDataFactory {
 
                             if (carInfoObj != null) {
                                 carsArraylist.add(carInfoObj);
-                                //Log.i("soni-", "retrieved carinfo object\n" + carInfoObj.getModel_name());
                             }
 
                         }

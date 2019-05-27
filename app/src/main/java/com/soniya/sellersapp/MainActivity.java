@@ -1,12 +1,16 @@
 package com.soniya.sellersapp;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -99,28 +103,54 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             finish();
         }*/
 
-        if(fbAdapter.checkCurrentUser()){
-            Intent i = new Intent(this, HomePage.class);
-            Log.i("soni-", "User already logged in");
-            startActivity(i);
-            finish();
+       if(isOnline()) {
+           if (fbAdapter.checkCurrentUser()) {
+               Intent i = new Intent(this, HomePage.class);
+               Log.i("soni-", "User already logged in");
+               startActivity(i);
+               finish();
+           }
+
+           user = (TextView) findViewById(R.id.userText);
+           pass = (TextView) findViewById(R.id.passText);
+           user.setText("");
+           pass.setText("");
+           pass.setOnClickListener(this);
+           loginButton = (Button) findViewById(R.id.loginButton);
+           signupTextView = (TextView) findViewById(R.id.signupText);
+           signupTextView.setOnClickListener(this);
+           loginButton.setOnClickListener(this);
+           backLayout = (ConstraintLayout) findViewById(R.id.backLayout);
+           backLayout.setOnClickListener(this);
+           logo = (ImageView) findViewById(R.id.logoView);
+           logo.setImageResource(R.drawable.logo);
+           logo.setOnClickListener(this);
+       }else{
+           try {
+               AlertDialog.Builder alert = new AlertDialog.Builder(this)
+                       .setMessage("Not connected to Internet!")
+                       .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                           @Override
+                           public void onClick(DialogInterface dialog, int which) {
+                               finish();
+                           }
+                       });
+               alert.show();
+           }
+           catch(Exception e)   {
+               Log.i("soni-", "mainactivity-alertdialog exc - "+ e.getMessage());
+           }
+       }
+
+    }
+
+    public boolean isOnline()   {
+        ConnectivityManager manager = (ConnectivityManager) getApplicationContext().getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = manager.getActiveNetworkInfo();
+        if(netInfo == null || !netInfo.isConnected())   {
+            return false;
         }
-
-        user = (TextView) findViewById(R.id.userText);
-        pass = (TextView) findViewById(R.id.passText);
-        user.setText("");
-        pass.setText("");
-        pass.setOnClickListener(this);
-        loginButton = (Button) findViewById(R.id.loginButton);
-        signupTextView = (TextView) findViewById(R.id.signupText);
-        signupTextView.setOnClickListener(this);
-        loginButton.setOnClickListener(this);
-        backLayout = (ConstraintLayout) findViewById(R.id.backLayout);
-        backLayout.setOnClickListener(this);
-        logo = (ImageView) findViewById(R.id.logoView);
-        logo.setImageResource(R.drawable.logo);
-        logo.setOnClickListener(this);
-
+        return true;
     }
 
     @Override

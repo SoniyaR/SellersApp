@@ -87,7 +87,7 @@ public class FirebaseAdapter {
     public boolean checkCurrentUser(){
         FirebaseUser user = mAuth.getCurrentUser();
         if(user !=null) {
-            Log.i("soni-",  user.getDisplayName()+ " " + user.getEmail() + " " + user.getUid());
+            //Log.i("soni-",  user.getDisplayName()+ " " + user.getEmail() + " " + user.getUid());
             return true;
         }
         return false;
@@ -99,7 +99,7 @@ public class FirebaseAdapter {
     public String getCurrentUser()  {
         FirebaseUser user = mAuth.getCurrentUser();
         if(user !=null) {
-            Log.i("soni-",  user.getDisplayName()+ " " + user.getEmail() + " " + user.getUid());
+            //Log.i("soni-",  user.getDisplayName()+ " " + user.getEmail() + " " + user.getUid());
             if(user.getDisplayName()!=null && !user.getDisplayName().isEmpty()) {
                 return user.getDisplayName();
             }else{

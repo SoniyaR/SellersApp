@@ -1,6 +1,9 @@
 package com.soniya.sellersapp;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -8,6 +11,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -123,82 +127,125 @@ public class HomePage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
-        Log.i("soni-", "in oncreate");
+
         setTitle("Active Orders");
 
         //{model_name=qwe12_bb, sellingprice=90000, description=nnhh_ffgg, location=pune, availability=Available}
 
-        activeOrders = null;
-        //hmList = new ArrayList<>();
-        carsArraylist = new ArrayList<>();
+        if (isOnline()) {
 
-        //tempImg = new ImageView(this);
+            activeOrders = null;
+            carsArraylist = new ArrayList<>();
 
-        carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
-        userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
+            carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
+            userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
 
-        viewPager = (ViewPager) findViewById(R.id.viewPager);
-        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
-        adapter = new TabAdapter(getSupportFragmentManager());
+            viewPager = findViewById(R.id.viewPager);
+            tabLayout = findViewById(R.id.tabLayout);
+//            adapter = new TabAdapter(getSupportFragmentManager());
 
-        Fragment tab1frag = new Tab1Fragment();
-        Fragment tab2frag = new Tab2Fragment();
+//        adapter.addFragment(tab1frag, "My Orders");
+//        adapter.addFragment(tab2frag, "Other Orders");
 
-        adapter.addFragment(tab1frag, "My Orders");
-        adapter.addFragment(tab2frag, "Other Orders");
+//        viewPager.setAdapter(adapter);
+//        tabLayout.setupWithViewPager(viewPager);
 
-        viewPager.setAdapter(adapter);
-        tabLayout.setupWithViewPager(viewPager);
+            if (fbAdapter.checkCurrentUser()) {
 
-        if(fbAdapter.checkCurrentUser()){
+                CarInfo carInfoInstance = new CarInfo();
 
-            CarInfo carInfoInstance = new CarInfo();
+                carInfoInstance.setCarInfoListener(new CarInfo.CarInfoListener() {
+                    @Override
+                    public void onDataRetrieved(ArrayList<CarInfo> data) {
+                        if (data != null && data.size() > 0) {
 
-            carInfoInstance.setCarInfoListener(new CarInfo.CarInfoListener() {
-                @Override
-                public void onDataRetrieved(ArrayList<CarInfo> data) {
-                    if (data != null && data.size() > 0) {
+                            carsArraylist.addAll(data);
 
-                        carsArraylist.addAll(data);
+                            adapter = new TabAdapter(getSupportFragmentManager(), carsArraylist);
 
-                        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                        adapter.removeAllFragments();
+                            Fragment tab1frag = new Tab1Fragment();
+                            Fragment tab2frag = new Tab2Fragment();
+                            adapter.removeAllFragments();
 
-                        Bundle t1bundle = new Bundle();
-                        t1bundle.putSerializable("carsArrayList", carsArraylist);
-                        tab1frag.setArguments(t1bundle);
-                        fragmentTransaction.replace(R.id.viewPager, tab1frag);
-                        fragmentTransaction.commit();
-                        adapter.addFragment(tab1frag, "My Orders");
+                            adapter.addFragment(tab1frag, "My Orders");
+                            adapter.addFragment(tab2frag, "Other Orders");
 
-                        fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                        tab2frag.setArguments(t1bundle);
-                        fragmentTransaction.replace(R.id.viewPager, tab2frag);
-                        fragmentTransaction.commit();
-                        adapter.addFragment(tab2frag, "Other Orders");
+                            /*FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
-                        viewPager.setAdapter(adapter);
-                        tabLayout.setupWithViewPager(viewPager);
 
+                            Bundle tab1bundle = new Bundle();
+                            tab1bundle.putSerializable("carsArrayList", carsArraylist);
+
+                            tab1frag.setArguments(tab1bundle);
+                            fragmentTransaction.replace(R.id.viewPager, tab1frag);
+                            fragmentTransaction.addToBackStack(null);
+                            fragmentTransaction.commit();
+
+                            Bundle tab2bundle = new Bundle();
+                            tab2bundle.putSerializable("carsArrayList", carsArraylist);
+
+                            Log.i("soni-", "setting arguments- homepage");
+
+                            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                            tab2frag.setArguments(tab2bundle);
+                            ft.replace(R.id.viewPager, tab2frag);
+                            //ft.addToBackStack(null);
+                            ft.commit();*/
+
+                            viewPager.setAdapter(adapter);
+                            tabLayout.setupWithViewPager(viewPager);
+
+                        }
                     }
-                }
 
-                @Override
-                public void onProgress() {
-                    //Toast.makeText(this, "Retrieving Cars List", Toast.LENGTH_SHORT).show();
-                }
-            });
+                    @Override
+                    public void onProgress() {
+                        //Toast.makeText(this, "Retrieving Cars List", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
 
+            } else {
+                //goto login screen
+                Log.i("soni-", "Not logged in, back to mainActivity classs");
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+
+        } else {
+            try {
+                AlertDialog.Builder alert = new AlertDialog.Builder(this)
+                        .setMessage("Not connected to Internet!")
+                        .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        });
+                alert.show();
+            }
+            catch (Exception e) {
+                Log.i("soni-", "homepage-alertdialog exc - "+ e.getMessage());
+            }
         }
-        else  {
-            //goto login screen
-            Log.i("soni-", "Not logged in, back to mainActivity classs");
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            finish();
-        }
 
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i1) {
+
+            }
+
+            @Override
+            public void onPageSelected(int i) {
+                Log.i("soni-", "onPageSelected = " + String.valueOf(i));
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
+
+            }
+        });
     }
 
     /*
@@ -306,6 +353,15 @@ public class HomePage extends AppCompatActivity {
 //            });*/
 //
 //    }
+
+    public boolean isOnline()   {
+        ConnectivityManager manager = (ConnectivityManager) getApplicationContext().getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = manager.getActiveNetworkInfo();
+        if(netInfo == null || !netInfo.isConnected())   {
+            return false;
+        }
+        return true;
+    }
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {

@@ -71,7 +71,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     ProgressBar progressBar;
 
     FirebaseDataFactory database = new FirebaseDataFactory();
-    List<HashMap<String, Object>> hmList = new ArrayList<>();
+   // List<HashMap<String, Object>> hmList = new ArrayList<>();
 
     ArrayList<String> ownerofList;
 
@@ -133,9 +133,9 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     public void saveAllInformation(View view)  {
         if(recHashmap !=null) {
 
-            hmList.clear();
+           // hmList.clear();
 
-            hmList.add(recHashmap);
+           // hmList.add(recHashmap);
 
             CarInfo carinfoDup = formCarinfoObject(recHashmap);
             database.uploadData(carinfoDup, curr_vehicleNum.replace(space, replacechar), ownerofList);
@@ -169,7 +169,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
             }
 
         }else{
-            Log.i("soni-", "something went wrong");
+            Log.i("soni-", "uploadinfo2- something went wrong");
         }
     }
 
@@ -178,17 +178,14 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     private CarInfo formCarinfoObject(HashMap<String, Object> recHashmap) {
         //vehicle_no	model_name	availability description	location	sellingprice
         CarInfo info = new CarInfo();
-        String vehicleNum = recHashmap.get("vehicle_no").toString().replace(space, replacechar);
+        //String vehicleNum = recHashmap.get("vehicle_no").toString().replace(space, replacechar);
         String modelName = recHashmap.get("model_name").toString().replace(space, replacechar);
         String availability = recHashmap.get("availability").toString().replace(space, replacechar);
         String description = recHashmap.get("description").toString().replace(space, replacechar);
         String location = recHashmap.get("location").toString().replace(space, replacechar);
         String price = recHashmap.get("sellingprice").toString().replace(space, replacechar);
 
-        /*return new CarInfo(vehicleNum, modelName, availability,
-                location, price, description);*/
-
-        info.setVehicle_no(vehicleNum);
+        //info.setVehicle_no(vehicleNum);
         info.setModel_name(modelName);
         info.setAvailability(availability);
         info.setDescription(description);

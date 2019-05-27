@@ -30,13 +30,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.AutocompletePrediction;
-import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
-import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.android.libraries.places.api.model.TypeFilter;
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -110,7 +103,7 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
         locationTextView = findViewById(R.id.editLocation);
 
 // Initialize Places.
-        Places.initialize(getApplicationContext(), "AIzaSyAoaTpL3mpT9gBtJB1DlUF9NYoAR90ssB4");
+        //Places.initialize(getApplicationContext(), "AIzaSyAoaTpL3mpT9gBtJB1DlUF9NYoAR90ssB4");
 
 // Create a new Places client instance.
        /* placesClient = Places.createClient(this);

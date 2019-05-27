@@ -1,5 +1,6 @@
 package com.soniya.sellersapp;
 
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -12,29 +13,36 @@ public class TabAdapter extends FragmentStatePagerAdapter {
 
     private final List<Fragment> mFragmentList = new ArrayList<>();
     private final List<String> mFragmentTitleList = new ArrayList<>();
-    //private ArrayList<CarInfo> mCarsArraylist = new ArrayList<>();
 
-    TabAdapter(FragmentManager fm) {
+    //private String [] titleList = {"My Orders", "Other Orders"};
+
+    ArrayList<CarInfo> carsList = new ArrayList<>();
+
+    TabAdapter(FragmentManager fm, ArrayList<CarInfo> carsArraylist) {
         super(fm);
         mFragmentList.clear();
+        carsList.clear();
+        carsList.addAll(carsArraylist);
     }
 
     @Override
     public Fragment getItem(int i) {
-        return mFragmentList.get(i);
+        Fragment fragment = mFragmentList.get(i);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("carsArraylist", carsList);
+        fragment.setArguments(bundle);
+       return fragment;
     }
 
     @Override
     public int getCount() {
-        return mFragmentList.size();
+        return mFragmentTitleList.size();
     }
 
     public void addFragment(Fragment fragment, String title) {
         mFragmentList.add(fragment);
         mFragmentTitleList.add(title);
-        //mCarsArraylist = carsArraylist;
     }
-
     public void removeAllFragments(){
         mFragmentList.clear();
     }
@@ -44,5 +52,6 @@ public class TabAdapter extends FragmentStatePagerAdapter {
     public CharSequence getPageTitle(int position) {
         return mFragmentTitleList.get(position);
     }
+
 
 }

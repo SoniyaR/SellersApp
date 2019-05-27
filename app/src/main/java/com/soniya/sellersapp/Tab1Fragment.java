@@ -2,6 +2,8 @@ package com.soniya.sellersapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -30,9 +32,24 @@ public class Tab1Fragment extends Fragment {
     ArrayList<String> activeOrders = new ArrayList<>();
     ArrayList<CarInfo> myCarslist = new ArrayList<>();
 
+    CustomAdapter carListAdapter;
+
+   /* public static Fragment getInstance(int position)   {
+        Log.i("soni-tab1frag", "position = " + String.valueOf(position));
+        Bundle bundle = new Bundle();
+        bundle.putInt("position", position);
+        Tab1Fragment tabfrag = new Tab1Fragment();
+        tabfrag.setArguments(bundle);
+        return tabfrag;
+    }*/
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
         View rootView = inflater.inflate(R.layout.fragment_one, container, false);
+
+        Log.i("soni-tab1frag", "onCreateView ");
+
         carsListView = rootView.findViewById(R.id.tab1listView);
         registerForContextMenu(carsListView);
 
@@ -40,7 +57,9 @@ public class Tab1Fragment extends Fragment {
             carsArraylist = (ArrayList<CarInfo>) getArguments().getSerializable("carsArrayList");
         }
 
+
         if(carsArraylist!=null && carsArraylist.size()>0) {
+            Log.i("soni-", "we have carsarraylist tab1frag");
             CarInfo carInfoInstance = new CarInfo();
             carInfoInstance.setCarNumbersListener(new CarInfo.CarNumbersListener() {
                 @Override
@@ -55,30 +74,48 @@ public class Tab1Fragment extends Fragment {
                         }
 
                         if (myCarslist != null && myCarslist.size() > 0) {
-                            CustomAdapter carListAdapter = new CustomAdapter(Tab1Fragment.this.getActivity(), myCarslist, R.layout.carslist_layout);
+                            Log.i("soni-tab1frag", "we have mycarslist tab1frag");
+                            carListAdapter = new CustomAdapter(getActivity(), myCarslist, R.layout.carslist_layout);
                             carsListView.setAdapter(carListAdapter);
+                            carListAdapter.notifyDataSetChanged();
                         } else {
-                            ArrayAdapter arrayAdapter = new ArrayAdapter(Tab1Fragment.this.getActivity(), android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
+                            ArrayAdapter arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
                             carsListView.setAdapter(arrayAdapter);
                         }
                     } else {
 
-                        ArrayAdapter arrayAdapter = new ArrayAdapter(Tab1Fragment.this.getActivity(), android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
+                        ArrayAdapter arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
                         carsListView.setAdapter(arrayAdapter);
+                        arrayAdapter.notifyDataSetChanged();
 
                     }
+
                 }
 
                 @Override
                 public void onProgress() {
-                    Toast.makeText(getActivity(), "Retrieving Cars List", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(Tab1Fragment.this.getActivity(), "Retrieving Cars List", Toast.LENGTH_SHORT).show();
                 }
             });
         } else  {
             ArrayAdapter arrayAdapter = new ArrayAdapter(Tab1Fragment.this.getActivity(), android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
             carsListView.setAdapter(arrayAdapter);
+            arrayAdapter.notifyDataSetChanged();
 
         }
+
+        carsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getActivity(), OrderDetails.class);
+
+                intent.putExtra("selVehicleNum", myCarslist.get(position).getVehicle_no());
+                startActivity(intent);
+
+            }
+        });
+
+
         /*CarInfo carInfoInstance = new CarInfo();
         carInfoInstance.setCarNumbersListener(data -> {
             if (data != null && data.size() > 0) {
@@ -122,16 +159,8 @@ public class Tab1Fragment extends Fragment {
         });
         */
 
-        carsListView.setOnItemClickListener((parent, view, position, id) -> {
-
-            Intent intent = new Intent(getActivity(), OrderDetails.class);
-
-            intent.putExtra("selVehicleNum", myCarslist.get(position).getVehicle_no());
-            startActivity(intent);
-
-        });
-
         return rootView;
+
     }
 
     @Override
@@ -172,4 +201,17 @@ public class Tab1Fragment extends Fragment {
         return super.onContextItemSelected(item);
 
     }
+
+    /*@Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        Log.i("soni-tab1frag", "onViewCreated method");
+        super.onViewCreated(view, savedInstanceState);
+
+        *//*if (myCarslist != null && myCarslist.size() > 0) {
+            carListAdapter = new CustomAdapter(Tab1Fragment.this.getActivity(), myCarslist, R.layout.carslist_layout);
+            carsListView.setAdapter(carListAdapter);
+            carListAdapter.notifyDataSetChanged();
+        }*//*
+
+    }*/
 }

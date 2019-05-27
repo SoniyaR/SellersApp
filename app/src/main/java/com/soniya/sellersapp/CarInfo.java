@@ -48,7 +48,7 @@ public class CarInfo implements Serializable {
     public CarNumbersListener carNumbersListener;
 
     public  CarInfo() {
-        carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
+        carInfoReference = FirebaseDatabase.getInstance().getReference();
         fbadapter = new FirebaseAdapter();
         uname = fbadapter.getCurrentUser();
        // this.myVehicleNumbers = retrieveMyVehicleNumbers();
@@ -162,7 +162,7 @@ public class CarInfo implements Serializable {
 
         ArrayList<CarInfo> carsArraylist = new ArrayList<>();
 
-        carInfoReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        carInfoReference.child("CarsInfo").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot !=null && dataSnapshot.getValue() !=null) {
@@ -170,15 +170,16 @@ public class CarInfo implements Serializable {
                     for (DataSnapshot carinfo : dataSnapshot.getChildren()) {
 
                         //if (activeOrders.contains(carinfo.getKey().toString())) {
-                            CarInfo carInfoObj = (CarInfo) carinfo.getValue(CarInfo.class);
+                        CarInfo carInfoObj = (CarInfo) carinfo.getValue(CarInfo.class);
+                        String vehicleNum = carinfo.getKey();
+                        carInfoObj.setVehicle_no(vehicleNum);
 
                         if(carInfoListener !=null){
                             carInfoListener.onProgress();
                         }
-                            if (carInfoObj != null) {
-                                carsArraylist.add(carInfoObj);
-                                //Log.i("soni-", "retrieved carinfo object\n" + carInfoObj.getModel_name());
-                            }
+                        if (carInfoObj != null) {
+                            carsArraylist.add(carInfoObj);
+                        }
 
                         //}
                     }
@@ -205,10 +206,10 @@ public class CarInfo implements Serializable {
 
     public List retrieveMyVehicleNumbers()   {
 
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference();
         activeOrders = null;
 
-        userRef.child(encodeString(uname)).addListenerForSingleValueEvent(new ValueEventListener() {
+        userRef.child("userInfo").child(encodeString(uname)).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 //activeOrders.clear();

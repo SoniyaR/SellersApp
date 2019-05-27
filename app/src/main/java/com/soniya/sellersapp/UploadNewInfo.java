@@ -1,46 +1,32 @@
 package com.soniya.sellersapp;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
 import android.text.InputFilter;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.AutocompletePrediction;
-import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.android.libraries.places.api.model.TypeFilter;
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
-import com.google.android.libraries.places.api.net.PlacesClient;
-import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.libraries.places.compat.Place;
+import com.google.android.libraries.places.compat.ui.PlaceAutocomplete;
 
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
 
 public class UploadNewInfo extends AppCompatActivity implements View.OnClickListener {
 
@@ -57,22 +43,24 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
     LocationListener listener;
     Location oldLocation;
 
+    TextView locationEditText;
 
-    PlacesClient placesClient;
+
+    //PlacesClient placesClient;
     String query;
 
-    AutocompleteSessionToken token;
-    RectangularBounds bounds;
+//    AutocompleteSessionToken token;
+//    RectangularBounds bounds;
+//
+//    FindAutocompletePredictionsRequest.Builder requestBuilder;
+//    FindAutocompletePredictionsRequest request;
 
-    FindAutocompletePredictionsRequest.Builder requestBuilder;
-    FindAutocompletePredictionsRequest request;
-
-    int AUTOCOMPLETE_REQUEST_CODE = 1;
+    int AUTOCOMPLETE_REQUEST = 1;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
                 oldLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -90,7 +78,7 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
 
         infoHashmap.clear();
 
-        titleText =findViewById(R.id.titleTextView);
+        titleText = findViewById(R.id.titleTextView);
 
         descriptionView = findViewById(R.id.descriptionView);
         descriptionView.setOnClickListener(this);
@@ -101,6 +89,8 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
         vehicleNum.setFilters(new InputFilter[]{new InputFilter.AllCaps()});
         locationText = findViewById(R.id.locationText);
 
+        locationEditText = findViewById(R.id.locationEditText);
+
         saveButton = findViewById(R.id.saveButton);
         saveButton.setOnClickListener(this);
 
@@ -109,7 +99,7 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
         listener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                if(oldLocation == null || (oldLocation !=null &&
+                if (oldLocation == null || (oldLocation != null &&
                         (location.getLatitude() != oldLocation.getLatitude() || location.getLongitude() != oldLocation.getLongitude()))) {
                     oldLocation = location;
                     Log.i("soni-", "in onLocationChanged");
@@ -133,16 +123,16 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
             }
         };
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        } else  {
+        } else {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
             oldLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             locationText.setText(new LocationAdapter(this, oldLocation).getAddress());
         }
 
         // Initialize Places.
-       // Places.initialize(getApplicationContext(), "AIzaSyAoaTpL3mpT9gBtJB1DlUF9NYoAR90ssB4");
+        // Places.initialize(getApplicationContext(), "AIzaSyAoaTpL3mpT9gBtJB1DlUF9NYoAR90ssB4");
 
 // Create a new Places client instance.
         /*placesClient = Places.createClient(this);
@@ -166,7 +156,7 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
                 .setSessionToken(token);*/
 
 
-        locationText.addTextChangedListener(new TextWatcher() {
+        /*locationText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 query = "";
@@ -174,7 +164,7 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                /*query = locationText.getText().toString();
+                *//*query = locationText.getText().toString();
                 //Log.i("soni-query=", query);
                 // Use the builder to create a FindAutocompletePredictionsRequest.
 
@@ -191,45 +181,45 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
                         Log.i("soni-", "Place not found: " + apiException.getStatusCode());
                     }
                 });
-*/
+                *//*
             }
 
             @Override
             public void afterTextChanged(Editable s) {
 
             }
-        });
+        });*/
 
     }
 
     @Override
     public void onClick(View v) {
 
-        switch(v.getId()){
+        switch (v.getId()) {
 
             case R.id.saveButton:
 
                 //save editDescriptionView.gettext().toString()  to database
 
-                    if(titleText.getText().length() == 0 || titleText.getText().toString().isEmpty()){
-                        titleText.setError("This field cannot be blank!");
-                    }/*else if(descriptionView.getText().length() == 0 || descriptionView.getText().toString().isEmpty()){
+                if (titleText.getText().length() == 0 || titleText.getText().toString().isEmpty()) {
+                    titleText.setError("This field cannot be blank!");
+                }/*else if(descriptionView.getText().length() == 0 || descriptionView.getText().toString().isEmpty()){
                         descriptionView.setError("This field cannot be blank!");
-                    }*/else if(sellingpriceView.getText().length() == 0 || sellingpriceView.getText().toString().isEmpty()){
-                        sellingpriceView.setError("This field cannot be blank!");
-                    }else if(vehicleNum.getText().length() == 0 ){
-                        vehicleNum.setError("This field cannot be blank!");
-                    }else if(locationText.getText().length() == 0){
+                    }*/ else if (sellingpriceView.getText().length() == 0 || sellingpriceView.getText().toString().isEmpty()) {
+                    sellingpriceView.setError("This field cannot be blank!");
+                } else if (vehicleNum.getText().length() == 0) {
+                    vehicleNum.setError("This field cannot be blank!");
+                }/*else if(locationText.getText().length() == 0){
                         locationText.setError("This field cannot be blank!");
-                    }else {
-                            //saveInfo(titleText.getText().toString(), img, descriptionView.getText().toString(), sellingpriceView.getText().toString());
-                            prepareHashmapData(infoHashmap);
+                    }*/ else {
+                    //saveInfo(titleText.getText().toString(), img, descriptionView.getText().toString(), sellingpriceView.getText().toString());
+                    prepareHashmapData(infoHashmap);
 
-                            Intent nextInfo = new Intent(getApplicationContext(), UploadNewInfo2.class);
-                            nextInfo.putExtra("infoHashmap", infoHashmap);
-                            startActivity(nextInfo);
+                    Intent nextInfo = new Intent(getApplicationContext(), UploadNewInfo2.class);
+                    nextInfo.putExtra("infoHashmap", infoHashmap);
+                    startActivity(nextInfo);
 
-                    }
+                }
                 break;
 
             case R.id.backgoundLayout:
@@ -243,20 +233,58 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
 
                 break;
 
-           /* case R.id.autoCompleteTextView:
-                List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
+            case R.id.locationEditText:
 
-// Start the autocomplete intent.
-                Intent intent = new Autocomplete.IntentBuilder(
-                        AutocompleteActivityMode.FULLSCREEN, fields)
+               /* PlaceOptions placeOptions = new PlaceOptions.Builder()
+                        .toolbarColor(Color.parseColor("#EEEEEE"))
+                        .limit(7)
+                        .country("IN")
+                        .build();
+
+                Intent intent = new PlaceAutocomplete.IntentBuilder()
+                        .accessToken("pk.eyJ1Ijoic29uaXlhc2FjaGluIiwiYSI6ImNqdnpkZjB1bzBuYXg0NG1xaHBnNGFnZjgifQ.8lnZh4KFRMN9M2VAZOjhZQ")
+                        .placeOptions(placeOptions)
                         .build(this);
-                startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+                startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);*/
+                showAutocomplete();
+
+
                 break;
-*/
+
             default:
                 break;
         }
 
+    }
+
+    /**
+     * Shows the autocomplete activity.
+     */
+    private void showAutocomplete() {
+        try {
+            Intent intent =
+                    new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
+                            .build(this);
+            startActivityForResult(intent, AUTOCOMPLETE_REQUEST);
+        } catch (GooglePlayServicesRepairableException e) {
+            Log.i("soni-", " uploadinfo - e1 - " +  String.valueOf(e.getConnectionStatusCode()) + e.getMessage());
+            //GooglePlayServicesUtil.getErrorDialog(e.getConnectionStatusCode(), this, 0);
+        } catch (GooglePlayServicesNotAvailableException e) {
+            Log.i("soni-", " uploadinfo - e2 - " +  e.getMessage());
+            //showResponse(getString(R.string.google_play_services_error));
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == AUTOCOMPLETE_REQUEST && resultCode == Activity.RESULT_OK) {
+            /*CarmenFeature feature = PlaceAutocomplete.getPlace(data);
+            Toast.makeText(this, feature.text(), Toast.LENGTH_LONG).show();*/
+
+            Place place = PlaceAutocomplete.getPlace(this, data);
+            locationEditText.setText(place.getName());
+        }
     }
 
     //vehicle_no	model_name	availability description	location	sellingprice
@@ -270,14 +298,5 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
         infoHashmap.put("sellingprice", sellingpriceView.getText().toString());
 
     }
-
-   /* @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-       *//* if(item.getItemId() == android.R.id.home)   {
-            Log.i("soni-back", " arrow pressed");
-            return true;
-        }*//*
-        return super.onOptionsItemSelected(item);
-    }*/
 }
+
