@@ -135,6 +135,8 @@ public class HomePage extends AppCompatActivity {
 
         setTitle("Active Orders");
 
+        carsArraylist = new ArrayList<>();
+
         //{model_name=qwe12_bb, sellingprice=90000, description=nnhh_ffgg, location=pune, availability=Available}
 
         if (isOnline()) {
@@ -284,6 +286,7 @@ public class HomePage extends AppCompatActivity {
         }
         return true;
     }
+
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {

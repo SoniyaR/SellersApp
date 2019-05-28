@@ -1,7 +1,6 @@
 package com.soniya.sellersapp;
 
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,13 +16,14 @@ public class CarInfoSerial implements Serializable {
     private String sellingprice;
     private ArrayList<String> image_uri_list;
 
-    public CarInfoSerial(String vehicle_no, String model_name, String availability, String location, String sellingprice, String description){
+    public CarInfoSerial(String vehicle_no, String model_name, String availability, String location, String sellingprice, String description, ArrayList<String> uri_list){
         this.availability = availability;
         this.description = description;
         this.location = location;
         this.model_name = model_name;
         this.sellingprice = sellingprice;
         this.vehicle_no = vehicle_no;
+        this.image_uri_list = uri_list;
     }
 
     public ArrayList<String> getImage_uri_list() {
@@ -92,12 +92,14 @@ Listener code below
     FirebaseAdapter fbadapter;
 
     public interface CarInfoListener    {
+
         public void onDataRetrieved(ArrayList<CarInfoSerial> data);
         public void onProgress();
         public void onRetrieveFailed();
     }
 
     public interface CarNumbersListener {
+
         public void onRetrieve(ArrayList<String> data);
         public void onProgress();
     }
@@ -121,6 +123,8 @@ Listener code below
         carNumbersListener = listener;
         dataFactory.retrieveMyVehicleNumbers(carNumbersListener);
     }
+
+
 
 
 }

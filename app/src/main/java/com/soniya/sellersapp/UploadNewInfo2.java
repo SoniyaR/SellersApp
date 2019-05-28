@@ -130,11 +130,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     public void saveAllInformation(View view)  {
         if(recHashmap !=null) {
 
-           // hmList.clear();
-
-           // hmList.add(recHashmap);
-
-            CarInfoSerial carinfoDup = formCarinfoObject(recHashmap);
+            CarInfo carinfoDup = buildCarinfoObject(recHashmap);
             database.uploadData(carinfoDup, curr_vehicleNum.replace(space, replacechar), ownerofList);
 
             if(selectedUriList != null && selectedUriList.size() > 0) {
@@ -171,11 +167,10 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     }
 
 
-    //test method: to delete later
-    private CarInfoSerial formCarinfoObject(HashMap<String, Object> recHashmap) {
+    private CarInfo buildCarinfoObject(HashMap<String, Object> recHashmap) {
         //vehicle_no	model_name	availability description	location	sellingprice
-        CarInfoSerial info = new CarInfoSerial();
-        //String vehicleNum = recHashmap.get("vehicle_no").toString().replace(space, replacechar);
+        CarInfo info = new CarInfo();
+        String vehicleNum = recHashmap.get("vehicle_no").toString().replace(space, replacechar);
         String modelName = recHashmap.get("model_name").toString().replace(space, replacechar);
         String availability = recHashmap.get("availability").toString().replace(space, replacechar);
         String description = recHashmap.get("description").toString().replace(space, replacechar);
@@ -183,6 +178,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         String price = recHashmap.get("sellingprice").toString().replace(space, replacechar);
 
         //info.setVehicle_no(vehicleNum);
+        curr_vehicleNum = vehicleNum;
         info.setModel_name(modelName);
         info.setAvailability(availability);
         info.setDescription(description);

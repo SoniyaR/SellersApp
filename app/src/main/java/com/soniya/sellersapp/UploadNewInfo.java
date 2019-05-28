@@ -135,31 +135,6 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
             }
         }
 
-        // Initialize Places.
-        // Places.initialize(getApplicationContext(), "AIzaSyAoaTpL3mpT9gBtJB1DlUF9NYoAR90ssB4");
-
-// Create a new Places client instance.
-        /*placesClient = Places.createClient(this);
-
-        query = "";
-
-        // Create a new token for the autocomplete session. Pass this to FindAutocompletePredictionsRequest,
-        // and once again when the user makes a selection (for example when calling fetchPlace()).
-        token = AutocompleteSessionToken.newInstance();
-        // Create a RectangularBounds object.
-        bounds = RectangularBounds.newInstance(
-                new LatLng(9.0000, 69.150373),
-                new LatLng(9.651869, 78.786150));
-
-        requestBuilder = FindAutocompletePredictionsRequest.builder()
-                // Call either setLocationBias() OR setLocationRestriction().
-                .setLocationBias(bounds)
-                //.setLocationRestriction(bounds)
-                //.setCountry("in")
-                .setTypeFilter(TypeFilter.ADDRESS)
-                .setSessionToken(token);*/
-
-
         /*locationText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

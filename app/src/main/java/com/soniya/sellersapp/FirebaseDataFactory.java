@@ -199,10 +199,10 @@ public class FirebaseDataFactory {
     /*
     method for pushing carInfoSerial object into db
      */
-    public void uploadData(CarInfoSerial carInfoSerial, String vehicleNum, ArrayList<String> ownerofList)    {
+    public void uploadData(CarInfo carInfoObj, String vehicleNum, ArrayList<String> ownerofList)    {
         DatabaseReference curr_ref =  db.child("CarsInfo");
 
-        curr_ref.child(vehicleNum).setValue(carInfoSerial).addOnSuccessListener(new OnSuccessListener<Void>() {
+        curr_ref.child(vehicleNum).setValue(carInfoObj).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.i("soni-", "Record added with carinfo object to database");
@@ -501,37 +501,42 @@ public class FirebaseDataFactory {
     public void retriveCarList(CarInfoSerial.CarInfoListener carInfoListener) {
         Log.i("soni-", "retriveCarList method");
 
-        ArrayList<CarInfoSerial> carsArraylist = new ArrayList<>();
+        ArrayList<CarInfo> carsArraylist = new ArrayList<>();
 
         carInfoReference.child("CarsInfo").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
                 if(dataSnapshot !=null && dataSnapshot.getValue() !=null) {
+
                     carsArraylist.clear();
                     for (DataSnapshot carinfo : dataSnapshot.getChildren()) {
 
-                        //if (activeOrders.contains(carinfo.getKey().toString())) {
-                        CarInfoSerial carInfoSerialObj = carinfo.getValue(CarInfoSerial.class);
+                        CarInfo carInfoObj = carinfo.getValue(CarInfo.class);
                         String vehicleNum = carinfo.getKey();
-                        carInfoSerialObj.setVehicle_no(vehicleNum);
+                        carInfoObj.setVehicle_no(vehicleNum);
                         carInfoListener.onProgress();
 
-                        if (carInfoSerialObj != null) {
-                            carsArraylist.add(carInfoSerialObj);
+                        if (carInfoObj != null) {
+                            carsArraylist.add(carInfoObj);
                         }
                     }
                     if(carInfoListener !=null && carsArraylist != null && carsArraylist.size()>0){
                         Log.i("soni-", "Carinfo Data retrieved..");
-                        carInfoListener.onDataRetrieved(carsArraylist);
+                        ArrayList<CarInfoSerial> carsSeriallist= buildInfoSerializable(carsArraylist);
+                        carInfoListener.onDataRetrieved(carsSeriallist);
                     }
 
+
+
                 }else{
+
                     if(carInfoListener !=null) {
                         carInfoListener.onRetrieveFailed();
                     }
                     Log.i("soni-", "no data found in CarsInfoDup");
-                }
 
+                }
 
             }
 
@@ -540,6 +545,19 @@ public class FirebaseDataFactory {
 
             }
         });
+    }
+
+    public ArrayList<CarInfoSerial> buildInfoSerializable(ArrayList<CarInfo> data) {
+        ArrayList<CarInfoSerial> carsArrayList = new ArrayList<>();
+        CarInfoSerial infoSerial;
+        for(CarInfo info:data){
+            infoSerial = new CarInfoSerial(info.getVehicle_no(), info.getModel_name(),
+                    info.getAvailability(), info.getLocation(), info.getSellingprice(), info.getDescription(), info.getImage_uri_list());
+            carsArrayList.add(infoSerial);
+        }
+
+        return carsArrayList;
+
     }
 
     ArrayList<String> activeOrders = new ArrayList<>();
@@ -553,9 +571,10 @@ public class FirebaseDataFactory {
         userRef.child("userInfo").child(encodeString(uname)).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                //activeOrders.clear();
+
                 if(dataSnapshot !=null && dataSnapshot.hasChild("ownerof")) {
                     if(dataSnapshot.child("ownerof").getValue() instanceof List) {
+
                         activeOrders = (ArrayList<String>) dataSnapshot.child("ownerof").getValue();
                         //Log.i("soni-", "retrieveMyVehicleNumbers - it is a List");
                         if(carNumbersListener !=null)   {
@@ -563,6 +582,7 @@ public class FirebaseDataFactory {
                         }
 
                     }else if(dataSnapshot.child("ownerof").getValue() instanceof HashMap){
+
                         HashMap<String, List<String>> hashMap = (HashMap<String, List<String>>) dataSnapshot.child("ownerof").getValue();
                         //Log.i("soni-", "retrieveMyVehicleNumbers - it is a hashmap " + hashMap.keySet().toString() );
                         if(hashMap.keySet().size() == 1)    {
@@ -573,8 +593,10 @@ public class FirebaseDataFactory {
                         if(carNumbersListener !=null)   {
                             carNumbersListener.onProgress();
                         }
+
                     }
                     if (activeOrders.size() > 0) {
+
                         int index = -1;
                         for (String order : (List<String>)activeOrders) {
                             if (order == null) {
@@ -582,7 +604,6 @@ public class FirebaseDataFactory {
                                 activeOrders.remove(index);
                             }
                         }
-
 
                     }
 
