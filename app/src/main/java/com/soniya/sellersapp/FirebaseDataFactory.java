@@ -26,7 +26,6 @@ public class FirebaseDataFactory {
     char space = ' ';
     char replacechar = '_';
     DatabaseReference carInfoReference;
-    DatabaseReference userInfoReference;
 
     DatabaseReference ownerInfoReference;
     ArrayList<String> ownerofList = new ArrayList<>();
@@ -38,13 +37,8 @@ public class FirebaseDataFactory {
 
     public FirebaseDataFactory(){
         uname = new FirebaseAdapter().getCurrentUser();
+        carInfoReference = FirebaseDatabase.getInstance().getReference();
     }
-   /* public void addUserInfo(String emailId){
-
-        //create new node for signed up user
-        db.child("userInfo").child("Username").setValue(emailId);
-
-    }*/
 
     StorageReference img_ref = FirebaseStorage.getInstance().getReference().child(new FirebaseAdapter().getCurrentUser());
 
@@ -54,95 +48,6 @@ public class FirebaseDataFactory {
 
     public static String decodeString(String string) {
         return string.replace(",", ".");
-    }
-
-/*
-    to retrieve cars list (active orders) for current user
-     */
-
-    public ArrayList<CarInfo> retriveCarList(List activeOrders, ArrayList<CarInfo> carsArraylist) {
-
-        //DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference().child("CarsInfoDup");
-        carInfoReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot !=null && dataSnapshot.getValue() !=null) {
-                    carsArraylist.clear();
-                    for (DataSnapshot carinfo : dataSnapshot.getChildren()) {
-                        //Log.i("soni-carinfo",carinfo.getKey().toString());
-
-                        if (activeOrders.contains(carinfo.getKey().toString())) {
-                            CarInfo carInfoObj = (CarInfo) carinfo.getValue(CarInfo.class);
-
-                            if (carInfoObj != null) {
-                                carsArraylist.add(carInfoObj);
-                            }
-
-                        }
-                    }
-                }else{
-                    Log.i("soni-", "no data found in CarsInfoDup");
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-            /*carInfoReference.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    hmList.clear();
-                    //vehicle_no	model_name	availability description    location	sellingprice    image_uri_list
-
-                    for (DataSnapshot carinfo : dataSnapshot.getChildren()) {
-                        //Log.i("soni-carinfo",carinfo.getKey().toString());
-
-                        if (activeOrders.contains(carinfo.getKey().toString())) {
-
-                            Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
-                            HashMap<String, Object> hm = new HashMap<String, Object>();
-                            String vehiclenum = carinfo.getKey().replace(replacechar, space);
-                            hm.put("vehicle_no", vehiclenum);
-                            while (it.hasNext()) {
-                                DataSnapshot ds = it.next();
-                                if (ds.getKey().equals("image_uri_list")) {
-                                    ArrayList<String> tempList = (ArrayList<String>) ds.getValue();
-                                    //imgUriForRecord.put(carinfo.getKey().toString(), tempList.get(0));
-                                    hm.put("carImage", tempList.get(0));
-                                    //Log.i("soni-", "got one img uri " + tempList.get(0));
-
-                                } else {
-                                    hm.put(ds.getKey(), ds.getValue().toString().replace(replacechar, space));
-                                }
-                            }
-
-                            if(!hm.keySet().contains("carImage"))   {
-                                hm.put("carImage", BitmapFactory.decodeResource(getResources(), R.drawable.nocarpicture));
-                            }
-
-                            hmList.add(hm);
-                            //simpleAdapter.notifyDataSetChanged();
-
-                        }
-                    }
-                    Log.i("soni-", "datasnapshot loop completed");
-//                    simpleAdapter = new CustomAdapter(getApplicationContext(), hmList, R.layout.carslist_layout, from, to);
-//                    carsList.setAdapter(simpleAdapter);
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });*/
-
-            return carsArraylist;
-
     }
 
     public List<HashMap<String, Object>> retrieveCarsList (ArrayList<String> vehicleNumList) {
@@ -292,12 +197,12 @@ public class FirebaseDataFactory {
     }*/
 
     /*
-    method for pushing carInfo object into db
+    method for pushing carInfoSerial object into db
      */
-    public void uploadData(CarInfo carInfo, String vehicleNum, ArrayList<String> ownerofList)    {
+    public void uploadData(CarInfoSerial carInfoSerial, String vehicleNum, ArrayList<String> ownerofList)    {
         DatabaseReference curr_ref =  db.child("CarsInfo");
 
-        curr_ref.child(vehicleNum).setValue(carInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
+        curr_ref.child(vehicleNum).setValue(carInfoSerial).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.i("soni-", "Record added with carinfo object to database");
@@ -580,6 +485,121 @@ public class FirebaseDataFactory {
             //removeImagesFromStorage(vehicleNum);
             moveInfoUpdatestoHistory(vehicleNum);
         }
+    }
+
+
+    /*
+
+    below methods used by listeners to retrieve data
+
+     */
+
+    /*
+    to retrieve cars list (active orders) for current user
+     */
+
+    public void retriveCarList(CarInfoSerial.CarInfoListener carInfoListener) {
+        Log.i("soni-", "retriveCarList method");
+
+        ArrayList<CarInfoSerial> carsArraylist = new ArrayList<>();
+
+        carInfoReference.child("CarsInfo").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot !=null && dataSnapshot.getValue() !=null) {
+                    carsArraylist.clear();
+                    for (DataSnapshot carinfo : dataSnapshot.getChildren()) {
+
+                        //if (activeOrders.contains(carinfo.getKey().toString())) {
+                        CarInfoSerial carInfoSerialObj = carinfo.getValue(CarInfoSerial.class);
+                        String vehicleNum = carinfo.getKey();
+                        carInfoSerialObj.setVehicle_no(vehicleNum);
+                        carInfoListener.onProgress();
+
+                        if (carInfoSerialObj != null) {
+                            carsArraylist.add(carInfoSerialObj);
+                        }
+                    }
+                    if(carInfoListener !=null && carsArraylist != null && carsArraylist.size()>0){
+                        Log.i("soni-", "Carinfo Data retrieved..");
+                        carInfoListener.onDataRetrieved(carsArraylist);
+                    }
+
+                }else{
+                    if(carInfoListener !=null) {
+                        carInfoListener.onRetrieveFailed();
+                    }
+                    Log.i("soni-", "no data found in CarsInfoDup");
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    ArrayList<String> activeOrders = new ArrayList<>();
+
+    public List retrieveMyVehicleNumbers(CarInfoSerial.CarNumbersListener carNumbersListener)   {
+
+        Log.i("soni-", "retrieveMyVehicleNumbers method");
+
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference();
+
+        userRef.child("userInfo").child(encodeString(uname)).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                //activeOrders.clear();
+                if(dataSnapshot !=null && dataSnapshot.hasChild("ownerof")) {
+                    if(dataSnapshot.child("ownerof").getValue() instanceof List) {
+                        activeOrders = (ArrayList<String>) dataSnapshot.child("ownerof").getValue();
+                        //Log.i("soni-", "retrieveMyVehicleNumbers - it is a List");
+                        if(carNumbersListener !=null)   {
+                            carNumbersListener.onProgress();
+                        }
+
+                    }else if(dataSnapshot.child("ownerof").getValue() instanceof HashMap){
+                        HashMap<String, List<String>> hashMap = (HashMap<String, List<String>>) dataSnapshot.child("ownerof").getValue();
+                        //Log.i("soni-", "retrieveMyVehicleNumbers - it is a hashmap " + hashMap.keySet().toString() );
+                        if(hashMap.keySet().size() == 1)    {
+                            for(String hmkey : hashMap.keySet()) {
+                                activeOrders = (ArrayList<String>) hashMap.get(hmkey);
+                            }
+                        }
+                        if(carNumbersListener !=null)   {
+                            carNumbersListener.onProgress();
+                        }
+                    }
+                    if (activeOrders.size() > 0) {
+                        int index = -1;
+                        for (String order : (List<String>)activeOrders) {
+                            if (order == null) {
+                                index = activeOrders.indexOf(order);
+                                activeOrders.remove(index);
+                            }
+                        }
+
+
+                    }
+
+                    if(carNumbersListener !=null)   {
+                        carNumbersListener.onRetrieve(activeOrders);
+                    }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        return activeOrders;
     }
 
 }

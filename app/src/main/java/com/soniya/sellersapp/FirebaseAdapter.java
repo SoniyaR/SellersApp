@@ -40,29 +40,9 @@ public class FirebaseAdapter {
 
     String errorMessage = "";
 
-    List<String> activeOrders;
 
     public FirebaseAdapter(){
         mAuth = FirebaseAuth.getInstance();
-    }
-
-
-    public void initFirebaseLogin(){
-
-        // Choose authentication providers
-        /*List<AuthUI.IdpConfig> providers = Arrays.asList(
-                new AuthUI.IdpConfig.EmailBuilder().build(),
-                new AuthUI.IdpConfig.PhoneBuilder().build(),
-                new AuthUI.IdpConfig.GoogleBuilder().build(),
-                new AuthUI.IdpConfig.FacebookBuilder().build(),
-
-        // Create and launch sign-in intent
-        startActivityForResult(
-                AuthUI.getInstance()
-                        .createSignInIntentBuilder()
-                        .setAvailableProviders(providers)
-                        .build(),
-                RC_SIGN_IN);*/
     }
 
     public boolean loginUser(String email, String password) {
@@ -138,5 +118,6 @@ public class FirebaseAdapter {
             mAuth.signOut();
         }
     }
+
 
 }

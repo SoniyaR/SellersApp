@@ -1,6 +1,5 @@
 package com.soniya.sellersapp;
 
-import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -16,9 +15,9 @@ public class TabAdapter extends FragmentStatePagerAdapter {
 
     //private String [] titleList = {"My Orders", "Other Orders"};
 
-    ArrayList<CarInfo> carsList = new ArrayList<>();
+    ArrayList<CarInfoSerial> carsList = new ArrayList<>();
 
-    TabAdapter(FragmentManager fm, ArrayList<CarInfo> carsArraylist) {
+    TabAdapter(FragmentManager fm, ArrayList<CarInfoSerial> carsArraylist) {
         super(fm);
         mFragmentList.clear();
     }

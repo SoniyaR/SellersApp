@@ -1,7 +1,6 @@
 package com.soniya.sellersapp;
 
 import android.Manifest;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -17,7 +16,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -36,7 +34,6 @@ import com.google.firebase.storage.UploadTask;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.StringTokenizer;
 
 
@@ -137,7 +134,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
 
            // hmList.add(recHashmap);
 
-            CarInfo carinfoDup = formCarinfoObject(recHashmap);
+            CarInfoSerial carinfoDup = formCarinfoObject(recHashmap);
             database.uploadData(carinfoDup, curr_vehicleNum.replace(space, replacechar), ownerofList);
 
             if(selectedUriList != null && selectedUriList.size() > 0) {
@@ -175,9 +172,9 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
 
 
     //test method: to delete later
-    private CarInfo formCarinfoObject(HashMap<String, Object> recHashmap) {
+    private CarInfoSerial formCarinfoObject(HashMap<String, Object> recHashmap) {
         //vehicle_no	model_name	availability description	location	sellingprice
-        CarInfo info = new CarInfo();
+        CarInfoSerial info = new CarInfoSerial();
         //String vehicleNum = recHashmap.get("vehicle_no").toString().replace(space, replacechar);
         String modelName = recHashmap.get("model_name").toString().replace(space, replacechar);
         String availability = recHashmap.get("availability").toString().replace(space, replacechar);

@@ -2,8 +2,6 @@ package com.soniya.sellersapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -29,9 +27,9 @@ public class Tab2Fragment extends Fragment {
     char space = ' ';
     char replacechar = '_';
 
-    ArrayList<CarInfo> carsArraylist = new ArrayList<>();
+    ArrayList<CarInfoSerial> carsArraylist = new ArrayList<>();
     ArrayList<String> activeOrders = new ArrayList<>();
-    ArrayList<CarInfo> otherCarslist = new ArrayList<>();
+    ArrayList<CarInfoSerial> otherCarslist = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -39,36 +37,35 @@ public class Tab2Fragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_two, container, false);
         carsListView = rootView.findViewById(R.id.tab2listView);
         registerForContextMenu(carsListView);
-        //carsArraylist.clear();
 
         if(getArguments()!=null) {
 
-            carsArraylist = (ArrayList<CarInfo>) getArguments().getSerializable("carsArrayList");
+            carsArraylist = (ArrayList<CarInfoSerial>) getArguments().getSerializable("carsArrayList");
         }
 
         if(carsArraylist !=null && carsArraylist.size()>0) {
             otherCarslist.clear();
-            Log.i("soni-", "we have carsarraylist tab2frag , size = " + carsArraylist.size());
+           // Log.i("soni-", "we have carsarraylist tab2frag , size = " + carsArraylist.size());
             CustomAdapter carListAdapter = new CustomAdapter(Tab2Fragment.this.getActivity(), carsArraylist, R.layout.carslist_layout);
             carsListView.setAdapter(carListAdapter);
             carListAdapter.notifyDataSetChanged();
 
-            CarInfo carInfoInstance = new CarInfo();
-            carInfoInstance.setCarNumbersListener(new CarInfo.CarNumbersListener() {
+            CarInfoSerial carInfoSerialInstance = new CarInfoSerial();
+            carInfoSerialInstance.setCarNumbersListener(new CarInfoSerial.CarNumbersListener() {
                 @Override
                 public void onRetrieve(ArrayList<String> data) {
                     if (data != null && data.size() > 0) {
                         activeOrders = data;
 
-                        for (CarInfo carInfo : carsArraylist) {
-                            //Log.i("soni-", carInfo.getVehicle_no());
-                            if (!activeOrders.contains(carInfo.getVehicle_no())) {
-                                otherCarslist.add(carInfo);
+                        for (CarInfoSerial carInfoSerial : carsArraylist) {
+                            //Log.i("soni-", carInfoSerial.getVehicle_no());
+                            if (!activeOrders.contains(carInfoSerial.getVehicle_no())) {
+                                otherCarslist.add(carInfoSerial);
                             }
                         }
 
                         if (otherCarslist != null && otherCarslist.size() > 0) {
-                            Log.i("soni-", "we have othercarslist tab2frag");
+                           // Log.i("soni-", "we have othercarslist tab2frag");
                             CustomAdapter carListAdapter = new CustomAdapter(Tab2Fragment.this.getActivity(), otherCarslist, R.layout.carslist_layout);
                             carsListView.setAdapter(carListAdapter);
                         }

@@ -72,7 +72,7 @@ public class HomePage extends AppCompatActivity {
         return string.replace(".", ",");
     }
 
-    ArrayList<CarInfo> carsArraylist;
+    ArrayList<CarInfoSerial> carsArraylist;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -139,103 +139,18 @@ public class HomePage extends AppCompatActivity {
 
         if (isOnline()) {
 
-            tab1frag = new Tab1Fragment();
-            tab2frag = new Tab2Fragment();
-
-            activeOrders = null;
-            carsArraylist = new ArrayList<>();
-
-            carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
-            userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
-
-            viewPager = findViewById(R.id.viewPagerHome);
-            tabLayout = findViewById(R.id.tabLayout);
-
-
-//            adapter = new TabAdapter(getSupportFragmentManager());
-
-//        adapter.addFragment(tab1frag, "My Orders");
-//        adapter.addFragment(tab2frag, "Other Orders");
-
-//        viewPager.setAdapter(adapter);
-//        tabLayout.setupWithViewPager(viewPager);
-
-            tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-                @Override
-                public void onTabSelected(TabLayout.Tab tab) {
-                    //Log.i("soni-", "tab selected " + String.valueOf(tab.getPosition()));
-                    switch(tab.getPosition())   {
-                        case 0:
-                            replaceFragment(tab1frag);
-                            break;
-
-                        case 1:
-                            replaceFragment(tab2frag);
-                            break;
-
-                    }
-
-                }
-
-                @Override
-                public void onTabUnselected(TabLayout.Tab tab) {
-                }
-
-                @Override
-                public void onTabReselected(TabLayout.Tab tab) {
-
-                }
-            });
-
-
-            if (fbAdapter.checkCurrentUser()) {
-
-                CarInfo carInfoInstance = new CarInfo();
-
-                carInfoInstance.setCarInfoListener(new CarInfo.CarInfoListener() {
-                    @Override
-                    public void onDataRetrieved(ArrayList<CarInfo> data) {
-                        if (data != null && data.size() > 0) {
-
-                            carsArraylist.addAll(data);
-
-                            adapter = new TabAdapter(getSupportFragmentManager(), carsArraylist);
-
-                            replaceFragment(tab1frag);
-
-                            //tabbundle.putSerializable("carsArrayList", carsArraylist);
-
-
-                            adapter.addFragment(tab1frag, "My Orders");
-                            adapter.addFragment(tab2frag, "Other Orders");
-
-                            viewPager.setAdapter(adapter);
-                            tabLayout.setupWithViewPager(viewPager);
-
-                        }
-                    }
-
-                    @Override
-                    public void onProgress() {
-                        //Toast.makeText(this, "Retrieving Cars List", Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onRetrieveFailed() {
-                        Log.i("soni-", "homepage- carinfo retrieve is failed");
-                    }
-                });
-
-
-            } else {
+            if (!fbAdapter.checkCurrentUser()) {
                 //goto login screen
                 Log.i("soni-", "Not logged in, back to mainActivity classs");
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
                 finish();
+            } else {
+                setupTabFragments();
             }
 
-        } else {
+        }
+        else {
             try {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this)
                         .setMessage("Not connected to Internet!")
@@ -251,7 +166,9 @@ public class HomePage extends AppCompatActivity {
                 Log.i("soni-", "homepage-alertdialog exc - "+ e.getMessage());
             }
         }
-/*
+
+
+        /*
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i1) {
@@ -270,6 +187,82 @@ public class HomePage extends AppCompatActivity {
         });*/
     }
 
+    private void setupTabFragments()    {
+
+        tab1frag = new Tab1Fragment();
+        tab2frag = new Tab2Fragment();
+
+        activeOrders = null;
+        carsArraylist = new ArrayList<>();
+
+        carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
+        userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
+
+        viewPager = findViewById(R.id.viewPagerHome);
+        tabLayout = findViewById(R.id.tabLayout);
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                //Log.i("soni-", "tab selected " + String.valueOf(tab.getPosition()));
+                switch (tab.getPosition()) {
+                    case 0:
+                        replaceFragment(tab1frag);
+                        break;
+
+                    case 1:
+                        replaceFragment(tab2frag);
+                        break;
+
+                }
+
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
+        CarInfoSerial CarInfoSerialInstance = new CarInfoSerial();
+
+        CarInfoSerialInstance.setCarInfoListener(new CarInfoSerial.CarInfoListener() {
+            @Override
+            public void onDataRetrieved(ArrayList<CarInfoSerial> data) {
+                if (data != null && data.size() > 0) {
+
+                    carsArraylist.addAll(data);
+
+                    adapter = new TabAdapter(getSupportFragmentManager(), carsArraylist);
+
+                    replaceFragment(tab1frag);
+
+                    adapter.addFragment(tab1frag, "My Orders");
+                    adapter.addFragment(tab2frag, "Other Orders");
+
+                    viewPager.setAdapter(adapter);
+                    tabLayout.setupWithViewPager(viewPager);
+
+                }
+            }
+
+            @Override
+            public void onProgress() {
+                //Toast.makeText(this, "Retrieving Cars List", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onRetrieveFailed() {
+                Log.i("soni-", "homepage- carinfo retrieve is failed");
+            }
+        });
+
+    }
+
     private void replaceFragment(Fragment fragment) {
 
         tabbundle.putSerializable("carsArrayList", carsArraylist);
@@ -282,112 +275,6 @@ public class HomePage extends AppCompatActivity {
         Log.i("soni-hompage", "replace fragment");
         ft.commit();
     }
-
-    /*
-    to retrieve cars list (active orders) for current user
-     */
-
-//    private void retriveCarList() {
-//
-//        CarInfo carInfoInstance = new CarInfo();
-//        carInfoInstance.setCarInfoListener(new CarInfo.CarInfoListener() {
-//            @Override
-//            public void onDataRetrieved(ArrayList<CarInfo> data) {
-//                if(data != null && data.size() > 0) {
-////                    carListAdapter = new CustomAdapter(getApplicationContext(), data, R.layout.carslist_layout);
-////                    carsListView.setAdapter(carListAdapter);
-//                }
-//            }
-//
-//            @Override
-//            public void onProgress() {
-//                Toast.makeText(HomePage.this, "Retrieving Cars List", Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//
-//        /*//DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference().child("CarsInfoDup");
-//        carInfoReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                if(dataSnapshot !=null && dataSnapshot.getValue() !=null) {
-//                    carsArraylist.clear();
-//                    for (DataSnapshot carinfo : dataSnapshot.getChildren()) {
-//                        //Log.i("soni-carinfo",carinfo.getKey().toString());
-//
-//                        if (activeOrders.contains(carinfo.getKey().toString())) {
-//                            CarInfo carInfoObj = (CarInfo) carinfo.getValue(CarInfo.class);
-//
-//                            if (carInfoObj != null) {
-//                                carsArraylist.add(carInfoObj);
-//                                //Log.i("soni-", "retrieved carinfo object\n" + carInfoObj.getModel_name());
-//                            }
-//
-//                        }
-//                    }
-//                }else{
-//                    Log.i("soni-", "no data found in CarsInfoDup");
-//                }
-//
-//                carListAdapter = new CustomAdapter(getApplicationContext(), carsArraylist, R.layout.carslist_layout);
-//                carsListView.setAdapter(carListAdapter);
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//            }
-//        });*/
-//
-//            /*carInfoReference.addValueEventListener(new ValueEventListener() {
-//                @Override
-//                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                    hmList.clear();
-//                    //vehicle_no	model_name	availability description    location	sellingprice    image_uri_list
-//
-//                    for (DataSnapshot carinfo : dataSnapshot.getChildren()) {
-//                        //Log.i("soni-carinfo",carinfo.getKey().toString());
-//
-//                        if (activeOrders.contains(carinfo.getKey().toString())) {
-//
-//                            Iterator<DataSnapshot> it = carinfo.getChildren().iterator();
-//                            HashMap<String, Object> hm = new HashMap<String, Object>();
-//                            String vehiclenum = carinfo.getKey().replace(replacechar, space);
-//                            hm.put("vehicle_no", vehiclenum);
-//                            while (it.hasNext()) {
-//                                DataSnapshot ds = it.next();
-//                                if (ds.getKey().equals("image_uri_list")) {
-//                                    ArrayList<String> tempList = (ArrayList<String>) ds.getValue();
-//                                    //imgUriForRecord.put(carinfo.getKey().toString(), tempList.get(0));
-//                                    hm.put("carImage", tempList.get(0));
-//                                    //Log.i("soni-", "got one img uri " + tempList.get(0));
-//
-//                                } else {
-//                                    hm.put(ds.getKey(), ds.getValue().toString().replace(replacechar, space));
-//                                }
-//                            }
-//
-//                            if(!hm.keySet().contains("carImage"))   {
-//                                hm.put("carImage", BitmapFactory.decodeResource(getResources(), R.drawable.nocarpicture));
-//                            }
-//
-//                            hmList.add(hm);
-//                            //simpleAdapter.notifyDataSetChanged();
-//
-//                        }
-//                    }
-//                    Log.i("soni-", "datasnapshot loop completed");
-////                    simpleAdapter = new CustomAdapter(getApplicationContext(), hmList, R.layout.carslist_layout, from, to);
-////                    carsList.setAdapter(simpleAdapter);
-//
-//                }
-//
-//                @Override
-//                public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//                }
-//            });*/
-//
-//    }
 
     public boolean isOnline()   {
         ConnectivityManager manager = (ConnectivityManager) getApplicationContext().getSystemService(CONNECTIVITY_SERVICE);

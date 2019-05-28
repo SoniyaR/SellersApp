@@ -2,8 +2,6 @@ package com.soniya.sellersapp;
 
 import android.app.Activity;
 import android.content.Context;
-import android.net.Uri;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,14 +16,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class CustomAdapter extends ArrayAdapter<CarInfo> {
+public class CustomAdapter extends ArrayAdapter<CarInfoSerial> {
     HashMap<String, String> imgMap = new HashMap<>();
     List<String> urlList = new ArrayList<>();
     Context context;
 
-    ArrayList<CarInfo> carList;
+    ArrayList<CarInfoSerial> carList;
 
-    public CustomAdapter(Context context, ArrayList<CarInfo> carsList, int resource){
+    public CustomAdapter(Context context, ArrayList<CarInfoSerial> carsList, int resource){
         super(context, resource, carsList);
         this.context = context;
         this.carList = carsList;
@@ -58,7 +56,7 @@ public class CustomAdapter extends ArrayAdapter<CarInfo> {
 
         }
 
-        CarInfo info = getItem(position);
+        CarInfoSerial info = getItem(position);
 
         ImageView imgView = (ImageView) convertView.findViewById(R.id.carImageView);
         Picasso.with(context).load(info.getImage_uri_list().get(0)).resize(100, 100).into(imgView);
