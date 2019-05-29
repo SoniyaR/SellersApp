@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class CarInfo {
 
+    private String brand_name;
     private String vehicle_no;
     private String model_name;
     private String availability;
@@ -63,6 +64,14 @@ public class CarInfo {
 
     public void setImage_uri_list(ArrayList<String> image_uri_list) {
         this.image_uri_list = image_uri_list;
+    }
+
+    public String getBrand_name() {
+        return brand_name;
+    }
+
+    public void setBrand_name(String brand_name) {
+        this.brand_name = brand_name;
     }
 
     private String location;

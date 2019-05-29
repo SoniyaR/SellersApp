@@ -33,7 +33,9 @@ public class CustomAdapter extends ArrayAdapter{
     }
 
     public static String decodeString(String string) {
-        return string.replace(",", ".");
+        string = string.replace(",", ".");
+        string = string.replace("_", " ");
+        return string;
     }
 
     @Override
@@ -64,6 +66,9 @@ public class CustomAdapter extends ArrayAdapter{
         else if(dataArrayList.get(position) instanceof LeadRequest) {
 
             LeadRequest request = (LeadRequest) getItem(position);
+
+            TextView brand = convertView.findViewById(R.id.lead_brand);
+            brand.setText(decodeString(request.getLead_brand()));
 
             TextView model = convertView.findViewById(R.id.lead_model);
             model.setText(decodeString(request.getLead_model()));

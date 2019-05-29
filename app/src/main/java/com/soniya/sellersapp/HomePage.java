@@ -43,6 +43,7 @@ public class HomePage extends AppCompatActivity {
     private TabAdapter adapter;
     private TabLayout tabLayout;
     private ViewPager viewPager;
+    int gotoTab = 0;
 
     private boolean doubleBackToExitPressedOnce=false;
 
@@ -149,6 +150,12 @@ public class HomePage extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             } else {
+                if(getIntent() !=null && getIntent().getExtras() !=null)    {
+                    Intent intent = getIntent();
+                    if(intent.hasExtra("gotoTab"))    {
+                        gotoTab = intent.getIntExtra("gotoTab", 0);
+                    }
+                }
                 setupTabFragments();
             }
 
@@ -249,6 +256,9 @@ public class HomePage extends AppCompatActivity {
                     adapter.addFragment(tab2frag, "Other Orders");
                     adapter.addFragment(tab3frag, "Leads");
 
+                    if(gotoTab > 0) {
+                        viewPager.setCurrentItem(gotoTab);
+                    }
                     viewPager.setAdapter(adapter);
                     tabLayout.setupWithViewPager(viewPager);
 
