@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:gravity="fill"
+    android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:layout_marginRight="4dp"
+            android:gravity="fill"
+            android:orientation="vertical"
+            android:paddingLeft="8dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/lead_model"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center|left"
+                android:padding="2dp"
+                android:layout_marginLeft="4dp"
+                android:text="name"
+                android:textColor="@android:color/black"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/lead_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center|left"
+                android:padding="2dp"
+                android:layout_marginLeft="4dp"
+                android:text="location"
+                android:textColor="@android:color/black"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/lead_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center|left"
+                android:padding="2dp"
+                android:layout_marginLeft="4dp"
+                android:text="selling price"
+                android:textColor="@android:color/black"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="match_parent"
+        android:src="@drawable/right_arrow"
+        android:layout_weight="1"/>
+
+</LinearLayout>

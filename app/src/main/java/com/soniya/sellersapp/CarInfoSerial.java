@@ -95,7 +95,7 @@ Listener code below
 
         public void onDataRetrieved(ArrayList<CarInfoSerial> data);
         public void onProgress();
-        public void onRetrieveFailed();
+        public void onRetrieveFailed(String error);
     }
 
     public interface CarNumbersListener {

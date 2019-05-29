@@ -66,6 +66,7 @@ public class HomePage extends AppCompatActivity {
 
     Fragment tab1frag;
     Fragment tab2frag;
+    Fragment tab3frag;
     Bundle tabbundle = new Bundle();
 
     public static String encodeString(String string) {
@@ -109,9 +110,9 @@ public class HomePage extends AppCompatActivity {
                 finish();
                 break;
 
-            case R.id.refreshList:
+            /*case R.id.refreshList:
                 refreshList();
-                break;
+                break;*/
 
             case R.id.soldhistory:
                 showSoldHistory();
@@ -193,6 +194,7 @@ public class HomePage extends AppCompatActivity {
 
         tab1frag = new Tab1Fragment();
         tab2frag = new Tab2Fragment();
+        tab3frag = new Tab3Fragment();
 
         activeOrders = null;
         carsArraylist = new ArrayList<>();
@@ -235,16 +237,17 @@ public class HomePage extends AppCompatActivity {
         CarInfoSerialInstance.setCarInfoListener(new CarInfoSerial.CarInfoListener() {
             @Override
             public void onDataRetrieved(ArrayList<CarInfoSerial> data) {
-                if (data != null && data.size() > 0) {
+                if (data != null) {
 
                     carsArraylist.addAll(data);
 
-                    adapter = new TabAdapter(getSupportFragmentManager(), carsArraylist);
+                    adapter = new TabAdapter(getSupportFragmentManager());
 
                     replaceFragment(tab1frag);
 
                     adapter.addFragment(tab1frag, "My Orders");
                     adapter.addFragment(tab2frag, "Other Orders");
+                    adapter.addFragment(tab3frag, "Leads");
 
                     viewPager.setAdapter(adapter);
                     tabLayout.setupWithViewPager(viewPager);
@@ -258,8 +261,9 @@ public class HomePage extends AppCompatActivity {
             }
 
             @Override
-            public void onRetrieveFailed() {
-                Log.i("soni-", "homepage- carinfo retrieve is failed");
+            public void onRetrieveFailed(String error) {
+
+                Log.i("soni-", "homepage- carinfo retrieve is failed " + error);
             }
         });
 
@@ -274,6 +278,7 @@ public class HomePage extends AppCompatActivity {
         fragment.setArguments(tabbundle);
         ft.replace(R.id.viewPagerHome, fragment);
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        //ft.addToBackStack(null);
         Log.i("soni-hompage", "replace fragment");
         ft.commit();
     }
@@ -341,8 +346,8 @@ public class HomePage extends AppCompatActivity {
 
             fbFactory.moveToSoldHistory(vehicleNum);
 
-            //remove vehicle number from userinfo -> username-> ownerof list
-            userRef.child(encodeString(uname)).child("ownerof").addListenerForSingleValueEvent(new ValueEventListener() {
+            //remove vehicle number from userinfo -> username-> activeorders list
+            userRef.child(encodeString(uname)).child("activeorders").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.getValue() instanceof List) {
@@ -350,13 +355,13 @@ public class HomePage extends AppCompatActivity {
                         if (numList.size() > 0 && numList.contains(vehicleNum)) {
                             numList.remove(vehicleNum);
                             Log.i("soni-homepage", "deleterecord() ---> removed " + vehicleNum + " from userinfo");
-                            userRef.child(encodeString(uname)).child("ownerof").setValue(numList);
+                            userRef.child(encodeString(uname)).child("activeorders").setValue(numList);
                         }
                     }
                     else if(dataSnapshot.getValue() instanceof HashMap){
                         HashMap<String, List<String>> hashMap = (HashMap<String, List<String>>) dataSnapshot.getValue();
 
-                        fbFactory.deleteOldOwnerofList();
+                        fbFactory.deleteOldActiveorders_List();
 
                         List<String> vehicleList =  new ArrayList<>();
                         if(hashMap.keySet().size() == 1)    {
@@ -377,10 +382,10 @@ public class HomePage extends AppCompatActivity {
                                 }
                             }
 
-                            userRef.child(encodeString(uname)).child("ownerof").setValue(tempList).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            userRef.child(encodeString(uname)).child("activeorders").setValue(tempList).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
-                                    Log.i("soni-", "updated ownerof list for deleteRecord");
+                                    Log.i("soni-", "updated activeorders list for deleteRecord");
                                 }
                             });
                         }
@@ -461,11 +466,11 @@ public class HomePage extends AppCompatActivity {
         startActivity(intentProfile);
     }
 
-    public void refreshList()   {
+  /*  public void refreshList()   {
         Log.i("soni-", "Sync icon clicked...");
         carsArraylist.clear();
 //        retriveCarList();
 //        carListAdapter.notifyDataSetChanged();
     }
-
+*/
 }

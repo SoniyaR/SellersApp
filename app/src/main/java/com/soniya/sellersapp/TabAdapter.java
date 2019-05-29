@@ -17,7 +17,7 @@ public class TabAdapter extends FragmentStatePagerAdapter {
 
     ArrayList<CarInfoSerial> carsList = new ArrayList<>();
 
-    TabAdapter(FragmentManager fm, ArrayList<CarInfoSerial> carsArraylist) {
+    TabAdapter(FragmentManager fm) {
         super(fm);
         mFragmentList.clear();
     }

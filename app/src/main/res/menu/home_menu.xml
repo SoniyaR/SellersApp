@@ -7,9 +7,9 @@
         android:title="Search"
         app:showAsAction="always"
         app:actionViewClass="android.widget.SearchView" />
-    <item
+    <!--<item
         android:id="@+id/refreshList"
-        android:title="Refresh Page"/>
+        android:title="Refresh Page"/>-->
     <item
         android:id="@+id/addnew"
         android:title="Add New Data">

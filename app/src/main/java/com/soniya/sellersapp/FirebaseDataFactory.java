@@ -14,6 +14,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,13 +23,12 @@ import java.util.Set;
 
 public class FirebaseDataFactory {
 
-    private DatabaseReference db = FirebaseDatabase.getInstance().getReference();
+    private DatabaseReference db;
     char space = ' ';
     char replacechar = '_';
     DatabaseReference carInfoReference;
 
-    DatabaseReference ownerInfoReference;
-    ArrayList<String> ownerofList = new ArrayList<>();
+    ArrayList<String> activeorders_List = new ArrayList<>();
 
     ArrayList<String> vehicleNumbers = new ArrayList<>();
 
@@ -37,7 +37,8 @@ public class FirebaseDataFactory {
 
     public FirebaseDataFactory(){
         uname = new FirebaseAdapter().getCurrentUser();
-        carInfoReference = FirebaseDatabase.getInstance().getReference();
+        db = FirebaseDatabase.getInstance().getReference();
+        carInfoReference = db.child("CarsInfo");
     }
 
     StorageReference img_ref = FirebaseStorage.getInstance().getReference().child(new FirebaseAdapter().getCurrentUser());
@@ -52,9 +53,7 @@ public class FirebaseDataFactory {
 
     public List<HashMap<String, Object>> retrieveCarsList (ArrayList<String> vehicleNumList) {
 
-        carInfoReference = db.child("CarsInfo");
-
-        //ArrayList<String> vehicleNumList = getOwnerof();
+        //ArrayList<String> vehicleNumList = getactiveorders();
         if (vehicleNumList.isEmpty()) {
             Log.i("soni-fbFactory", "vehicleNumList is empty");
         }
@@ -96,41 +95,40 @@ public class FirebaseDataFactory {
 
     }
 
-    public ArrayList<String> getOwnerofList() {
+    public ArrayList<String> getactiveorders_List() {
         vehicleNumbers.clear();
-        ownerofList.clear();
+        activeorders_List.clear();
         Log.i("soni-", "uname = " + encodeString(uname));
-        DatabaseReference cur_UserRef =  db.child("userInfo").child(encodeString(uname))/*.child("ownerof")*/;
+        DatabaseReference cur_UserRef =  db.child("userInfo").child(encodeString(uname)).child("activeorders");
         cur_UserRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot!=null && dataSnapshot.hasChild("ownerof")) {
+                if(dataSnapshot!=null && dataSnapshot.getValue() !=null) {
 
-                    if (dataSnapshot.child("ownerof").getValue() instanceof List) {
-                        vehicleNumbers = (ArrayList<String>) dataSnapshot.child("ownerof").getValue();
+                    if (dataSnapshot.getValue() instanceof List) {
+                        vehicleNumbers = (ArrayList<String>) dataSnapshot.getValue();
 
                         if (!vehicleNumbers.isEmpty()) {
-                            Log.i("soni-", "getOwnerofList - we have ownerofList vals");
+                            Log.i("soni-", "getactiveordersList - we have activeordersList vals");
                             for (String num : vehicleNumbers) {
-                                ownerofList.add(num);
+                                activeorders_List.add(num);
                             }
 
-                        } else {
-                            Log.i("soni-", "getOwnerofList - ownerofList is empty");
                         }
-                    } else if (dataSnapshot.child("ownerof").getValue() instanceof HashMap) {
-                        HashMap<String, String> hm = (HashMap<String, String>) dataSnapshot.child("ownerof").getValue();
+
+                    } else if (dataSnapshot.getValue() instanceof HashMap) {
+                        HashMap<String, String> hm = (HashMap<String, String>) dataSnapshot.getValue();
                         Set<String> keys = ((HashMap) hm).keySet();
                         for (String key : keys) {
                             vehicleNumbers.add(hm.get(key));
-                            ownerofList.add(hm.get(key));
+                            activeorders_List.add(hm.get(key));
                         }
-                        Log.i("soni-", "getOwnerofList , its hashmap ownerlist size=" + String.valueOf(ownerofList.size()));
-                    } else if (dataSnapshot.child("ownerof").getValue() instanceof String) {
-                        Log.i("soni-", "ownerofList is a String");
-                        ownerofList.add(dataSnapshot.child("ownerof").getValue().toString());
+                        Log.i("soni-", "getactiveordersList , its hashmap ownerlist size=" + String.valueOf(activeorders_List.size()));
+                    } else if (dataSnapshot.getValue() instanceof String) {
+                        Log.i("soni-", "activeordersList is a String");
+                        activeorders_List.add(dataSnapshot.getValue().toString());
                     } else {
-                        Log.i("soni-", "not able to get ownerofList");
+                        Log.i("soni-", "not able to get activeordersList");
                     }
                 } else{
                     Log.i("soni-", "dataSnapshot is null - factory 140");
@@ -143,7 +141,53 @@ public class FirebaseDataFactory {
             }
         });
 
-        return ownerofList;
+        return activeorders_List;
+    }
+
+    public ArrayList<String> getSoldorders_List() {
+        ArrayList<String> soldorders_List = new ArrayList<>();
+        DatabaseReference cur_UserRef =  db.child("userInfo").child(encodeString(uname)).child("soldorders");
+        cur_UserRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot!=null && dataSnapshot.getValue() !=null) {
+
+                    if (dataSnapshot.getValue() instanceof List) {
+                        vehicleNumbers = (ArrayList<String>) dataSnapshot.getValue();
+
+                        if (!vehicleNumbers.isEmpty()) {
+                            Log.i("soni-", "getSoldordersList - we have soldordersList vals");
+                            for (String num : vehicleNumbers) {
+                                soldorders_List.add(num);
+                            }
+
+                        }
+
+                    } else if (dataSnapshot.getValue() instanceof HashMap) {
+                        HashMap<String, String> hm = (HashMap<String, String>) dataSnapshot.getValue();
+                        Set<String> keys = ((HashMap) hm).keySet();
+                        for (String key : keys) {
+                            soldorders_List.add(hm.get(key));
+                        }
+                        Log.i("soni-", "getSoldordersList - hashmap");
+                    } else if (dataSnapshot.getValue() instanceof String) {
+                        Log.i("soni-", "activeordersList is a String");
+                        soldorders_List.add(dataSnapshot.getValue().toString());
+                    } else {
+                        Log.i("soni-", "not able to get activeordersList");
+                    }
+                } else{
+                    Log.i("soni-", "dataSnapshot is null - factory 140");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        return soldorders_List;
     }
 
 
@@ -160,12 +204,12 @@ public class FirebaseDataFactory {
 
         currentUserRef.child(usernameEn).child("emailId").setValue(emailId);
         currentUserRef.child(usernameEn).child("location").setValue(location);
-        //currentUserRef.child(username).child("ownerof").setValue(new ArrayList<String>());
+        //currentUserRef.child(username).child("activeorders").setValue(new ArrayList<String>());
     }
 
 
     //old way of uploading data
-    /*public void uploadImportData(List<HashMap<String, Object>>hmlist, List<String> ownerofList)    {
+    /*public void uploadImportData(List<HashMap<String, Object>>hmlist, List<String> activeordersList)    {
 
         DatabaseReference curr_ref =  db.child("CarsInfo"); //.child(new FirebaseAdapter().getCurrentUser())
         //vehicle_no	model_name	availability description	location	sellingprice
@@ -188,9 +232,9 @@ public class FirebaseDataFactory {
 
             // add vehicle number in userInfo for the current user who uploaded this info, it will be array of strings for vehicleNum
 
-            if(!ownerofList.contains(vehicleNum)) {
-                ownerofList.add(vehicleNum);
-                updateOwnerOf(ownerofList);
+            if(!activeordersList.contains(vehicleNum)) {
+                activeordersList.add(vehicleNum);
+                updateactiveorders(activeordersList);
             }
         }
 
@@ -199,7 +243,7 @@ public class FirebaseDataFactory {
     /*
     method for pushing carInfoSerial object into db
      */
-    public void uploadData(CarInfo carInfoObj, String vehicleNum, ArrayList<String> ownerofList)    {
+    public void uploadData(CarInfo carInfoObj, String vehicleNum, ArrayList<String> activeorders_List)    {
         DatabaseReference curr_ref =  db.child("CarsInfo");
 
         curr_ref.child(vehicleNum).setValue(carInfoObj).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -209,24 +253,32 @@ public class FirebaseDataFactory {
             }
         });
 
-        if(!ownerofList.contains(vehicleNum)) {
-            ownerofList.add(vehicleNum);
-            updateOwnerOf(ownerofList);
+        if(!activeorders_List.contains(vehicleNum)) {
+            activeorders_List.add(vehicleNum);
+            updateActiveorders(activeorders_List);
         }
 
     }
 
 
-    private void updateOwnerOf(ArrayList<String> ownerofList) {
-        String currUser = new FirebaseAdapter().getCurrentUser();
-        Log.i("soni-updateUserInfo", "curr user "+  currUser);
-        ownerInfoReference = db.child("userInfo").child(encodeString(currUser)).child("ownerof");
-            ownerInfoReference.setValue(ownerofList).addOnSuccessListener(new OnSuccessListener<Void>() {
+    private void updateActiveorders(ArrayList<String> activeorders_List) {
+        DatabaseReference activeOrdersReference = db.child("userInfo").child(encodeString(uname)).child("activeorders");
+        activeOrdersReference.setValue(activeorders_List).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
-                    Log.i("soni-", "added new ownerof list");
+                    Log.i("soni-", "added new activeorders list");
                 }
             });
+    }
+
+    private void updateSoldOrders(ArrayList<String> soldOrders) {
+        DatabaseReference soldOrdersReference = db.child("userInfo").child(encodeString(uname)).child("soldorders");
+        soldOrdersReference.setValue(soldOrders).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.i("soni-", "added new soldOrders list");
+            }
+        });
     }
 
     /*
@@ -272,12 +324,12 @@ public class FirebaseDataFactory {
         });
     }
 
-    public void deleteOldOwnerofList() {
-        DatabaseReference cur_UserRef =  db.child("userInfo").child(encodeString(uname)).child("ownerof");
+    public void deleteOldActiveorders_List() {
+        DatabaseReference cur_UserRef =  db.child("userInfo").child(encodeString(uname)).child("activeorders");
         cur_UserRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                Log.i("soni-", "removed old ownerof list");
+                Log.i("soni-", "removed old activeorders list");
             }
         });
 
@@ -292,6 +344,9 @@ public class FirebaseDataFactory {
         if(vehicleNum.contains(" ")){
             vehicleNum = vehicleNum.replace(" ", "_");
         }
+
+        deleteFromActiveOrders(vehicleNum);
+        addToSoldOrders(vehicleNum);
 
         DatabaseReference fromRef = db.child("CarsInfo").child(vehicleNum);
         DatabaseReference toRef = db.child("SoldHistory");
@@ -311,6 +366,7 @@ public class FirebaseDataFactory {
                             fromRef.removeValue();
                         }
                     });
+                    moveInfoUpdatestoHistory(number);
                 }
             }
 
@@ -320,6 +376,20 @@ public class FirebaseDataFactory {
             }
         });
 
+    }
+
+    public void deleteFromActiveOrders(String vehicleNum)   {
+        ArrayList<String> activeList = getactiveorders_List();
+        deleteOldActiveorders_List();
+        activeList.remove(vehicleNum);
+        updateActiveorders(activeList);
+
+    }
+
+    public void addToSoldOrders(String vehicleNum)  {
+        ArrayList<String> soldOrders = getSoldorders_List();
+        soldOrders.add(vehicleNum);
+        updateSoldOrders(soldOrders);
     }
 
     public void activateOrder(String vehicleNum)    {
@@ -421,15 +491,38 @@ public class FirebaseDataFactory {
      */
     public void deleteRecord(String vehicleNum) {
 
-        //activeOrders.remove(vehicleNum);
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
+        DatabaseReference fromRef = db.child("CarInfo").child(vehicleNum);
+        DatabaseReference toRef = db.child("DeletedRecords");
+        final String number = vehicleNum;
 
-        if(vehicleNum != null && !vehicleNum.isEmpty() && !vehicleNum.equalsIgnoreCase(""))   {
+        fromRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot !=null && dataSnapshot.getValue() !=null)   {
+                    toRef.child(number).setValue(dataSnapshot.getValue(), new OnCompleteListener() {
+                        @Override
+                        public void onComplete(@NonNull Task task) {
+                            fromRef.removeValue();
+                            Log.i("soni-", "Carinfo for "+ number + " moved to Deleted Records");
+                        }
+                    });
+
+                    deleteFromActiveOrders(number);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        /*if(vehicleNum != null && !vehicleNum.isEmpty() && !vehicleNum.equalsIgnoreCase(""))   {
 
             moveToSoldHistory(vehicleNum);
 
-            //remove vehicle number from userinfo -> username-> ownerof list
-            userRef.child(encodeString(uname)).child("ownerof").addListenerForSingleValueEvent(new ValueEventListener() {
+            //remove vehicle number from userinfo -> username-> activeorders list
+            userRef.child(encodeString(uname)).child("activeorders").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.getValue() instanceof List) {
@@ -437,13 +530,13 @@ public class FirebaseDataFactory {
                         if (numList.size() > 0 && numList.contains(vehicleNum)) {
                             numList.remove(vehicleNum);
                             Log.i("soni-homepage", "deleterecord() ---> removed " + vehicleNum + " from userinfo");
-                            userRef.child(encodeString(uname)).child("ownerof").setValue(numList);
+                            userRef.child(encodeString(uname)).child("activeorders").setValue(numList);
                         }
                     }
                     else if(dataSnapshot.getValue() instanceof HashMap){
                         HashMap<String, List<String>> hashMap = (HashMap<String, List<String>>) dataSnapshot.getValue();
 
-                        deleteOldOwnerofList();
+                        deleteOldActiveorders_List();
 
                         List<String> vehicleList =  new ArrayList<>();
                         if(hashMap.keySet().size() == 1)    {
@@ -464,10 +557,10 @@ public class FirebaseDataFactory {
                                 }
                             }
 
-                            userRef.child(encodeString(uname)).child("ownerof").setValue(tempList).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            userRef.child(encodeString(uname)).child("activeorders").setValue(tempList).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
-                                    Log.i("soni-", "updated ownerof list for deleteRecord");
+                                    Log.i("soni-", "updated activeorders list for deleteRecord");
                                 }
                             });
                         }
@@ -484,7 +577,10 @@ public class FirebaseDataFactory {
 
             //removeImagesFromStorage(vehicleNum);
             moveInfoUpdatestoHistory(vehicleNum);
-        }
+        }*/
+
+
+
     }
 
 
@@ -503,37 +599,33 @@ public class FirebaseDataFactory {
 
         ArrayList<CarInfo> carsArraylist = new ArrayList<>();
 
-        carInfoReference.child("CarsInfo").addListenerForSingleValueEvent(new ValueEventListener() {
+        carInfoReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 if(dataSnapshot !=null && dataSnapshot.getValue() !=null) {
 
-                    carsArraylist.clear();
+                    //carsArraylist.clear();
                     for (DataSnapshot carinfo : dataSnapshot.getChildren()) {
+                        if(carinfo !=null) {
+                            CarInfo carInfoObj = carinfo.getValue(CarInfo.class);
+                            String vehicleNum = carinfo.getKey();
+                            carInfoObj.setVehicle_no(vehicleNum);
+                            carInfoListener.onProgress();
 
-                        CarInfo carInfoObj = carinfo.getValue(CarInfo.class);
-                        String vehicleNum = carinfo.getKey();
-                        carInfoObj.setVehicle_no(vehicleNum);
-                        carInfoListener.onProgress();
-
-                        if (carInfoObj != null) {
                             carsArraylist.add(carInfoObj);
                         }
                     }
+
                     if(carInfoListener !=null && carsArraylist != null && carsArraylist.size()>0){
                         Log.i("soni-", "Carinfo Data retrieved..");
                         ArrayList<CarInfoSerial> carsSeriallist= buildInfoSerializable(carsArraylist);
                         carInfoListener.onDataRetrieved(carsSeriallist);
                     }
 
-
-
                 }else{
-
-                    if(carInfoListener !=null) {
-                        carInfoListener.onRetrieveFailed();
-                    }
+                    ArrayList<CarInfoSerial> carsSeriallist = new ArrayList<>();
+                    carInfoListener.onDataRetrieved(carsSeriallist);
                     Log.i("soni-", "no data found in CarsInfoDup");
 
                 }
@@ -542,7 +634,9 @@ public class FirebaseDataFactory {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                if(carInfoListener !=null) {
+                    carInfoListener.onRetrieveFailed(databaseError.getMessage());
+                }
             }
         });
     }
@@ -566,24 +660,22 @@ public class FirebaseDataFactory {
 
         Log.i("soni-", "retrieveMyVehicleNumbers method");
 
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference();
-
-        userRef.child("userInfo").child(encodeString(uname)).addListenerForSingleValueEvent(new ValueEventListener() {
+        db.child("userInfo").child(encodeString(uname)).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                if(dataSnapshot !=null && dataSnapshot.hasChild("ownerof")) {
-                    if(dataSnapshot.child("ownerof").getValue() instanceof List) {
+                if(dataSnapshot !=null && dataSnapshot.hasChild("activeorders")) {
+                    if(dataSnapshot.child("activeorders").getValue() instanceof List) {
 
-                        activeOrders = (ArrayList<String>) dataSnapshot.child("ownerof").getValue();
+                        activeOrders = (ArrayList<String>) dataSnapshot.child("activeorders").getValue();
                         //Log.i("soni-", "retrieveMyVehicleNumbers - it is a List");
                         if(carNumbersListener !=null)   {
                             carNumbersListener.onProgress();
                         }
 
-                    }else if(dataSnapshot.child("ownerof").getValue() instanceof HashMap){
+                    }else if(dataSnapshot.child("activeorders").getValue() instanceof HashMap){
 
-                        HashMap<String, List<String>> hashMap = (HashMap<String, List<String>>) dataSnapshot.child("ownerof").getValue();
+                        HashMap<String, List<String>> hashMap = (HashMap<String, List<String>>) dataSnapshot.child("activeorders").getValue();
                         //Log.i("soni-", "retrieveMyVehicleNumbers - it is a hashmap " + hashMap.keySet().toString() );
                         if(hashMap.keySet().size() == 1)    {
                             for(String hmkey : hashMap.keySet()) {

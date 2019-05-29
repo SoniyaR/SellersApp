@@ -21,12 +21,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.libraries.places.compat.Place;
-import com.google.android.libraries.places.compat.ui.PlaceAutocomplete;
+import com.mapbox.api.geocoding.v5.models.CarmenFeature;
+import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete;
 
 import java.util.HashMap;
+
+//import com.google.android.libraries.places.compat.Place;
 
 public class UploadNewInfo extends AppCompatActivity implements View.OnClickListener {
 
@@ -36,7 +37,7 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
     TextView sellingpriceView;
     HashMap<String, Object> infoHashmap = new HashMap<>();
     TextView vehicleNum;
-    TextView locationText;
+    //TextView locationText;
 
 
     LocationManager locationManager;
@@ -55,7 +56,7 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
 //    FindAutocompletePredictionsRequest.Builder requestBuilder;
 //    FindAutocompletePredictionsRequest request;
 
-    int AUTOCOMPLETE_REQUEST = 1;
+    int REQUEST_CODE_AUTOCOMPLETE = 1;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -65,7 +66,7 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
                 oldLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 if(oldLocation !=null) {
-                    locationText.setText(new LocationAdapter(getApplicationContext(), oldLocation).getAddress());
+                    locationEditText.setText(new LocationAdapter(getApplicationContext(), oldLocation).getAddress());
                 }
             }
         }
@@ -89,12 +90,15 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
 
         vehicleNum = findViewById(R.id.numberText);
         vehicleNum.setFilters(new InputFilter[]{new InputFilter.AllCaps()});
-        locationText = findViewById(R.id.locationText);
+        //locationText = findViewById(R.id.locationText);
 
         locationEditText = findViewById(R.id.locationEditText);
 
         saveButton = findViewById(R.id.saveButton);
         saveButton.setOnClickListener(this);
+
+
+        //
 
         //get current location and autofill in location
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -105,7 +109,7 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
                         (location.getLatitude() != oldLocation.getLatitude() || location.getLongitude() != oldLocation.getLongitude()))) {
                     oldLocation = location;
                     Log.i("soni-", "in onLocationChanged");
-                    locationText.setText(new LocationAdapter(getApplicationContext(), location).getAddress());
+                    locationEditText.setText(new LocationAdapter(getApplicationContext(), location).getAddress());
                 }
             }
 
@@ -125,15 +129,8 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
             }
         };
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        } else {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
-            oldLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if(oldLocation !=null) {
-                locationText.setText(new LocationAdapter(this, oldLocation).getAddress());
-            }
-        }
+        getLocationPermission();
+
 
         /*locationText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -169,6 +166,18 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
             }
         });*/
 
+    }
+
+    public void getLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        } else {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
+            oldLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if(oldLocation !=null) {
+                locationEditText.setText(new LocationAdapter(this, oldLocation).getAddress());
+            }
+        }
     }
 
     @Override
@@ -215,7 +224,7 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
             case R.id.locationEditText:
 
                 Log.i("soni-", "clicked on locationEditText");
-               /* PlaceOptions placeOptions = new PlaceOptions.Builder()
+               /*PlacesOptions placeOptions = new PlacesOptions.Builder()
                         .toolbarColor(Color.parseColor("#EEEEEE"))
                         .limit(7)
                         .country("IN")
@@ -227,6 +236,11 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
                         .build(this);
                 startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);*/
 
+                Intent intent = new PlaceAutocomplete.IntentBuilder()
+                        .accessToken(Mapbox.getAccessToken())
+                        .build(this);
+                startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);
+
                 //showAutocomplete();
 
                 break;
@@ -237,9 +251,7 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
 
     }
 /*
-
-    */
-/**
+*//**
      * Shows the autocomplete activity.
      *//*
 
@@ -256,22 +268,18 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
             Log.i("soni-", " uploadinfo - e2 - " +  e.getMessage());
             //showResponse(getString(R.string.google_play_services_error));
         }
-    }
+    }*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == AUTOCOMPLETE_REQUEST && resultCode == Activity.RESULT_OK) {
-            */
-/*CarmenFeature feature = PlaceAutocomplete.getPlace(data);
-            Toast.makeText(this, feature.text(), Toast.LENGTH_LONG).show();*//*
+        if (requestCode == REQUEST_CODE_AUTOCOMPLETE && resultCode == Activity.RESULT_OK) {
 
-
-            Place place = PlaceAutocomplete.getPlace(this, data);
-            locationEditText.setText(place.getName());
+            CarmenFeature feature = PlaceAutocomplete.getPlace(data);
+            locationEditText.setText(feature.text());
         }
     }
-*/
+
 
     //vehicle_no	model_name	availability description	location	sellingprice
     private void prepareHashmapData(HashMap<String, Object> infoHashmap) {
@@ -280,7 +288,7 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
         infoHashmap.put("model_name", titleText.getText().toString());
         infoHashmap.put("availability", "Available");
         infoHashmap.put("description", descriptionView.getText().toString());
-        infoHashmap.put("location", locationText.getText().toString());
+        infoHashmap.put("location", locationEditText.getText().toString());
         infoHashmap.put("sellingprice", sellingpriceView.getText().toString());
 
     }

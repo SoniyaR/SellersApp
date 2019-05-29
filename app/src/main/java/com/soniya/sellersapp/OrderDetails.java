@@ -64,13 +64,6 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
     HashMap<String, Object> hm = new HashMap<>();
     List<Bitmap> carImagesList = new ArrayList<>();
 
-//    @Override
-//    public void onBackPressed() {
-//        super.onBackPressed();
-//        Intent i = new Intent(getApplicationContext(), HomePage.class);
-//        startActivity(i);
-//    }
-
     boolean modelchanged = false;
     boolean pricechanged = false;
     boolean statuschanged = false;
@@ -145,7 +138,10 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
             soldButton.setBackgroundResource(R.drawable.round_button);
             soldButton.setEnabled(true);
             carInfoReference.child("availability").setValue("Available");
-            updateAvailability();
+            //updateCarAvailability();
+
+            FirebaseDataFactory dataFactory = new FirebaseDataFactory();
+            dataFactory.activateOrder(vehicleNum.getText().toString().replace(space, replacechar));
         }
 
     }
@@ -222,13 +218,6 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
         Log.i("soni-update", "info saved successfully!");
     }
-/*
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-
-    }*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -439,7 +428,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                     soldButton.setBackgroundColor(Color.GRAY);
                     soldButton.setEnabled(false);
                     carInfoReference.child("availability").setValue("sold");
-                    updateAvailability();
+                    updateCarAvailability();
                 }
                 
                 break;
@@ -475,7 +464,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void updateAvailability() {
+    private void updateCarAvailability() {
 
         String newstatus = availability.getText().toString();
         carInfoReference.child("availability").setValue(newstatus);

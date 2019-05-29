@@ -70,7 +70,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     FirebaseDataFactory database = new FirebaseDataFactory();
    // List<HashMap<String, Object>> hmList = new ArrayList<>();
 
-    ArrayList<String> ownerofList;
+    ArrayList<String> activeordersList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,9 +119,9 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
             prevButton.setEnabled(false);
             nextButton.setEnabled(false);
         }
-        ownerofList = new ArrayList<>();
+        activeordersList = new ArrayList<>();
 
-        ownerofList=database.getOwnerofList();
+        activeordersList=database.getactiveorders_List();
 
     }
 
@@ -131,7 +131,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         if(recHashmap !=null) {
 
             CarInfo carinfoDup = buildCarinfoObject(recHashmap);
-            database.uploadData(carinfoDup, curr_vehicleNum.replace(space, replacechar), ownerofList);
+            database.uploadData(carinfoDup, curr_vehicleNum.replace(space, replacechar), activeordersList);
 
             if(selectedUriList != null && selectedUriList.size() > 0) {
 

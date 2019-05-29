@@ -1,5 +1,6 @@
 package com.soniya.sellersapp;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -31,6 +32,7 @@ public class Tab1Fragment extends Fragment {
 
     CustomAdapter carListAdapter;
 
+    Context context;
    /* public static Fragment getInstance(int position)   {
         Log.i("soni-tab1frag", "position = " + String.valueOf(position));
         Bundle bundle = new Bundle();
@@ -44,6 +46,7 @@ public class Tab1Fragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_one, container, false);
+        context = getActivity();
 
         carsListView = rootView.findViewById(R.id.tab1listView);
         registerForContextMenu(carsListView);
@@ -94,9 +97,8 @@ public class Tab1Fragment extends Fragment {
                 }
             });
         } else  {
-            ArrayAdapter arrayAdapter = new ArrayAdapter(Tab1Fragment.this.getActivity(), android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
+            ArrayAdapter arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
             carsListView.setAdapter(arrayAdapter);
-            arrayAdapter.notifyDataSetChanged();
 
         }
 
@@ -142,7 +144,7 @@ public class Tab1Fragment extends Fragment {
 
             case R.id.editRecord:
                 Log.i("soni-contextmenu", "editRecord selected");
-                Intent editIntent = new Intent(getActivity(), OrderDetails.class);
+                Intent editIntent = new Intent(context, OrderDetails.class);
                 editIntent.putExtra("forEdit", true);
                 editIntent.putExtra("selVehicleNum", myCarslist.get(contextSelPosition).getVehicle_no());
                 startActivity(editIntent);
