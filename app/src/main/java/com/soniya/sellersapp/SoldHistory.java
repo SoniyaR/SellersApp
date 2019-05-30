@@ -145,7 +145,7 @@ public class SoldHistory extends AppCompatActivity {
                         }
                     }
 
-                    ArrayList<CarInfoSerial> soldCarsSeriallist= new FirebaseDataFactory().buildInfoSerializable(soldCarInfoList);
+                    ArrayList<CarInfoSerial> soldCarsSeriallist= new FirebaseAdapter().buildInfoSerializable(soldCarInfoList);
                     Log.i("soni-", "datasnapshot sold history retrieved");
                     adapter = new CustomAdapter(getApplicationContext(), soldCarsSeriallist, R.layout.carslist_layout);
                     soldList.setAdapter(adapter);

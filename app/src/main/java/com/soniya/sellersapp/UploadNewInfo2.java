@@ -14,9 +14,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -33,7 +36,6 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.StringTokenizer;
 
 
@@ -56,6 +58,8 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     Button prevButton;
     Button nextButton;
 
+    EditText descriptionView;
+
     DatabaseReference carInfoRef;
 
     Bitmap img = null;
@@ -68,7 +72,6 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     ProgressBar progressBar;
 
     FirebaseDataFactory database = new FirebaseDataFactory();
-   // List<HashMap<String, Object>> hmList = new ArrayList<>();
 
     ArrayList<String> activeordersList;
 
@@ -103,6 +106,23 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         selectedImages.setOnClickListener(this);
         selectedImages.setVisibility(View.INVISIBLE);
 
+        descriptionView = findViewById(R.id.descriptionView);
+        descriptionView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                Log.i("soni-", "description "+ s + " " + String.valueOf(start) + " " + String.valueOf(count));
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
         skipText= findViewById(R.id.skipText);
         skipText.setOnClickListener(this);
         skipText.setPaintFlags(skipText.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
@@ -127,68 +147,64 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
 
     int index=0;
 
-    public void saveAllInformation(View view)  {
+    public void saveAllInformation()  {
         if(carInfoSerial !=null) {
 
-            CarInfo carinfoDup = buildCarinfoObject(carInfoSerial);
-            database.uploadData(carinfoDup, curr_vehicleNum.replace(space, replacechar), activeordersList);
+            CarInfo object = buildCarinfoObject(carInfoSerial);
 
-            if(selectedUriList != null && selectedUriList.size() > 0) {
+            CarInfo carinfoObj = new CarInfo(curr_vehicleNum, activeordersList);
+            carinfoObj.setCarInfoUploadListener(object, new CarInfo.CarInfoUploadListener() {
+                @Override
+                public void onUploadComplete(String result) {
+                    if(result.equalsIgnoreCase(carinfoObj.result))  {
+                        if(selectedUriList != null && selectedUriList.size() > 0) {
 
-                if (img_ref != null) {
-                    index=0;
+                            if (img_ref != null) {
+                                index=0;
 
-                    for (Uri uri : selectedUriList) {
-                        String filename = "";
-                        String path = uri.getPath().toString();
-                        StringTokenizer tokenizer = new StringTokenizer(path, "/");
-                        while (tokenizer.hasMoreTokens()) {
-                            filename = tokenizer.nextToken();
+                                for (Uri uri : selectedUriList) {
+                                    String filename = "";
+                                    String path = uri.getPath().toString();
+                                    StringTokenizer tokenizer = new StringTokenizer(path, "/");
+                                    while (tokenizer.hasMoreTokens()) {
+                                        filename = tokenizer.nextToken();
+                                    }
+
+                                    //Log.i("soni-filename", filename);
+                                    uploadImage(uri, filename);
+                                }
+
+                            }
+
+                        }else{
+                            Log.i("soni-176", "uploadinfo2 - No images to upload...");
+
+                            Intent i = new Intent(getApplicationContext(), HomePage.class);
+                            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            Toast.makeText(UploadNewInfo2.this, "New Record Added Successfully!", Toast.LENGTH_SHORT).show();
+                            startActivity(i);
                         }
-
-                        //Log.i("soni-filename", filename);
-                        uploadImage(uri, filename);
                     }
-
                 }
 
-            }else{
-                Log.i("soni-176", "uploadinfo2 - No images to upload...");
+                @Override
+                public void onUploadFail(String Error) {
 
-                Intent i = new Intent(getApplicationContext(), HomePage.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                Toast.makeText(this, "New Record Added Successfully!", Toast.LENGTH_SHORT).show();
-                startActivity(i);
-            }
+                    Intent i = new Intent(getApplicationContext(), HomePage.class);
+                    i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    Toast.makeText(UploadNewInfo2.this, "Something went wrong, Try again! " + Error, Toast.LENGTH_SHORT).show();
+                    startActivity(i);
+                }
+            });
+            //database.uploadData(carinfoObj, curr_vehicleNum.replace(space, replacechar), activeordersList);
+
+
 
         }else{
             Log.i("soni-", "uploadinfo2- something went wrong");
         }
     }
 
-
-    /*private CarInfo buildCarinfoObject(HashMap<String, Object> recHashmap) {
-        //vehicle_no	model_name	availability description	location	sellingprice
-        CarInfo info = new CarInfo();
-        String vehicleNum = recHashmap.get("vehicle_no").toString().replace(space, replacechar);
-        String modelName = recHashmap.get("model_name").toString().replace(space, replacechar);
-        String availability = recHashmap.get("availability").toString().replace(space, replacechar);
-        String description = recHashmap.get("description").toString().replace(space, replacechar);
-        String location = recHashmap.get("location").toString().replace(space, replacechar);
-        String price = recHashmap.get("sellingprice").toString().replace(space, replacechar);
-
-        //info.setVehicle_no(vehicleNum);
-        curr_vehicleNum = vehicleNum;
-        info.setModel_name(modelName);
-        info.setAvailability(availability);
-        info.setDescription(description);
-        info.setLocation(location);
-        info.setSellingprice(price);
-
-        return info;
-
-    }
-*/
     /*
     to upload images for current user for current vehicle (newly added)
     into firebase storage,
@@ -236,7 +252,6 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                 }
             }
         });
-
     }
 
     @Override
@@ -304,7 +319,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                 break;
 
             case R.id.saveAllButton:
-                saveAllInformation(v);
+                saveAllInformation();
                 break;
 
 
@@ -320,7 +335,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
 
 
             case R.id.skipText:
-                saveAllInformation(v);
+                saveAllInformation();
                 break;
 
         }
@@ -356,23 +371,12 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                         if(selectedUriList.size() > 1)  {
                             nextButton.setEnabled(true);
                         }
-
-                       /* //test code
-                        for (Uri uri : selectedUriList) {
-                            String filename = "";
-                            String path = uri.getPath().toString();
-                            StringTokenizer tokenizer = new StringTokenizer(path, "/");
-                            while (tokenizer.hasMoreTokens()) {
-                                filename = tokenizer.nextToken();
-                            }
-
-                            //Log.i("soni-filename", filename);
-                        }*/
                     }
                 }
             }
         }
     }
+
 /*
     private String getFileExtension(Uri uri)    {
         ContentResolver cR = getContentResolver();
@@ -384,6 +388,15 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
 
         CarInfo info = new CarInfo(obj.getBrand_name(), obj.getVehicle_no(), obj.getModel_name(), obj.getAvailability(), obj.getLocation(),
                 obj.getSellingprice(), obj.getImage_uri_list());
+
+        info.setFuelType(obj.getFuelType());
+        info.setColor(obj.getColor());
+        info.setYear(obj.getYearManufacturing());
+        info.setInsurance(obj.getInsurance());
+        info.setKmsDriven(obj.getKmsDriven());
+        info.setOwner(obj.getOwner());
+        info.setTransmission(obj.getTransmission());
+        info.setDescription(obj.getDescription());
 
         return info;
 

@@ -82,8 +82,8 @@
         android:layout_marginRight="16dp"
         android:gravity="center"
         android:text="Location"
-        android:textColor="@android:color/black"
-        android:textSize="18sp"
+        android:textColor="@color/darkGrey"
+        android:textSize="14sp"
         app:layout_column="1"
         app:layout_columnWeight="1"
         app:layout_constraintEnd_toEndOf="parent"
@@ -321,64 +321,64 @@
             app:rowCount="1"
             app:columnCount="2">
 
-        <LinearLayout
-            android:orientation="vertical"
-            app:layout_column="0"
-            app:layout_row="0"
-            app:layout_columnWeight="1"
-            app:layout_rowWeight="1"
-            android:background="@android:color/white">
+            <LinearLayout
+                android:orientation="vertical"
+                app:layout_column="0"
+                app:layout_row="0"
+                app:layout_columnWeight="1"
+                app:layout_rowWeight="1"
+                android:background="@android:color/white">
 
-            <TextView
-                android:id="@+id/transmissiontext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="4dp"
-                android:text="Transmission"
-                android:textColor="@android:color/black"
-                android:textSize="14sp" />
-            <TextView
-                android:id="@+id/transmission"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="4dp"
-                android:text="Manual"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"/>
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/transmissiontext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="4dp"
+                    android:text="Transmission"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp" />
+                <TextView
+                    android:id="@+id/transmission"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:text="Manual"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"/>
+            </LinearLayout>
 
-        <LinearLayout
-            android:orientation="vertical"
-            app:layout_column="1"
-            app:layout_columnWeight="1"
-            app:layout_row="0"
-            app:layout_rowWeight="1"
-            android:background="@android:color/tertiary_text_light">
+            <LinearLayout
+                android:orientation="vertical"
+                app:layout_column="1"
+                app:layout_columnWeight="1"
+                app:layout_row="0"
+                app:layout_rowWeight="1"
+                android:background="@android:color/tertiary_text_light">
 
-            <TextView
-                android:id="@+id/insurancetext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="4dp"
-                android:text="Insurance"
-                android:textColor="@android:color/black"
-                android:textSize="14sp"/>
+                <TextView
+                    android:id="@+id/insurancetext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="4dp"
+                    android:text="Insurance"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"/>
 
-            <TextView
-                android:id="@+id/insurance"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="4dp"
-                android:layout_gravity="center"
-                android:text="Yes"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"/>
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/insurance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:layout_gravity="center"
+                    android:text="Yes"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"/>
+            </LinearLayout>
         </android.support.v7.widget.GridLayout>
 
         <TextView
@@ -441,16 +441,14 @@
         android:id="@+id/vehNumDetailsView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/light_round_button"
-        android:padding="10dp"
-        android:textColor="@android:color/black"
-        android:textSize="18sp"
+        android:textColor="@color/darkGrey"
+        android:textSize="14sp"
+        android:text="Veh_number"
         android:textStyle="bold|italic"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/modelname" />
 
 
 

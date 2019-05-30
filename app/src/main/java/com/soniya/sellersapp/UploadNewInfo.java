@@ -2,9 +2,7 @@ package com.soniya.sellersapp;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -22,48 +20,37 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.mapbox.api.geocoding.v5.models.CarmenFeature;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete;
 
-import java.util.HashMap;
 
-//import com.google.android.libraries.places.compat.Place;
 
 public class UploadNewInfo extends AppCompatActivity implements View.OnClickListener {
 
-    TextView descriptionView;
     Button saveButton;
     TextView titleText;
     TextView sellingpriceView;
-    HashMap<String, Object> infoHashmap = new HashMap<>();
     TextView vehicleNum;
-    //TextView locationText;
     Spinner fueltypeDropdown;
+    Spinner ownerDropdown;
+    Spinner transmDropdown;
     TextView colorEdit;
     TextView yearEdit;
-
-    String [] fueltypesArr;
-
+    TextView brandName;
+    RadioGroup insuranceCheck;
+    TextView kmsDriven;
+    TextView locationText;
 
     LocationManager locationManager;
     LocationListener listener;
     Location oldLocation;
-
-    TextView locationEditText;
-
-
-    //PlacesClient placesClient;
-    String query;
-
-//    AutocompleteSessionToken token;
-//    RectangularBounds bounds;
-//
-//    FindAutocompletePredictionsRequest.Builder requestBuilder;
-//    FindAutocompletePredictionsRequest request;
 
     int REQUEST_CODE_AUTOCOMPLETE = 1;
 
@@ -75,7 +62,7 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
                 oldLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 if(oldLocation !=null) {
-                    locationEditText.setText(new LocationAdapter(getApplicationContext(), oldLocation).getAddress());
+                    locationText.setText(new LocationAdapter(getApplicationContext(), oldLocation).getAddress());
                 }
             }
         }
@@ -88,33 +75,32 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_upload_new_info);
         setTitle("Upload New Information");
 
-        infoHashmap.clear();
-
         titleText = findViewById(R.id.titleTextView);
-
-        descriptionView = findViewById(R.id.descriptionView);
-        descriptionView.setOnClickListener(this);
-
         sellingpriceView = findViewById(R.id.sellingpriceView);
 
         vehicleNum = findViewById(R.id.numberText);
         vehicleNum.setFilters(new InputFilter[]{new InputFilter.AllCaps()});
-        //locationText = findViewById(R.id.locationText);
-
-        locationEditText = findViewById(R.id.locationEditText);
-
+        locationText = findViewById(R.id.locationEditText);
         colorEdit = findViewById(R.id.colorEditText);
         yearEdit = findViewById(R.id.yearManuf);
+        insuranceCheck = findViewById(R.id.insuranceRadioGrp);
 
         saveButton = findViewById(R.id.saveButton);
         saveButton.setOnClickListener(this);
 
+        brandName = findViewById(R.id.brandTextEdit);
+        kmsDriven = findViewById(R.id.kmsnumber);
+
         fueltypeDropdown = findViewById(R.id.fueldropdown);
-        //fueltype.setOnClickListener(this);
-        fueltypesArr = new String[]{"Petrol", "Diesel", "Electric", "LPG"};
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, fueltypesArr);
-        fueltypeDropdown.setAdapter(spinnerAdapter);
-        //
+        ArrayAdapter<String> fuelAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, new String[]{"Petrol", "Diesel", "Electric", "LPG"});
+        fueltypeDropdown.setAdapter(fuelAdapter);
+
+        ownerDropdown = findViewById(R.id.ownerdropdown);
+        ArrayAdapter ownerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, new String[]{"First", "Second", "Third", "Fourth", "Fifth"});
+        ownerDropdown.setAdapter(ownerAdapter);
+
+        transmDropdown = findViewById(R.id.transmsndropdown);
+        transmDropdown.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, new String[]{"Manual", "Automatic"}));
 
         //get current location and autofill in location
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -125,7 +111,7 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
                         (location.getLatitude() != oldLocation.getLatitude() || location.getLongitude() != oldLocation.getLongitude()))) {
                     oldLocation = location;
                     Log.i("soni-", "in onLocationChanged");
-                    locationEditText.setText(new LocationAdapter(getApplicationContext(), location).getAddress());
+                    locationText.setText(new LocationAdapter(getApplicationContext(), location).getAddress());
                 }
             }
 
@@ -191,7 +177,7 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
             oldLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if(oldLocation !=null) {
-                locationEditText.setText(new LocationAdapter(this, oldLocation).getAddress());
+                locationText.setText(new LocationAdapter(this, oldLocation).getAddress());
             }
         }
     }
@@ -203,27 +189,49 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
 
             case R.id.saveButton:
 
-                //save editDescriptionView.gettext().toString()  to database
+                boolean infoReady = false;
 
-                if (titleText.getText().length() == 0 || titleText.getText().toString().isEmpty()) {
+                if(titleText.getText().toString().isEmpty()) {
                     titleText.setError("This field cannot be blank!");
-                }/*else if(descriptionView.getText().length() == 0 || descriptionView.getText().toString().isEmpty()){
-                        descriptionView.setError("This field cannot be blank!");
-                    }*/ else if (sellingpriceView.getText().length() == 0 || sellingpriceView.getText().toString().isEmpty()) {
+                }
+                if(sellingpriceView.getText().toString().isEmpty()) {
                     sellingpriceView.setError("This field cannot be blank!");
-                } else if (vehicleNum.getText().length() == 0) {
+                }
+                if(vehicleNum.getText().toString().isEmpty()) {
                     vehicleNum.setError("This field cannot be blank!");
-                }/*else if(locationText.getText().length() == 0){
-                        locationText.setError("This field cannot be blank!");
-                    }*/ else {
-                    //saveInfo(titleText.getText().toString(), img, descriptionView.getText().toString(), sellingpriceView.getText().toString());
+                }
+                if(locationText.getText().toString().isEmpty()){
+                    locationText.setError("This field cannot be blank!");
+                }
+                if(colorEdit.getText().toString().isEmpty())    {
+                    colorEdit.setError("This field cannot be blank!");
+                }
+                if(yearEdit.getText().toString().isEmpty()) {
+                    yearEdit.setError("This field cannot be blank!");
+                }
+                if(brandName.getText().toString().isEmpty())    {
+                    brandName.setError("This field cannot be blank!");
+                }
+                if(kmsDriven.getText().toString().isEmpty())    {
+                    kmsDriven.setError("This field cannot be blank!");
+                }
+
+                if(!titleText.getText().toString().isEmpty() && !sellingpriceView.getText().toString().isEmpty() && !vehicleNum.getText().toString().isEmpty()
+                        && !locationText.getText().toString().isEmpty() && !colorEdit.getText().toString().isEmpty() && !yearEdit.getText().toString().isEmpty()
+                        && !brandName.getText().toString().isEmpty() && !kmsDriven.getText().toString().isEmpty())  {
+                    infoReady = true;
+                }
+
+                if(infoReady)   {
 
                     CarInfoSerial carinfoObject = buildCarInfoSerialObject();
-
                     Intent nextInfo = new Intent(getApplicationContext(), UploadNewInfo2.class);
                     nextInfo.putExtra("newcarinfo", carinfoObject);
                     startActivity(nextInfo);
 
+                }
+                else{
+                    Toast.makeText(this, "Mandatory fields are empty!", Toast.LENGTH_SHORT).show();
                 }
                 break;
 
@@ -240,17 +248,6 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
             case R.id.locationEditText:
 
                 Log.i("soni-", "clicked on locationEditText");
-               /*PlacesOptions placeOptions = new PlacesOptions.Builder()
-                        .toolbarColor(Color.parseColor("#EEEEEE"))
-                        .limit(7)
-                        .country("IN")
-                        .build();
-
-                Intent intent = new PlaceAutocomplete.IntentBuilder()
-                        .accessToken("pk.eyJ1Ijoic29uaXlhc2FjaGluIiwiYSI6ImNqdnpkZjB1bzBuYXg0NG1xaHBnNGFnZjgifQ.8lnZh4KFRMN9M2VAZOjhZQ")
-                        .placeOptions(placeOptions)
-                        .build(this);
-                startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);*/
 
                 Intent intent = new PlaceAutocomplete.IntentBuilder()
                         .accessToken(Mapbox.getAccessToken())
@@ -292,28 +289,34 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
         if (requestCode == REQUEST_CODE_AUTOCOMPLETE && resultCode == Activity.RESULT_OK) {
 
             CarmenFeature feature = PlaceAutocomplete.getPlace(data);
-            locationEditText.setText(feature.text());
+            locationText.setText(feature.text());
         }
     }
 
 
-    //vehicle_no	model_name	availability description	location	sellingprice
     private CarInfoSerial buildCarInfoSerialObject() {
 
         //there are total 15 features to be set to CarInfo/CarInfoSerial object
-        //out of which 14 to be set here (image uri on next page)
+        //out of which 13 to be set here (image uri, description on next page)
 
         CarInfoSerial carInfoSerial = new CarInfoSerial();
 
+        carInfoSerial.setBrand_name(brandName.getText().toString());
         carInfoSerial.setVehicle_no(vehicleNum.getText().toString());
         carInfoSerial.setModel_name(titleText.getText().toString());
         carInfoSerial.setSellingprice(sellingpriceView.getText().toString());
         carInfoSerial.setAvailability("Available");
-        carInfoSerial.setLocation(locationEditText.getText().toString());
-        carInfoSerial.setDescription(descriptionView.getText().toString());
+        carInfoSerial.setLocation(locationText.getText().toString());
         carInfoSerial.setFuelType(fueltypeDropdown.getSelectedItem().toString());
         carInfoSerial.setColor(colorEdit.getText().toString());
         carInfoSerial.setYearManufacturing(yearEdit.getText().toString());
+        carInfoSerial.setOwner(ownerDropdown.getSelectedItem().toString());
+        carInfoSerial.setTransmission(transmDropdown.getSelectedItem().toString());
+        carInfoSerial.setKmsDriven(kmsDriven.getText().toString());
+
+        int selectedRadio = insuranceCheck.getCheckedRadioButtonId();
+        RadioButton radioButton = findViewById(selectedRadio);
+        carInfoSerial.setInsurance(radioButton.getText().toString());
 
         return carInfoSerial;
 

@@ -239,14 +239,14 @@ public class HomePage extends AppCompatActivity {
             }
         });
 
-        CarInfoSerial CarInfoSerialInstance = new CarInfoSerial();
+        CarInfo CarInfoInstance = new CarInfo();
 
-        CarInfoSerialInstance.setCarInfoListener(new CarInfoSerial.CarInfoListener() {
+        CarInfoInstance.setCarInfoRetrieveListener(new CarInfo.CarInfoRetrieveListener() {
             @Override
-            public void onDataRetrieved(ArrayList<CarInfoSerial> data) {
+            public void onDataRetrieved(ArrayList<CarInfo> data) {
                 if (data != null) {
 
-                    carsArraylist.addAll(data);
+                    carsArraylist.addAll(fbAdapter.buildInfoSerializable(data));
 
                     adapter = new TabAdapter(getSupportFragmentManager());
 

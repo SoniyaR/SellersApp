@@ -24,7 +24,8 @@ public class CarInfoSerial implements Serializable {
     private String insurance;
     private String owner;
 
-
+    public CarInfoSerial(){
+    }
     public CarInfoSerial(String brand, String vehicle_no, String model_name, String availability, String location,
                          String sellingprice, ArrayList<String> uri_list){
         this.setBrand_name(brand);
@@ -161,7 +162,7 @@ public class CarInfoSerial implements Serializable {
 Listener code below
  */
 
-    String uname = "";
+    /*String uname = "";
     private DatabaseReference carInfoReference;
     FirebaseDataFactory dataFactory;
     FirebaseAdapter fbadapter;
@@ -198,7 +199,7 @@ Listener code below
         carNumbersListener = listener;
         dataFactory.retrieveMyVehicleNumbers(carNumbersListener);
     }
-
+*/
 
 
 

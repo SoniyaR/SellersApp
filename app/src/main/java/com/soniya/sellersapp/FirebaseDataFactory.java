@@ -245,14 +245,18 @@ public class FirebaseDataFactory {
     /*
     method for pushing carInfoSerial object into db
      */
-    public void uploadData(CarInfo carInfoObj, String vehicleNum, ArrayList<String> activeorders_List)    {
+    public void uploadData(CarInfo carInfoObj, String vehicleNum, ArrayList<String> activeorders_List, CarInfo.CarInfoUploadListener listener)    {
         DatabaseReference curr_ref =  db.child("CarsInfo");
 
         curr_ref.child(vehicleNum).setValue(carInfoObj).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.i("soni-", "Record added with carinfo object to database");
+                if(listener !=null) {
+                    listener.onUploadComplete("OK");
+                }
             }
+
         });
 
         if(!activeorders_List.contains(vehicleNum)) {
@@ -596,7 +600,7 @@ public class FirebaseDataFactory {
     to retrieve cars list (active orders) for current user
      */
 
-    public void retriveCarList(CarInfoSerial.CarInfoListener carInfoListener) {
+    public void retriveCarList(CarInfo.CarInfoRetrieveListener carInfoListener) {
         Log.i("soni-", "retriveCarList method");
 
         ArrayList<CarInfo> carsArraylist = new ArrayList<>();
@@ -621,13 +625,13 @@ public class FirebaseDataFactory {
 
                     if(carInfoListener !=null && carsArraylist != null && carsArraylist.size()>0){
                         Log.i("soni-", "Carinfo Data retrieved..");
-                        ArrayList<CarInfoSerial> carsSeriallist= new FirebaseAdapter().buildInfoSerializable(carsArraylist);
-                        carInfoListener.onDataRetrieved(carsSeriallist);
+                        //ArrayList<CarInfoSerial> carsSeriallist= new FirebaseAdapter().buildInfoSerializable(carsArraylist);
+                        carInfoListener.onDataRetrieved(carsArraylist);
                     }
 
                 }else{
                     ArrayList<CarInfoSerial> carsSeriallist = new ArrayList<>();
-                    carInfoListener.onDataRetrieved(carsSeriallist);
+                    carInfoListener.onDataRetrieved(carsArraylist);
                     Log.i("soni-", "no data found in CarsInfoDup");
 
                 }
@@ -645,7 +649,7 @@ public class FirebaseDataFactory {
 
     ArrayList<String> activeOrders = new ArrayList<>();
 
-    public List retrieveMyVehicleNumbers(CarInfoSerial.CarNumbersListener carNumbersListener)   {
+    public List retrieveMyVehicleNumbers(CarInfo.CarNumbersListener carNumbersListener)   {
 
         Log.i("soni-", "retrieveMyVehicleNumbers method");
 
