@@ -42,7 +42,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     char space = ' ';
     char replacechar = '_';
 
-    HashMap<String, Object> recHashmap = null;
+    CarInfoSerial carInfoSerial ;
     Button uploadButton;
     ImageView selectedImages;
     public static final int PICK_IMAGE = 1;
@@ -108,10 +108,10 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         skipText.setPaintFlags(skipText.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
         Intent intent = getIntent();
-        if(intent.getExtras()!=null && intent.getSerializableExtra("infoHashmap") !=null){
-            recHashmap = (HashMap<String, Object>) intent.getSerializableExtra("infoHashmap");
-            curr_vehicleNum = recHashmap.get("vehicle_no").toString();
-            curr_model = recHashmap.get("model_name").toString();
+        if(intent.getExtras()!=null && intent.getSerializableExtra("newcarinfo") !=null){
+            carInfoSerial = (CarInfoSerial) intent.getSerializableExtra("newcarinfo");
+            curr_vehicleNum = carInfoSerial.getVehicle_no();
+            curr_model = carInfoSerial.getModel_name();
             img_ref = storageReference.child(new FirebaseAdapter().getCurrentUser()).child(curr_vehicleNum.replace(space, replacechar));
         }
 
@@ -128,9 +128,9 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     int index=0;
 
     public void saveAllInformation(View view)  {
-        if(recHashmap !=null) {
+        if(carInfoSerial !=null) {
 
-            CarInfo carinfoDup = buildCarinfoObject(recHashmap);
+            CarInfo carinfoDup = buildCarinfoObject(carInfoSerial);
             database.uploadData(carinfoDup, curr_vehicleNum.replace(space, replacechar), activeordersList);
 
             if(selectedUriList != null && selectedUriList.size() > 0) {
@@ -167,7 +167,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     }
 
 
-    private CarInfo buildCarinfoObject(HashMap<String, Object> recHashmap) {
+    /*private CarInfo buildCarinfoObject(HashMap<String, Object> recHashmap) {
         //vehicle_no	model_name	availability description	location	sellingprice
         CarInfo info = new CarInfo();
         String vehicleNum = recHashmap.get("vehicle_no").toString().replace(space, replacechar);
@@ -188,7 +188,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         return info;
 
     }
-
+*/
     /*
     to upload images for current user for current vehicle (newly added)
     into firebase storage,
@@ -379,5 +379,14 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         MimeTypeMap mime = MimeTypeMap.getSingleton();
         return mime.getExtensionFromMimeType(cR.getType(uri));
     }*/
+
+    public CarInfo buildCarinfoObject(CarInfoSerial obj)    {
+
+        CarInfo info = new CarInfo(obj.getBrand_name(), obj.getVehicle_no(), obj.getModel_name(), obj.getAvailability(), obj.getLocation(),
+                obj.getSellingprice(), obj.getImage_uri_list());
+
+        return info;
+
+    }
 
 }

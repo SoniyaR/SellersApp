@@ -14,12 +14,27 @@
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="40dp"
-        android:text="Model"
+        android:text="Brand"
         android:textColor="@android:color/holo_blue_dark"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    <EditText
+        android:id="@+id/brandTextEdit"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:ems="10"
+        android:hint="Brand name"
+        android:inputType="text"
+        android:textSize="18sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/brandText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/brandText" />
 
     <TextView
         android:id="@+id/titleView"
@@ -27,13 +42,13 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="24dp"
         android:text="Model"
         android:textColor="@android:color/holo_blue_dark"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/brandTextEdit" />
 
     <EditText
         android:id="@+id/titleTextView"
@@ -44,23 +59,23 @@
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:ems="10"
+        android:hint="Model name"
         android:inputType="textPersonName"
-        android:textSize="24sp"
+        android:textSize="18sp"
         app:layout_constraintBaseline_toBaselineOf="@+id/titleView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/titleView" />
 
-    <TextView
-        android:id="@+id/vehiclenum"
-        android:layout_width="79dp"
-        android:layout_height="47dp"
+    <EditText
+        android:id="@+id/yearManuf"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginTop="30dp"
-        android:text="Vehicle Number"
-        android:textColor="@android:color/holo_blue_dark"
+        android:layout_marginTop="24dp"
+        android:hint="Year"
+        android:inputType="number"
         android:textSize="18sp"
-        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/titleTextView" />
 
@@ -73,12 +88,85 @@
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:ems="10"
-        android:hint="Ex. MH12KLJ123"
+        android:hint="Vehicle no. Ex.MH12 KL123"
         android:inputType="textCapCharacters"
+        android:textSize="18sp"
         android:textAllCaps="true"
-        app:layout_constraintBaseline_toBaselineOf="@+id/vehiclenum"
+        app:layout_constraintBaseline_toBaselineOf="@+id/yearManuf"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/vehiclenum" />
+        app:layout_constraintStart_toEndOf="@+id/yearManuf" />
+
+    <TextView
+        android:id="@+id/fueltype"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="24dp"
+        android:text="Fuel Type"
+        android:textColor="@android:color/holo_blue_dark"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/numberText" />
+
+    <!--<TextView
+        android:id="@+id/fueltypeEdit"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:hint="Enter fuel type"
+        android:textSize="18sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/fueltype"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/fueltype" />
+-->
+
+    <Spinner
+        android:id="@+id/fueldropdown"
+        android:layout_width="0dp"
+        android:layout_height="21dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginRight="32dp"
+        android:dropDownWidth="match_parent"
+        android:spinnerMode="dialog"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/fueltype"
+        app:layout_constraintTop_toBottomOf="@+id/numberText"></Spinner>
+
+    <TextView
+        android:id="@+id/colorText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="20dp"
+        android:text="Car Color"
+        android:textColor="@android:color/holo_blue_dark"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fueldropdown" />
+
+    <EditText
+        android:id="@+id/colorEditText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:hint="Enter car color"
+        android:textSize="18sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/colorText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/colorText" />
 
     <TextView
         android:id="@+id/locationView"
@@ -86,28 +174,14 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="20dp"
         android:text="Location"
         android:textColor="@android:color/holo_blue_dark"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/vehiclenum" />
-<!--
-    <EditText
-        android:id="@+id/locationText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:ems="10"
-        android:inputType="text"
-        android:visibility="gone"
-        app:layout_constraintBaseline_toBaselineOf="@+id/locationView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/locationView" />-->
+        app:layout_constraintTop_toBottomOf="@+id/colorText" />
+
 
     <EditText
         android:id="@+id/locationEditText"
@@ -118,6 +192,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:hint="Enter area..."
+        android:textSize="18sp"
         app:layout_constraintBaseline_toBaselineOf="@+id/locationView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/locationView" />
@@ -128,11 +203,12 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:hint="Set Selling Price"
         android:inputType="number|numberDecimal"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/rupeeimg"
         app:layout_constraintTop_toBottomOf="@+id/locationView" />

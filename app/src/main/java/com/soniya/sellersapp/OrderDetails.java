@@ -1,5 +1,7 @@
 package com.soniya.sellersapp;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -15,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
@@ -39,29 +42,29 @@ import java.util.List;
 public class OrderDetails extends AppCompatActivity implements View.OnClickListener {
 
     TextView model;
-    EditText modelEdit;
     TextView availability;
     TextView price;
     TextView vehicleNum;
-    AlertDialog pricedialog;
-    AlertDialog modeldialog;
-    EditText priceEdit;
-    boolean editmode=false;
     Button soldButton;
-    EditText descEdit;
-    //ImageView imgView;
     ArrayList<String> urlList = new ArrayList<>();
     TextView description;
+    TextView color;
+    TextView brand;
+    TextView fuel;
+    TextView locDetails;
+    TextView yearDetails;
+    LinearLayout collapseLinear;
+    TextView showmoreless;
 
     DatabaseReference carInfoReference;
+    DatabaseReference updateRef;
     LinearLayout gallery;
+
+    boolean editmode=false;
 
     char space = ' ';
     char replacechar = '_';
 
-    DatabaseReference updateRef;
-
-    HashMap<String, Object> hm = new HashMap<>();
     List<Bitmap> carImagesList = new ArrayList<>();
 
     boolean modelchanged = false;
@@ -70,6 +73,103 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
     String oldPriceVal= "";
     String oldModelVal= "";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_order_details);
+        setTitle("Car Information");
+
+        editmode = false;
+
+        model = findViewById(R.id.modelname);
+        locDetails = findViewById(R.id.locationdetails);
+        price = findViewById(R.id.price);
+        color = findViewById(R.id.colorDetails);
+        brand = findViewById(R.id.brandDetails);
+        fuel = findViewById(R.id.fuelEditDetails);
+        yearDetails = findViewById(R.id.yearDetails);
+        vehicleNum = findViewById(R.id.vehNumDetailsView);
+        collapseLinear = findViewById(R.id.collapseLinear);
+        collapseLinear.setVisibility(View.GONE);
+        soldButton = findViewById(R.id.soldButton);
+        description = findViewById(R.id.descriptionDetails);
+        showmoreless = findViewById(R.id.showMoreLess);
+        showmoreless.setOnClickListener(this);
+
+        HorizontalScrollView scrollView = findViewById(R.id.horizontalScrollView);
+        scrollView.setOnClickListener(this);
+
+        gallery = findViewById(R.id.imgGallery);
+        gallery.setOnClickListener(this);
+
+        updateRef = FirebaseDatabase.getInstance().getReference().child("InfoUpdates");
+
+        Intent intent = getIntent();
+
+        if(intent.getExtras() != null && intent.hasExtra("selVehicleNum"))  {
+            // call retrieve car info
+            String vehicleNo = intent.getStringExtra("selVehicleNum").replace(space, replacechar);
+            vehicleNum.setText(intent.getStringExtra("selVehicleNum"));
+
+            carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo").child(vehicleNo);
+            carInfoReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if( dataSnapshot != null && dataSnapshot.getValue()!=null)   {
+
+                        CarInfo carInfo = dataSnapshot.getValue(CarInfo.class);
+
+                        brand.setText(carInfo.getBrand_name());
+                        model.setText(carInfo.getModel_name());
+                        color.setText(carInfo.getColor());
+                        locDetails.setText(carInfo.getLocation());
+                        locDetails.setCompoundDrawablesWithIntrinsicBounds(R.drawable.map_default_map_marker, 0, 0, 0);
+                        //availability.setText(carInfo.getAvailability());
+                        price.setText(carInfo.getSellingprice());
+                        description.setText(carInfo.getDescription());
+                        fuel.setText(carInfo.getFuelType());
+                        yearDetails.setText(carInfo.getYear());
+
+                        if(carInfo.getAvailability().equalsIgnoreCase("Sold"))  {
+                            Log.i("soni-", "this model is sold!");
+                            soldButton.setText("Sold");
+                            soldButton.setBackgroundColor(Color.GRAY);
+                            soldButton.setEnabled(false);
+                        }
+
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+            if(intent.hasExtra("forEdit") && intent.getBooleanExtra("forEdit", false)) {
+                editmode = true;
+
+            }
+        }
+
+        /*pricedialog = new AlertDialog.Builder(this).create();
+        pricedialog.setButton(DialogInterface.BUTTON_POSITIVE, "Save", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.i("soni-which OrdDetails", Integer.toString(which));
+                if(editmode) {
+                    if(!price.getText().toString().equals(priceEdit.getText().toString()))  {
+                        pricechanged = true;
+                    }
+                    oldPriceVal = price.getText().toString();
+                    price.setText(priceEdit.getText());
+                }
+            }
+        });*/
+
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -158,17 +258,6 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
         return true;
     }
 
-    private void makeEditable() {
-
-        if(editmode)    {
-            descEdit.setVisibility(View.VISIBLE);
-            description.setVisibility(View.INVISIBLE);
-            descEdit.setText(description.getText().toString());
-
-        }
-
-    }
-
     private void updateCarInfo() {
 
         //vehicle_no	model_name	availability description    location	sellingprice    image_uri_list
@@ -185,7 +274,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
         Log.i("soni-timestamp", timeStampStr);
 
         //description
-        if(!descEdit.getText().toString().equals(description.getText().toString())) {
+        /*if(!descEdit.getText().toString().equals(description.getText().toString())) {
 
             updateRef.child(vehicle).child("description").child(timeStampStr).child("Old").setValue(description.getText().toString());
             updateRef.child(vehicle).child("description").child(timeStampStr).child("New").setValue(descEdit.getText().toString());
@@ -195,7 +284,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
             descEdit.setVisibility(View.INVISIBLE);
 
             carInfoReference.child("description").setValue(description.getText().toString());
-        }
+        }*/
 
         //model
         if(modelchanged)    {
@@ -217,166 +306,6 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
 
         Log.i("soni-update", "info saved successfully!");
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_order_details);
-        setTitle("Car Information");
-
-        model = (TextView) findViewById(R.id.modelname);
-        model.setOnClickListener(this);
-        modelEdit = new EditText(this);
-
-        availability = (TextView) findViewById(R.id.availability);
-        availability.setOnClickListener(this);
-        price = (TextView) findViewById(R.id.price);
-        priceEdit = new EditText(this);
-
-        vehicleNum = findViewById(R.id.vehNumDetailsView);
-
-        descEdit = findViewById(R.id.editDescription);
-        descEdit.setVisibility(View.INVISIBLE);
-
-        editmode = false;
-
-        soldButton = (Button) findViewById(R.id.soldButton);
-        soldButton.setOnClickListener(this);
-
-        description = (TextView) findViewById(R.id.editTextDesc);
-        description.setOnClickListener(this);
-
-        HorizontalScrollView scrollView = findViewById(R.id.horizontalScrollView);
-        scrollView.setOnClickListener(this);
-
-        gallery = findViewById(R.id.imgGallery);
-        gallery.setOnClickListener(this);
-
-        updateRef = FirebaseDatabase.getInstance().getReference().child("InfoUpdates");
-
-        Intent intent = getIntent();
-
-        if(intent.getExtras() != null && intent.hasExtra("selVehicleNum"))  {
-            // call retrieve car info
-            String vehicleNo = intent.getStringExtra("selVehicleNum").replace(space, replacechar);
-
-            vehicleNum.setText(intent.getStringExtra("selVehicleNum"));
-
-            carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo").child(vehicleNo);
-
-            carInfoReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if( dataSnapshot != null && dataSnapshot.hasChildren())   {
-
-                        Iterator<DataSnapshot> it = dataSnapshot.getChildren().iterator();
-                        while(it.hasNext()) {
-                            DataSnapshot ds = it.next();
-                            if(ds.getKey().equals("image_uri_list"))    {
-                                urlList = (ArrayList<String>) ds.getValue();
-                                //load img to imgview
-                                if(urlList.size() > 0)  {
-                                    //Glide.with(getApplicationContext()).load(urlList.get(0)).into(imgView);
-                                    loadImages();
-                                }
-                            }
-                            else{
-
-                                switch(ds.getKey()) {
-
-                                    case "model_name":
-
-                                        model.setText(ds.getValue().toString().replace(replacechar, space));
-
-                                        break;
-
-                                    case "availability":
-                                        availability.setText(ds.getValue().toString().replace(replacechar, space));
-                                        if(availability.getText().toString().equalsIgnoreCase("Sold"))  {
-                                            Log.i("soni-", "this model is sold!");
-                                            soldButton.setText("Sold");
-                                            soldButton.setBackgroundColor(Color.GRAY);
-                                            soldButton.setEnabled(false);
-                                        }
-                                        break;
-
-                                    case "sellingprice":
-
-                                        price.setText(ds.getValue().toString());
-
-                                        break;
-
-                                    case "description":
-
-                                        description.setText(ds.getValue().toString().replace(replacechar, space));
-                                        descEdit.setText(description.getText());
-
-                                        break;
-                                }
-
-                            }
-
-                        }
-
-
-                        /*//set images
-                        if(hm.keySet().contains("image_uri_list")) {
-                            urlList = (ArrayList<String>) hm.get("image_uri_list");
-
-                            if(urlList.size() > 0)  {
-                                Glide.with(this).load(urlList.get(0)).into(imgView);
-                                loadImagesToList();
-                            }
-                        }*/
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-
-            if(intent.hasExtra("forEdit") && intent.getBooleanExtra("forEdit", false)) {
-                editmode = true;
-                makeEditable();
-            }
-        }
-
-        pricedialog = new AlertDialog.Builder(this).create();
-        pricedialog.setButton(DialogInterface.BUTTON_POSITIVE, "Save", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Log.i("soni-which OrdDetails", Integer.toString(which));
-                if(editmode) {
-                    if(!price.getText().toString().equals(priceEdit.getText().toString()))  {
-                        pricechanged = true;
-                    }
-                    oldPriceVal = price.getText().toString();
-                    price.setText(priceEdit.getText());
-                }
-            }
-        });
-
-
-        modeldialog = new AlertDialog.Builder(this).create();
-        modeldialog.setButton(DialogInterface.BUTTON_POSITIVE, "Save", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                //Log.i("soni-which OrdDetails", Integer.toString(which));
-                if(editmode) {
-                    if(!modelEdit.getText().toString().equals(model.getText().toString()))  {
-                        modelchanged = true;
-                    }
-                    oldModelVal = model.getText().toString();
-                    model.setText(modelEdit.getText());
-                }
-            }
-        });
-
-        price.setOnClickListener(this);
-
     }
 
     private void loadImages() {
@@ -411,13 +340,13 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
         
         switch (v.getId())  {
 
-            case R.id.modelname:
-                if(editmode) {
-                    modeldialog.setView(modelEdit);
-                    modeldialog.setTitle("Enter new model name");
-                    modelEdit.setInputType(InputType.TYPE_CLASS_TEXT);
-                    modelEdit.setText(model.getText());
-                    modeldialog.show();
+            case R.id.showMoreLess:
+                if(collapseLinear.getVisibility() == View.GONE) {
+                    expand();
+                    showmoreless.setText("Show Less <<");
+                }else {
+                    collapse();
+                    showmoreless.setText("Show more >>");
                 }
                 break;
 
@@ -433,28 +362,6 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                 
                 break;
 
-            case R.id.price:
-
-                if(editmode) {
-                    pricedialog.setView(priceEdit);
-                    pricedialog.setTitle("Enter the new Price");
-                    priceEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
-                    priceEdit.setText(price.getText());
-                    pricedialog.show();
-                }
-
-                break;
-
-            case R.id.editTextDesc:
-
-                if(editmode)    {
-                    descEdit.setVisibility(View.VISIBLE);
-                    description.setVisibility(View.INVISIBLE);
-                    descEdit.setText(description.getText().toString());
-
-                }
-                break;
-
             case R.id.horizontalScrollView:
             case R.id.imgGallery:
                 //opens all images to show
@@ -462,6 +369,65 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                 break;
 
         }
+    }
+
+    public void expand()    {
+        collapseLinear.setVisibility(View.VISIBLE);
+        final int widthSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        final int heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        collapseLinear.measure(widthSpec, heightSpec);
+
+        ValueAnimator mAnimator = slideAnimator(0, collapseLinear.getMeasuredHeight());
+        mAnimator.start();
+    }
+
+    public void collapse()  {
+        int finalHeight = collapseLinear.getHeight();
+
+        ValueAnimator mAnimator = slideAnimator(finalHeight, 0);
+
+        mAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                //Height=0, but it set visibility to GONE
+                collapseLinear.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+
+        });
+        mAnimator.start();
+    }
+
+    private ValueAnimator slideAnimator(int start, int end)
+    {
+
+        ValueAnimator animator = ValueAnimator.ofInt(start, end);
+
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                //Update Height
+                int value = (Integer) valueAnimator.getAnimatedValue();
+                ViewGroup.LayoutParams layoutParams = collapseLinear.getLayoutParams();
+                layoutParams.height = value;
+                collapseLinear.setLayoutParams(layoutParams);
+            }
+        });
+        return animator;
     }
 
     private void updateCarAvailability() {

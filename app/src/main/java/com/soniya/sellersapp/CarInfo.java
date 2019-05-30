@@ -9,6 +9,73 @@ public class CarInfo {
     private String model_name;
     private String availability;
     private String description;
+    private String location;
+    private String sellingprice;
+    private ArrayList<String> image_uri_list;
+    private String fuelType;
+    private String color;
+    private String year;
+    private String owner;
+    //
+    private String kmsDriven;
+    private String transmission;
+    private String insurance;
+
+    public String getKmsDriven() {
+        return kmsDriven;
+    }
+
+    public void setKmsDriven(String kmsDriven) {
+        this.kmsDriven = kmsDriven;
+    }
+
+    public String getTransmission() {
+        return transmission;
+    }
+
+    public void setTransmission(String transmission) {
+        this.transmission = transmission;
+    }
+
+    public String getInsurance() {
+        return insurance;
+    }
+
+    public void setInsurance(String insurance) {
+        this.insurance = insurance;
+    }
+
+    public String getYear() {
+        return year;
+    }
+
+    public void setYear(String year) {
+        this.year = year;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getFuelType() {
+        return fuelType;
+    }
+
+    public void setFuelType(String fuelType) {
+        this.fuelType = fuelType;
+    }
 
     public String getVehicle_no() {
         return vehicle_no;
@@ -74,8 +141,17 @@ public class CarInfo {
         this.brand_name = brand_name;
     }
 
-    private String location;
-    private String sellingprice;
-    private ArrayList<String> image_uri_list;
+
+    public CarInfo(String brand, String vehicleNum, String modelName, String availability, String location, String sellingprice,
+                   ArrayList<String> imgUriList)    {
+        this.brand_name = brand;
+        this.vehicle_no = vehicleNum;
+        this.model_name = modelName;
+        this.availability = availability;
+        this.sellingprice = sellingprice;
+        this.image_uri_list = imgUriList;
+        this.location = location;
+    }
+
 
 }

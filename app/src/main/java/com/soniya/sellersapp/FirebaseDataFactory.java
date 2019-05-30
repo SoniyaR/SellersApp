@@ -621,7 +621,7 @@ public class FirebaseDataFactory {
 
                     if(carInfoListener !=null && carsArraylist != null && carsArraylist.size()>0){
                         Log.i("soni-", "Carinfo Data retrieved..");
-                        ArrayList<CarInfoSerial> carsSeriallist= buildInfoSerializable(carsArraylist);
+                        ArrayList<CarInfoSerial> carsSeriallist= new FirebaseAdapter().buildInfoSerializable(carsArraylist);
                         carInfoListener.onDataRetrieved(carsSeriallist);
                     }
 
@@ -641,19 +641,6 @@ public class FirebaseDataFactory {
                 }
             }
         });
-    }
-
-    public ArrayList<CarInfoSerial> buildInfoSerializable(ArrayList<CarInfo> data) {
-        ArrayList<CarInfoSerial> carsArrayList = new ArrayList<>();
-        CarInfoSerial infoSerial;
-        for(CarInfo info:data){
-            infoSerial = new CarInfoSerial(info.getVehicle_no(), info.getModel_name(),
-                    info.getAvailability(), info.getLocation(), info.getSellingprice(), info.getDescription(), info.getImage_uri_list());
-            carsArrayList.add(infoSerial);
-        }
-
-        return carsArrayList;
-
     }
 
     ArrayList<String> activeOrders = new ArrayList<>();

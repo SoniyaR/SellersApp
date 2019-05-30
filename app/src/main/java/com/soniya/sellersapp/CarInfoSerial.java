@@ -8,6 +8,7 @@ import java.util.ArrayList;
 public class CarInfoSerial implements Serializable {
 
     //vehicle_no	model_name	availability description	location	sellingprice
+    private String brand_name;
     private String vehicle_no;
     private String model_name;
     private String availability;
@@ -15,15 +16,57 @@ public class CarInfoSerial implements Serializable {
     private String location;
     private String sellingprice;
     private ArrayList<String> image_uri_list;
+    private String fuelType;
+    private String yearManufacturing;
+    private String color;
+    private String kmsDriven;
+    private String transmission;
+    private String insurance;
+    private String owner;
 
-    public CarInfoSerial(String vehicle_no, String model_name, String availability, String location, String sellingprice, String description, ArrayList<String> uri_list){
+
+    public CarInfoSerial(String brand, String vehicle_no, String model_name, String availability, String location,
+                         String sellingprice, ArrayList<String> uri_list){
+        this.setBrand_name(brand);
         this.availability = availability;
-        this.description = description;
         this.location = location;
         this.model_name = model_name;
         this.sellingprice = sellingprice;
         this.vehicle_no = vehicle_no;
         this.image_uri_list = uri_list;
+    }
+
+    public String getKmsDriven() {
+        return kmsDriven;
+    }
+
+    public void setKmsDriven(String kmsDriven) {
+        this.kmsDriven = kmsDriven;
+    }
+
+    public String getTransmission() {
+        return transmission;
+    }
+
+    public void setTransmission(String transmission) {
+        this.transmission = transmission;
+    }
+
+    public String getInsurance() {
+        return insurance;
+    }
+
+    public void setInsurance(String insurance) {
+        this.insurance = insurance;
+    }
+
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public ArrayList<String> getImage_uri_list() {
@@ -82,7 +125,39 @@ public class CarInfoSerial implements Serializable {
         this.sellingprice = sellingprice;
     }
 
-/*
+    public String getBrand_name() {
+        return brand_name;
+    }
+
+    public void setBrand_name(String brand_name) {
+        this.brand_name = brand_name;
+    }
+
+    public String getFuelType() {
+        return fuelType;
+    }
+
+    public void setFuelType(String fuelType) {
+        this.fuelType = fuelType;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getYearManufacturing() {
+        return yearManufacturing;
+    }
+
+    public void setYearManufacturing(String yearManufacturing) {
+        this.yearManufacturing = yearManufacturing;
+    }
+
+    /*
 Listener code below
  */
 

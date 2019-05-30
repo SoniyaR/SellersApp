@@ -2,7 +2,9 @@ package com.soniya.sellersapp;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -18,7 +20,9 @@ import android.text.InputFilter;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.mapbox.api.geocoding.v5.models.CarmenFeature;
@@ -38,6 +42,11 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
     HashMap<String, Object> infoHashmap = new HashMap<>();
     TextView vehicleNum;
     //TextView locationText;
+    Spinner fueltypeDropdown;
+    TextView colorEdit;
+    TextView yearEdit;
+
+    String [] fueltypesArr;
 
 
     LocationManager locationManager;
@@ -94,10 +103,17 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
 
         locationEditText = findViewById(R.id.locationEditText);
 
+        colorEdit = findViewById(R.id.colorEditText);
+        yearEdit = findViewById(R.id.yearManuf);
+
         saveButton = findViewById(R.id.saveButton);
         saveButton.setOnClickListener(this);
 
-
+        fueltypeDropdown = findViewById(R.id.fueldropdown);
+        //fueltype.setOnClickListener(this);
+        fueltypesArr = new String[]{"Petrol", "Diesel", "Electric", "LPG"};
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, fueltypesArr);
+        fueltypeDropdown.setAdapter(spinnerAdapter);
         //
 
         //get current location and autofill in location
@@ -201,10 +217,11 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
                         locationText.setError("This field cannot be blank!");
                     }*/ else {
                     //saveInfo(titleText.getText().toString(), img, descriptionView.getText().toString(), sellingpriceView.getText().toString());
-                    prepareHashmapData(infoHashmap);
+
+                    CarInfoSerial carinfoObject = buildCarInfoSerialObject();
 
                     Intent nextInfo = new Intent(getApplicationContext(), UploadNewInfo2.class);
-                    nextInfo.putExtra("infoHashmap", infoHashmap);
+                    nextInfo.putExtra("newcarinfo", carinfoObject);
                     startActivity(nextInfo);
 
                 }
@@ -213,7 +230,6 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
             case R.id.backgoundLayout:
             case R.id.titleView:
             case R.id.locationView:
-            case R.id.vehiclenum:
             case R.id.rupeeimg:
                 //hide keyboard
                 InputMethodManager ipMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
@@ -282,14 +298,24 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
 
 
     //vehicle_no	model_name	availability description	location	sellingprice
-    private void prepareHashmapData(HashMap<String, Object> infoHashmap) {
+    private CarInfoSerial buildCarInfoSerialObject() {
 
-        infoHashmap.put("vehicle_no", vehicleNum.getText().toString());
-        infoHashmap.put("model_name", titleText.getText().toString());
-        infoHashmap.put("availability", "Available");
-        infoHashmap.put("description", descriptionView.getText().toString());
-        infoHashmap.put("location", locationEditText.getText().toString());
-        infoHashmap.put("sellingprice", sellingpriceView.getText().toString());
+        //there are total 15 features to be set to CarInfo/CarInfoSerial object
+        //out of which 14 to be set here (image uri on next page)
+
+        CarInfoSerial carInfoSerial = new CarInfoSerial();
+
+        carInfoSerial.setVehicle_no(vehicleNum.getText().toString());
+        carInfoSerial.setModel_name(titleText.getText().toString());
+        carInfoSerial.setSellingprice(sellingpriceView.getText().toString());
+        carInfoSerial.setAvailability("Available");
+        carInfoSerial.setLocation(locationEditText.getText().toString());
+        carInfoSerial.setDescription(descriptionView.getText().toString());
+        carInfoSerial.setFuelType(fueltypeDropdown.getSelectedItem().toString());
+        carInfoSerial.setColor(colorEdit.getText().toString());
+        carInfoSerial.setYearManufacturing(yearEdit.getText().toString());
+
+        return carInfoSerial;
 
     }
 }
