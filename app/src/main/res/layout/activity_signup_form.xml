@@ -64,7 +64,7 @@
         android:ems="10"
         android:gravity="center"
         android:hint="Enter new password..."
-        android:inputType="textPassword"
+        android:inputType="textPassword|textVisiblePassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/newMailText" />
@@ -76,6 +76,8 @@
         android:layout_marginTop="32dp"
         android:onClick="signupClicked"
         android:text="Signup"
+        android:background="@drawable/round_button"
+        android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/repPasswordText" />

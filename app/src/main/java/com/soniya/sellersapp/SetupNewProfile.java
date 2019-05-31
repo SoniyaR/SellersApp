@@ -8,13 +8,13 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -39,12 +39,15 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
     String currentEmailId = "";
     String currentPassword = "";
     TextView emailVerfi;
+    TextView mobileText;
     Button nextButton;
     FirebaseAuth auth;
 
     LocationManager locationManager;
     LocationListener listener;
     Location oldLocation;
+
+    UserInformation userInfo;
     /*PlacesClient placesClient;
     String query;
 
@@ -75,6 +78,7 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
         setTitle("Set up your profile");
 
         auth = FirebaseAuth.getInstance();
+        userInfo = new UserInformation();
 
         emailVerfi = findViewById(R.id.emailVerText);
         emailVerfi.setOnClickListener(this);
@@ -83,10 +87,13 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
         nextButton.setOnClickListener(this);
         nextButton.setVisibility(View.INVISIBLE);
 
+        mobileText = findViewById(R.id.editmobilenum);
+
         Intent intent = getIntent();
         if(intent.getExtras() !=null){
             if(intent.getStringExtra("emailId") !=null) {
                 currentEmailId = intent.getStringExtra("emailId");
+                userInfo.setEmailId(currentEmailId);
             }
 
             if(intent.getStringExtra("password") !=null)    {
@@ -100,33 +107,9 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
         newUsername = findViewById(R.id.editUsername);
         locationTextView = findViewById(R.id.editLocation);
 
-// Initialize Places.
-        //Places.initialize(getApplicationContext(), "AIzaSyAoaTpL3mpT9gBtJB1DlUF9NYoAR90ssB4");
-
-// Create a new Places client instance.
-       /* placesClient = Places.createClient(this);
-
-        query = "";
-
-        // Create a new token for the autocomplete session. Pass this to FindAutocompletePredictionsRequest,
-        // and once again when the user makes a selection (for example when calling fetchPlace()).
-        token = AutocompleteSessionToken.newInstance();
-        // Create a RectangularBounds object.
-        bounds = RectangularBounds.newInstance(
-                new LatLng(22.337804, 69.150373),
-                new LatLng(9.651869, 78.786150));
-
-        requestBuilder = FindAutocompletePredictionsRequest.builder()
-                // Call either setLocationBias() OR setLocationRestriction().
-                .setLocationBias(bounds)
-                //.setLocationRestriction(bounds)
-                //.setCountry("in")
-                .setTypeFilter(TypeFilter.ADDRESS)
-                .setSessionToken(token);
-*/
         //get current location and autofill in location
 
-        locationTextView.addTextChangedListener(new TextWatcher() {
+        /*locationTextView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 //query = "";
@@ -134,7 +117,7 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                /*query = locationTextView.getText().toString();
+                *//*query = locationTextView.getText().toString();
                 //Log.i("soni-query=", query);
                 // Use the builder to create a FindAutocompletePredictionsRequest.
 
@@ -150,7 +133,7 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
                         ApiException apiException = (ApiException) exception;
                         Log.i("soni-", "Place not found: " + apiException.getStatusCode());
                     }
-                });*/
+                });*//*
 
             }
 
@@ -159,7 +142,7 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
 
             }
         });
-
+*/
         if(!currentEmailId.isEmpty() && currentEmailId.contains("@"))   {
             newUsername.setText(currentEmailId.split("@")[0]);
         }
@@ -203,6 +186,26 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
             locationTextView.setText(new LocationAdapter(getApplicationContext(), oldLocation).getAddress());
         }
 
+        newUsername.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(newUsername.getText().toString().contains("@")) {
+                    Toast.makeText(SetupNewProfile.this, "@ not allowed in username", Toast.LENGTH_SHORT).show();
+                    newUsername.setError("Enter valid username");
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
     }
 
     public void sendVerificationMail() {
@@ -240,11 +243,27 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
 
             case R.id.nextButton:
                 if(auth.getCurrentUser() !=null) {
-                    if (newUsername.getText() != null && !newUsername.getText().toString().isEmpty()
-                            && locationTextView.getText() != null && !locationTextView.getText().toString().isEmpty()) {
+
+                    String mobilenum = "";
+
+                    if(mobilenum.length() != 10)    {
+                        mobileText.setError("Enter valid mobile number");
+                    }else{
+                        mobilenum = mobileText.getText().toString();
+                    }
+
+                    if (newUsername.getText() != null && !newUsername.getText().toString().isEmpty() && newUsername.getError().toString().isEmpty()
+                            && locationTextView.getText() != null && !locationTextView.getText().toString().isEmpty()
+                            && !mobilenum.isEmpty() && mobileText.getError().toString().isEmpty() ){
+
                         if (!currentEmailId.equals("") && !currentEmailId.isEmpty()) {
+
+                            //userInfo.setUsername(newUsername.getText().toString());
+                            userInfo.setMobileNo(mobilenum);
+                            userInfo.setLocation(locationTextView.getText().toString());
+
                             FirebaseDataFactory dataFactory = new FirebaseDataFactory();
-                            dataFactory.addNewProfileInfo(currentEmailId, newUsername.getText().toString(), locationTextView.getText().toString());
+                            dataFactory.addNewProfileInfo(newUsername.getText().toString(), userInfo);
 
                             if(auth.getCurrentUser().isEmailVerified()){
                                 Intent i = new Intent(getApplicationContext(), HomePage.class);

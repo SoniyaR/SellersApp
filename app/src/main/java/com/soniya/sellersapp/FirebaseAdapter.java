@@ -79,7 +79,6 @@ public class FirebaseAdapter {
     public String getCurrentUser()  {
         FirebaseUser user = mAuth.getCurrentUser();
         if(user !=null) {
-            //Log.i("soni-",  user.getDisplayName()+ " " + user.getEmail() + " " + user.getUid());
             if(user.getDisplayName()!=null && !user.getDisplayName().isEmpty()) {
                 return user.getDisplayName();
             }else{

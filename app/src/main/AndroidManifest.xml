@@ -18,8 +18,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".AddNewLead"
-            android:parentActivityName=".MainActivity"></activity>
+        <activity android:name=".SplashScreen"></activity>
+        <activity
+            android:name=".AddNewLead"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".SoldHistory"
             android:parentActivityName=".HomePage" />
@@ -52,9 +54,9 @@
         <activity android:name=".HomePage" />
         <activity
             android:name=".MainActivity"
-            android:supportsPictureInPicture="true"
+            android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait"
-            android:configChanges="orientation|screenSize">
+            android:supportsPictureInPicture="true">
             <layout
                 android:defaultHeight="500dp"
                 android:gravity="top"

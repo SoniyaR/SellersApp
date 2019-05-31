@@ -36,18 +36,15 @@ public class SignupForm extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup_form);
 
-        userEmailView = (EditText) findViewById(R.id.newMailText);
+        userEmailView = findViewById(R.id.newMailText);
         userEmailView.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
-        passwordView = (EditText) findViewById(R.id.newpassText);
-        repPassword = (EditText) findViewById(R.id.repPasswordText);
+        passwordView = findViewById(R.id.newpassText);
+        repPassword = findViewById(R.id.repPasswordText);
         passwordView.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
         repPassword.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
         repPassword.setTag("repeatPassword");
 
-        signupButton = (Button) findViewById(R.id.signupButton) ;
-        //TODO when all fields are error-free, enable the signup button
-        //signupButton.setEnabled(false);
-        //signupButton.
+        signupButton = findViewById(R.id.signupButton) ;
 
         Log.i("soni-", "in signupform class");
         userEmailView.addTextChangedListener(new TextValidation(userEmailView));

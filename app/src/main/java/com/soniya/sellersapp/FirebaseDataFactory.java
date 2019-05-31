@@ -46,10 +46,13 @@ public class FirebaseDataFactory {
     StorageReference img_ref = FirebaseStorage.getInstance().getReference().child(new FirebaseAdapter().getCurrentUser());
 
     public static String encodeString(String string) {
-        return string.replace(".", ",");
+        string = string.replace(".", ",");
+        return string.replace(" ", "_");
+
     }
 
     public static String decodeString(String string) {
+        string = string.replace("_", " ");
         return string.replace(",", ".");
     }
 
@@ -193,19 +196,20 @@ public class FirebaseDataFactory {
     }
 
 
-    public void addNewProfileInfo(String emailId, String username, String location)   {
+    public void addNewProfileInfo(String username, UserInformation userInfo)   {
         DatabaseReference currentUserRef =  db.child("userInfo");
+        currentUserRef.child(encodeString(username)).setValue(userInfo);
 
-        String usernameEn = "";
-        if(username.isEmpty() || username == null)   {
-            usernameEn = encodeString(new FirebaseAdapter().getCurrentUser());
-        }else{
-            usernameEn = encodeString(username);
-        }
-        Log.i("soni-", "adding to userinfo user= "+ usernameEn);
-
-        currentUserRef.child(usernameEn).child("emailId").setValue(emailId);
-        currentUserRef.child(usernameEn).child("location").setValue(location);
+//        String usernameEn = "";
+//        if(username.isEmpty() || username == null)   {
+//            usernameEn = encodeString(new FirebaseAdapter().getCurrentUser());
+//        }else{
+//            usernameEn = encodeString(username);
+//        }
+//        Log.i("soni-", "adding to userinfo user= "+ usernameEn);
+//
+//        currentUserRef.child(usernameEn).child("emailId").setValue(emailId);
+//        currentUserRef.child(usernameEn).child("location").setValue(location);
         //currentUserRef.child(username).child("activeorders").setValue(new ArrayList<String>());
     }
 

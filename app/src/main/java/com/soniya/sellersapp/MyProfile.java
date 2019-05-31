@@ -43,7 +43,6 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
     SimpleAdapter adapter;
 
     ListView feedListView;
-
     ImageView profilePictureView;
     Bitmap currentPP = null;
     TextView aboutmeTextView;
@@ -66,19 +65,10 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
         super.onOptionsItemSelected(item);
 
         switch(item.getItemId()){
-            case R.id.newpost:
-                Intent i = new Intent(getApplicationContext(), UploadNewInfo.class);
-                startActivity(i);
+            case R.id.editprofile:
+//                Intent i = new Intent(getApplicationContext(), UploadNewInfo.class);
+//                startActivity(i);
                 break;
-
-           /* case R.id.updateProfile:
-                Intent iupdate = new Intent(getApplicationContext(), AdditionalInfo.class);
-                startActivity(iupdate);
-                finish();
-
-                break;
-
-                */
 
             case R.id.logout:
                 fbAdapter.logoutUser();
@@ -103,50 +93,17 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
         setContentView(R.layout.activity_my_profile);
 
         setTitle("My Profile");
-
-        //user = ParseUser.getCurrentUser().getUsername();
         user = fbAdapter.getCurrentUser();
 
-        profilePictureView = (ImageView) findViewById(R.id.profilePicView) ;
-        aboutmeTextView = (TextView) findViewById(R.id.aboutmeTextView);
-
-        feedListView = (ListView) findViewById(R.id.myfeedListView);
-
-        followingTextView = (TextView) findViewById(R.id.followingCountView);
+        profilePictureView = findViewById(R.id.profilePicView) ;
 
         if(user !=null){
-            TextView myname = (TextView) findViewById(R.id.myname);
+            TextView myname = findViewById(R.id.myname);
             myname.setText(user);
         }
 
-        //retrieveMyProfile(); //parse implementation
         retrieveProfile(); //firebase implementation
 
-        /*String[] from = {"model_name", "sellingprice", "location", "carImage"};
-        int[] to = {R.id.modelName, R.id.sellingprice, R.id.location, R.id.carImageView};
-
-        adapter = new SimpleAdapter(this, hmlist, R.layout.carslist_layout, from, to);
-        adapter.setViewBinder(new SimpleAdapter.ViewBinder() {
-            @Override
-            public boolean setViewValue(View view, Object data, String textRepresentation) {
-                if(data == null){
-                    view.setVisibility(View.GONE);
-                }
-                if(view instanceof ImageView && data instanceof Bitmap
-                        && (view.getId() == R.id.profilePicView || view.getId() == R.id.carImageView)){
-                    ImageView imgV = (ImageView) view;
-                    imgV.setImageBitmap((Bitmap)data);
-                }else if(view instanceof TextView && data instanceof String){
-                    TextView textV = (TextView) view;
-                    textV.setText((String) data);
-                }
-                return true;
-            }
-        });
-        feedListView.setAdapter(adapter);
-
-        retrieveFeedContent();
-*/
     }
 
     public static String encodeString(String string) {
@@ -165,9 +122,6 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot != null)    {
                     Log.i("soni-profile", dataSnapshot.getValue().toString());
-                    /*if(dataSnapshot.hasChild("location "))  {
-                        Log.i("soni-prof", dataSnapshot.child("location").getValue().toString());
-                    }*/
                 }
             }
 

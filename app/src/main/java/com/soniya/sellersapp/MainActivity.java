@@ -13,10 +13,12 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView signupTextView;
     ConstraintLayout backLayout;
     ImageView logo;
+    TextView forgotPwd;
 
     //in case of username login
     String emailId = "";
@@ -89,42 +92,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
 
-        /*DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        Map<String, String> vals = new HashedMap<>();
-        vals.put("name", "Soniya");*/
-
-
-        //Firebase test: Initialise database connectivity
-       /* DatabaseAdapter databaseAdapter = new DatabaseAdapter(this.getApplicationContext());
-
-        if (databaseAdapter.alreadyLoggedIn()) {
-            Intent i = new Intent(this, HomePage.class);
-            startActivity(i);
-            finish();
-        }*/
-
        if(isOnline()) {
            if (fbAdapter.checkCurrentUser()) {
                Intent i = new Intent(this, HomePage.class);
                Log.i("soni-", "User already logged in");
                startActivity(i);
                finish();
-           }
+           }else {
 
-           user = (TextView) findViewById(R.id.userText);
-           pass = (TextView) findViewById(R.id.passText);
-           user.setText("");
-           pass.setText("");
-           pass.setOnClickListener(this);
-           loginButton = (Button) findViewById(R.id.loginButton);
-           signupTextView = (TextView) findViewById(R.id.signupText);
-           signupTextView.setOnClickListener(this);
-           loginButton.setOnClickListener(this);
-           backLayout = (ConstraintLayout) findViewById(R.id.backLayout);
-           backLayout.setOnClickListener(this);
-           logo = (ImageView) findViewById(R.id.logoView);
-           logo.setImageResource(R.drawable.logo);
-           logo.setOnClickListener(this);
+               user = (TextView) findViewById(R.id.userText);
+               pass = (TextView) findViewById(R.id.passText);
+               user.setText("");
+               pass.setText("");
+               pass.setOnClickListener(this);
+               loginButton = (Button) findViewById(R.id.loginButton);
+               signupTextView = (TextView) findViewById(R.id.signupText);
+               signupTextView.setOnClickListener(this);
+               loginButton.setOnClickListener(this);
+               backLayout = (ConstraintLayout) findViewById(R.id.backLayout);
+               backLayout.setOnClickListener(this);
+               logo = (ImageView) findViewById(R.id.logoView);
+               logo.setImageResource(R.drawable.logo);
+               logo.setOnClickListener(this);
+               forgotPwd = findViewById(R.id.forgotpwd);
+               forgotPwd.setOnClickListener(this);
+           }
        }else{
            try {
                AlertDialog.Builder alert = new AlertDialog.Builder(this)
@@ -169,23 +161,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 if(user.getText() !=null && pass.getText() != null && (user.getText().toString().isEmpty() || user.getText().toString().contains(" ")
                         || pass.getText().toString().isEmpty() || pass.getText().toString().contains(" "))){
-                    Toast.makeText(this, "Enter valid username!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Enter valid username/password!", Toast.LENGTH_SHORT).show();
                 }else {
-                    //for parse server
-                    /*if(new ParseDatabaseFactory().signInUser(user.getText().toString(), pass.getText().toString())){
-                        Intent loginIntent = new Intent(getApplicationContext(), HomePage.class);
-                        Toast.makeText(MainActivity.this, user.getText().toString() + " Logged In!", Toast.LENGTH_SHORT).show();
-                        startActivity(loginIntent);
-                    }*/
-
                     //firebase login process
 
-                    if(user.getText().toString().contains("@") && emailId.isEmpty())   {
-                        Toast.makeText(this, "Username does not exist!", Toast.LENGTH_SHORT).show();
-                    }
+                    if(user.getText().toString().contains("@")) {
 
-
-                    mAuth.signInWithEmailAndPassword(emailId, pass.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        mAuth.signInWithEmailAndPassword(emailId, pass.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful()) {
@@ -202,15 +184,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 }
                             }
                         });
-                    /*if(fbAdapter.loginUser(user.getText().toString(), pass.getText().toString())){
-                        Toast.makeText(this, "Login with Email is Successful!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(getApplicationContext(), HomePage.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    }else{
-                        Log.i("soni-", fbAdapter.getErrorMessage());
-                        Toast.makeText(this, "error-" + fbAdapter.getErrorMessage(), Toast.LENGTH_SHORT).show();
-                    }*/
+                    }
+                    else{
+
+                    }
                 }
 
                 break;
@@ -233,6 +210,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ipMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 break;
 
+            case R.id.forgotpwd:
+                EditText emailEdit = new EditText(this);
+                emailEdit.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+                new AlertDialog.Builder(this)
+                        .setTitle("Enter your email Id")
+                        .setView(emailEdit)
+                        .setNeutralButton("Reset Password", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                //send email for reset password
+                                FirebaseAuth.getInstance().sendPasswordResetEmail(emailEdit.getText().toString())
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Log.i("soni-", "Email sent for password reset.");
+                                                    Toast.makeText(MainActivity.this, "Reset password and try login again!", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                            }
+                        }).create();
+                break;
 
             default:
                 break;
