@@ -23,6 +23,7 @@ public class CarInfoSerial implements Serializable {
     private String transmission;
     private String insurance;
     private String owner;
+    private String thumbnailUriString;
 
     public CarInfoSerial(){
     }
@@ -35,6 +36,14 @@ public class CarInfoSerial implements Serializable {
         this.sellingprice = sellingprice;
         this.vehicle_no = vehicle_no;
         this.image_uri_list = uri_list;
+    }
+
+    public String getThumbnailUriString() {
+        return thumbnailUriString;
+    }
+
+    public void setThumbnailUriString(String thumbnailUriString) {
+        this.thumbnailUriString = thumbnailUriString;
     }
 
     public String getKmsDriven() {

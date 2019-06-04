@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
        if(isOnline()) {
-           if (fbAdapter.checkCurrentUser()) {
+           if (fbAdapter.checkCurrentUser() ) {
                Intent i = new Intent(this, HomePage.class);
                Log.i("soni-", "User already logged in");
                startActivity(i);
@@ -164,42 +164,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.makeText(this, "Enter valid username/password!", Toast.LENGTH_SHORT).show();
                 }else {
                     //firebase login process
+                    String emailaddress = "";
 
                     if(user.getText().toString().contains("@")) {
 
-                        mAuth.signInWithEmailAndPassword(emailId, pass.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        emailaddress = user.getText().toString().trim();
+                    }
+                    else{
+                        //Username is entered
+                        emailaddress = findEmailId(user.getText().toString());
+                    }
+
+                    if(!emailaddress.isEmpty()) {
+                        mAuth.signInWithEmailAndPassword(emailaddress, pass.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful()) {
-                                    //signinUserSuccessful = true;
-                                    //Toast.makeText(this, "Login with Email is Successful!", Toast.LENGTH_SHORT).show();
                                     checkEmailVerified();
 
                                 } else {
-                                    //signinUserSuccessful = false;
                                     if (task.getException() != null && task.getException().getMessage() != null) {
                                         Log.i("soni-", task.getException().getMessage());
-                                        Toast.makeText(MainActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(MainActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
                                     }
                                 }
                             }
                         });
-                    }
-                    else{
-
+                    }else{
+                        Log.i("soni-", "emailaddress is empty, email id Not found");
                     }
                 }
 
-                break;
-
-            case R.id.passText:
-                if(!user.getText().toString().contains("@")) {
-                    //username entered case
-                    Log.i("soni-", "its not mail id");
-                    emailId =  findEmailId(user.getText().toString());
-                }else{
-                    emailId = user.getText().toString();
-                }
                 break;
 
             case R.id.logoView:
@@ -220,8 +215,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
+                                dialog.cancel();
+
                                 //send email for reset password
-                                FirebaseAuth.getInstance().sendPasswordResetEmail(emailEdit.getText().toString())
+                                mAuth.sendPasswordResetEmail(emailEdit.getText().toString())
                                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -240,11 +237,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public static String encodeString(String string) {
+    public String encodeString(String string) {
+        if(string == null || (string !=null && string.isEmpty())){
+            return "";
+        }
         return string.replace(".", ",");
     }
 
-    public static String decodeString(String string) {
+    /*public String decodeString(String string) {
+        string = string.replace("_", " ");
+        return string.replace(",", ".");
+    }*/
+
+    public String decodeEmailId(String string) {
         return string.replace(",", ".");
     }
 
@@ -254,13 +259,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot != null && dataSnapshot.getValue()!=null)  {
-                    if(dataSnapshot.getValue() instanceof HashMap)  {
-
-                        HashMap<String, Object> hm = (HashMap<String, Object>) dataSnapshot.getValue();
-                        emailId = hm.get("emailId").toString();
-
-                        Log.i("soni-", "data is hashmap (username login process) " + emailId);
-                    }
+                    UserInformation userinf = dataSnapshot.getValue(UserInformation.class);
+                    emailId = decodeEmailId(userinf.getEmailId());
                 }
             }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/orderDetailBack"
@@ -7,6 +7,9 @@
     android:layout_height="match_parent"
     tools:context=".OrderDetails">
 
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <!--<ImageView
         android:id="@+id/carImage"
         android:layout_width="0dp"
@@ -43,53 +46,55 @@
             android:orientation="horizontal" />
     </HorizontalScrollView>
 
-    <TextView
-        android:id="@+id/brandDetails"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:padding="0dp"
-        android:text="brand"
-        android:textColor="@android:color/black"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintBaseline_toBaselineOf="@+id/modelname"
-        app:layout_constraintEnd_toStartOf="@+id/modelname" />
+       <!-- <TextView
+            android:id="@+id/brandModelDetails"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:padding="0dp"
+            android:text="brand"
+            android:textAllCaps="true"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintBaseline_toBaselineOf="@+id/modelname"
+            app:layout_constraintEnd_toStartOf="@+id/modelname" />-->
 
-    <TextView
-        android:id="@+id/modelname"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:padding="0dp"
-        android:text="model"
-        android:textColor="@android:color/black"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/horizontalScrollView" />
+        <TextView
+            android:id="@+id/brandModelDetails"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:paddingLeft="4dp"
+            android:text="brand + model"
+            android:textAllCaps="true"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/horizontalScrollView" />
 
-    <TextView
-        android:id="@+id/locationdetails"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="16dp"
-        android:gravity="center"
-        android:text="Location"
-        android:textColor="@color/darkGrey"
-        android:textSize="14sp"
-        app:layout_column="1"
-        app:layout_columnWeight="1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/modelname"
-        app:layout_row="0"
-        app:layout_rowWeight="1" />
+        <TextView
+            android:id="@+id/locationdetails"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="16dp"
+            android:gravity="center"
+            android:text="Location"
+            android:textColor="@color/darkGrey"
+            android:textSize="16sp"
+            app:layout_column="1"
+            app:layout_columnWeight="1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/brandModelDetails"
+            app:layout_row="0"
+            app:layout_rowWeight="1" />
 
     <android.support.v7.widget.GridLayout
         android:id="@+id/gridLayout"
@@ -100,6 +105,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
+        android:background="@color/lightgrey"
         app:rowCount="3"
         app:columnCount="2"
         app:layout_constraintEnd_toEndOf="parent"
@@ -111,7 +117,8 @@
             app:layout_row="0"
             app:layout_columnWeight="1"
             app:layout_rowWeight="1"
-            android:background="@android:color/tertiary_text_light">
+            android:background="@color/white"
+            android:layout_margin="2dp">
 
             <TextView
                 android:id="@+id/Mfg_year"
@@ -136,11 +143,12 @@
 
         <LinearLayout
             android:orientation="vertical"
+            android:background="@color/white"
+            android:layout_margin="2dp"
             app:layout_column="0"
             app:layout_columnWeight="1"
             app:layout_row="0"
-            app:layout_rowWeight="1"
-            android:background="@android:color/white">
+            app:layout_rowWeight="1">
 
             <TextView
                 android:id="@+id/pricetext"
@@ -166,11 +174,12 @@
 
         <LinearLayout
             android:orientation="vertical"
+            android:background="@color/white"
+            android:layout_margin="2dp"
             app:layout_column="0"
             app:layout_row="1"
             app:layout_columnWeight="1"
-            app:layout_rowWeight="1"
-            android:background="@android:color/tertiary_text_light">
+            app:layout_rowWeight="1">
 
             <TextView
                 android:id="@+id/textView2"
@@ -196,11 +205,12 @@
 
         <LinearLayout
             android:orientation="vertical"
+            android:background="@color/white"
+            android:layout_margin="2dp"
             app:layout_column="1"
             app:layout_row="1"
             app:layout_columnWeight="1"
-            app:layout_rowWeight="1"
-            android:background="@android:color/white">
+            app:layout_rowWeight="1">
 
             <TextView
                 android:id="@+id/textView4"
@@ -225,11 +235,12 @@
 
         <LinearLayout
             android:orientation="vertical"
+            android:background="@color/white"
+            android:layout_margin="2dp"
             app:layout_column="0"
             app:layout_row="2"
             app:layout_columnWeight="1"
-            app:layout_rowWeight="1"
-            android:background="@android:color/tertiary_text_light">
+            app:layout_rowWeight="1">
 
             <TextView
                 android:id="@+id/textView6"
@@ -255,11 +266,12 @@
 
         <LinearLayout
             android:orientation="vertical"
+            android:background="@color/white"
+            android:layout_margin="2dp"
             app:layout_column="1"
             app:layout_row="2"
             app:layout_columnWeight="1"
-            app:layout_rowWeight="1"
-            android:background="@android:color/white">
+            app:layout_rowWeight="1">
 
             <TextView
                 android:id="@+id/textView7"
@@ -299,123 +311,139 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/gridLayout" />
 
-    <LinearLayout
-        android:id="@+id/collapseLinear"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:orientation="vertical"
-        android:animateLayoutChanges="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/showMoreLess">
-
-        <android.support.v7.widget.GridLayout
-            android:id="@+id/gridLayoutCollapse"
+        <LinearLayout
+            android:id="@+id/collapseLinear"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:rowCount="1"
-            app:columnCount="2">
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="16dp"
+            android:animateLayoutChanges="true"
+            android:orientation="vertical"
 
-            <LinearLayout
-                android:orientation="vertical"
-                app:layout_column="0"
-                app:layout_row="0"
-                app:layout_columnWeight="1"
-                app:layout_rowWeight="1"
-                android:background="@android:color/white">
+            android:background="@color/lightgrey"
+            app:layout_constraintBottom_toTopOf="@+id/soldButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/showMoreLess">
 
-                <TextView
-                    android:id="@+id/transmissiontext"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="4dp"
-                    android:text="Transmission"
-                    android:textColor="@android:color/black"
-                    android:textSize="14sp" />
-                <TextView
-                    android:id="@+id/transmission"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:text="Manual"
-                    android:textColor="@android:color/black"
-                    android:textSize="18sp"/>
-            </LinearLayout>
+            <android.support.v7.widget.GridLayout
+                android:id="@+id/gridLayoutCollapse"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:columnCount="2"
+                app:rowCount="1">
 
-            <LinearLayout
-                android:orientation="vertical"
-                app:layout_column="1"
-                app:layout_columnWeight="1"
-                app:layout_row="0"
-                app:layout_rowWeight="1"
-                android:background="@android:color/tertiary_text_light">
+                <LinearLayout
+                    android:layout_margin="2dp"
+                    android:background="@color/white"
+                    android:orientation="vertical"
+                    app:layout_column="0"
+                    app:layout_columnWeight="1"
+                    app:layout_row="0"
+                    app:layout_rowWeight="1">
 
-                <TextView
-                    android:id="@+id/insurancetext"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="4dp"
-                    android:text="Insurance"
-                    android:textColor="@android:color/black"
-                    android:textSize="14sp"/>
+                    <TextView
+                        android:id="@+id/transmissiontext"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="4dp"
+                        android:text="Transmission"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp" />
 
-                <TextView
-                    android:id="@+id/insurance"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_gravity="center"
-                    android:text="Yes"
-                    android:textColor="@android:color/black"
-                    android:textSize="18sp"/>
-            </LinearLayout>
-        </android.support.v7.widget.GridLayout>
+                    <TextView
+                        android:id="@+id/transmission"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp"
+                        android:text="Manual"
+                        android:textColor="@android:color/black"
+                        android:textSize="18sp" />
+                </LinearLayout>
 
-        <TextView
-            android:id="@+id/descriptionDetails"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:text="This is description" />
+                <LinearLayout
+                    android:layout_margin="2dp"
+                    android:background="@color/white"
+                    android:orientation="vertical"
+                    app:layout_column="1"
+                    app:layout_columnWeight="1"
+                    app:layout_row="0"
+                    app:layout_rowWeight="1">
 
-        <TextView
-            android:id="@+id/owner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:text="first, second etc" />
-    </LinearLayout>
+                    <TextView
+                        android:id="@+id/insurancetext"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="4dp"
+                        android:text="Insurance"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/insurance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp"
+                        android:text="Yes"
+                        android:textColor="@android:color/black"
+                        android:textSize="18sp" />
+                </LinearLayout>
+            </android.support.v7.widget.GridLayout>
+            <!--<TextView
+                android:id="@+id/ownerdetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:gravity="center"
+                android:textSize="18sp"
+                android:background="@color/white"
+                android:text="first, second etc"
+                android:textColor="@color/black" />-->
+            <TextView
+                android:id="@+id/descriptionDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="This is description"
+                android:textColor="@color/black" />
+
+
+        </LinearLayout>
+
     <Button
         android:id="@+id/soldButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
         android:layout_marginEnd="24dp"
         android:layout_marginRight="24dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="16dp"
         android:background="@drawable/round_button"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:text="Mark as Sold"
         android:textAllCaps="false"
-        android:textColor="@android:color/background_light"
-        android:textSize="18sp"
+        android:textColor="@color/white"
+        android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
    <!-- <TextView
         android:id="@+id/editTextDesc"
@@ -446,11 +474,10 @@
         android:textColor="@color/darkGrey"
         android:textSize="14sp"
         android:text="Veh_number"
-        android:textStyle="bold|italic"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/modelname" />
+        app:layout_constraintTop_toBottomOf="@+id/brandModelDetails" />
 
+    </android.support.constraint.ConstraintLayout>
 
-
-
-</android.support.constraint.ConstraintLayout>
+</ScrollView>

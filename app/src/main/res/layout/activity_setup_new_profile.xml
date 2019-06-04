@@ -68,7 +68,7 @@
         android:ems="10"
         android:gravity="center"
         android:hint="Mobile no."
-        android:inputType="textPersonName"
+        android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/entermobile" />
@@ -107,7 +107,7 @@
         app:layout_constraintTop_toBottomOf="@+id/location" />
 
     <Button
-        android:id="@+id/nextButton"
+        android:id="@+id/doneButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -139,4 +139,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editLocation" />
+
 </android.support.constraint.ConstraintLayout>

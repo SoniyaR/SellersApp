@@ -33,6 +33,9 @@ public class AddNewLead extends AppCompatActivity implements View.OnClickListene
     FirebaseAdapter fbadapter;
 
     private String encodeString(String s) {
+        if(s == null || (s !=null && s.isEmpty())){
+            return "";
+        }
         s = s.replace(" ", "_");
         s = s.replace(".", ",");
         return s;
@@ -103,14 +106,14 @@ public class AddNewLead extends AppCompatActivity implements View.OnClickListene
                 }
 
                 if(requestReady) {
-                    request.setLead_brand(encodeString(brand));
-                    request.setLead_model(encodeString(model));
-                    request.setLead_location(encodeString(loc));
-                    request.setLead_price(encodeString(pric));
+                    request.setLead_brand(brand);
+                    request.setLead_model(model);
+                    request.setLead_location(loc);
+                    request.setLead_price(pric);
 
-                    request.setCustomer_name(encodeString(customer));
-                    request.setMobile_no(encodeString(mobnum));
-                    request.setEmailId(encodeString(emailId.getText().toString()));
+                    request.setCustomer_name(customer);
+                    request.setMobile_no(mobnum);
+                    request.setEmailId(emailId.getText().toString());
 
                     addLeadRequest(request);
 

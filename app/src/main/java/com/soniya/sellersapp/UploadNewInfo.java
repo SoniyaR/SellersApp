@@ -239,6 +239,13 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
             case R.id.titleView:
             case R.id.locationView:
             case R.id.rupeeimg:
+            case R.id.insuranceRadioGrp:
+            case R.id.insurancetxt:
+            case R.id.transmsn:
+            case R.id.kmstext:
+            case R.id.ownertext:
+            case R.id.scrollbackgoundLayout:
+            case R.id.brandText:
                 //hide keyboard
                 InputMethodManager ipMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                 ipMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);

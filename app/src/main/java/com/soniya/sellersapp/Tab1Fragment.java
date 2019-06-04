@@ -59,10 +59,10 @@ public class Tab1Fragment extends Fragment {
         if(carsArraylist!=null && carsArraylist.size()>0) {
             myCarslist.clear();
             //Log.i("soni-", "we have carsarraylist tab1frag , size = " + carsArraylist.size());
-            CarInfoSerial carInfoSerialInstance = new CarInfoSerial();
-            carInfoSerialInstance.setCarNumbersListener(new CarInfoSerial.CarNumbersListener() {
+            AppListeners carInfoInstance = new AppListeners();
+            carInfoInstance.setCarNumbersListener(new AppListeners.CarNumbersListener() {
                 @Override
-                public void onRetrieve(ArrayList<String> data) {
+                public void onRetrieve(ArrayList<String> data, String paymentStatus) {
                     if (data != null && data.size() > 0) {
                         activeOrders = data;
 
@@ -74,16 +74,16 @@ public class Tab1Fragment extends Fragment {
 
                         if (myCarslist != null && myCarslist.size() > 0) {
                             //Log.i("soni-tab1frag", "we have mycarslist tab1frag");
-                            carListAdapter = new CustomAdapter(getActivity(), myCarslist, R.layout.carslist_layout);
+                            carListAdapter = new CustomAdapter(context, myCarslist, R.layout.carslist_layout);
                             carsListView.setAdapter(carListAdapter);
                             carListAdapter.notifyDataSetChanged();
                         } else {
-                            ArrayAdapter arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
+                            ArrayAdapter arrayAdapter = new ArrayAdapter(context, android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
                             carsListView.setAdapter(arrayAdapter);
                         }
                     } else {
 
-                        ArrayAdapter arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
+                        ArrayAdapter arrayAdapter = new ArrayAdapter(context, android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
                         carsListView.setAdapter(arrayAdapter);
                         arrayAdapter.notifyDataSetChanged();
 
@@ -97,7 +97,7 @@ public class Tab1Fragment extends Fragment {
                 }
             });
         } else  {
-            ArrayAdapter arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
+            ArrayAdapter arrayAdapter = new ArrayAdapter(context, android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
             carsListView.setAdapter(arrayAdapter);
 
         }

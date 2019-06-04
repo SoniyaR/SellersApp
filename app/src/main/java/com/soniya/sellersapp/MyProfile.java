@@ -107,10 +107,16 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
     }
 
     public static String encodeString(String string) {
+        if(string == null || (string !=null && string.isEmpty())){
+            return "";
+        }
         return string.replace(".", ",");
     }
 
     public static String decodeString(String string) {
+        if(string == null || (string !=null && string.isEmpty())){
+            return "";
+        }
         return string.replace(",", ".");
     }
 

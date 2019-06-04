@@ -70,7 +70,12 @@ public class HomePage extends AppCompatActivity {
     Fragment tab3frag;
     Bundle tabbundle = new Bundle();
 
+    boolean paidForOtherOrders = false;
+
     public static String encodeString(String string) {
+        if(string == null || (string !=null && string.isEmpty())){
+            return "";
+        }
         return string.replace(".", ",");
     }
 
@@ -222,11 +227,18 @@ public class HomePage extends AppCompatActivity {
                         break;
 
                     case 1:
-                        replaceFragment(tab2frag);
+                        Log.i("soni-", "tab2- other orders is selected!");
+
+                        //if user paid to see other orders, open tab with list of all other orders
+                        //else show text as user needs to subscribe with some pay plan
+                        //if(paidForOtherOrders) {
+                            replaceFragment(tab2frag);
+//                        }else{
+//                            paymentPendingFragment(tab2frag);
+//                        }
+
                         break;
-
                 }
-
             }
 
             @Override
@@ -239,9 +251,9 @@ public class HomePage extends AppCompatActivity {
             }
         });
 
-        CarInfo CarInfoInstance = new CarInfo();
+        AppListeners listenerInstance = new AppListeners();
 
-        CarInfoInstance.setCarInfoRetrieveListener(new CarInfo.CarInfoRetrieveListener() {
+        listenerInstance.setCarInfoRetrieveListener(new AppListeners.CarInfoRetrieveListener() {
             @Override
             public void onDataRetrieved(ArrayList<CarInfo> data) {
                 if (data != null) {
@@ -282,15 +294,31 @@ public class HomePage extends AppCompatActivity {
     private void replaceFragment(Fragment fragment) {
 
         tabbundle.putSerializable("carsArrayList", carsArraylist);
+        if (!isFinishing()) {
+            FragmentManager fm = getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            fragment.setArguments(tabbundle);
+            ft.replace(R.id.viewPagerHome, fragment);
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            //ft.addToBackStack(null);
+            //Log.i("soni-hompage", "replace fragment");
+            ft.commit();
+        }
+    }
 
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        fragment.setArguments(tabbundle);
-        ft.replace(R.id.viewPagerHome, fragment);
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        //ft.addToBackStack(null);
-        Log.i("soni-hompage", "replace fragment");
-        ft.commit();
+    private void paymentPendingFragment(Fragment fragment)  {
+        Bundle tempbundle = new Bundle();
+        tempbundle.putString("paymentStatus", "Pending");
+        if (!isFinishing()) {
+            FragmentManager fm = getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            fragment.setArguments(tempbundle);
+            ft.replace(R.id.viewPagerHome, fragment);
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            //ft.addToBackStack(null);
+            //Log.i("soni-hompage", "payment Pending fragment");
+            ft.commit();
+        }
     }
 
     public boolean isOnline()   {

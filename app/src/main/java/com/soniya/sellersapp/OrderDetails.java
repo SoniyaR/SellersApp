@@ -6,8 +6,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
@@ -41,20 +43,21 @@ import java.util.List;
 
 public class OrderDetails extends AppCompatActivity implements View.OnClickListener {
 
-    TextView model;
+    TextView brandmodel;
     TextView availability;
     TextView price;
     TextView vehicleNum;
     Button soldButton;
     ArrayList<String> urlList = new ArrayList<>();
     TextView description;
+    TextView ownerDetails;
     TextView color;
-    TextView brand;
     TextView fuel;
     TextView locDetails;
     TextView yearDetails;
     LinearLayout collapseLinear;
     TextView showmoreless;
+    TextView kmsDriven;
 
     DatabaseReference carInfoReference;
     DatabaseReference updateRef;
@@ -69,7 +72,6 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
     boolean modelchanged = false;
     boolean pricechanged = false;
-    boolean statuschanged = false;
 
     String oldPriceVal= "";
     String oldModelVal= "";
@@ -82,11 +84,11 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
         editmode = false;
 
-        model = findViewById(R.id.modelname);
+        brandmodel = findViewById(R.id.brandModelDetails);
         locDetails = findViewById(R.id.locationdetails);
         price = findViewById(R.id.price);
         color = findViewById(R.id.colorDetails);
-        brand = findViewById(R.id.brandDetails);
+        //brand = findViewById(R.id.brandDetails);
         fuel = findViewById(R.id.fuelEditDetails);
         yearDetails = findViewById(R.id.yearDetails);
         vehicleNum = findViewById(R.id.vehNumDetailsView);
@@ -94,8 +96,10 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
         collapseLinear.setVisibility(View.GONE);
         soldButton = findViewById(R.id.soldButton);
         description = findViewById(R.id.descriptionDetails);
+        ownerDetails = findViewById(R.id.ownerwhich);
         showmoreless = findViewById(R.id.showMoreLess);
         showmoreless.setOnClickListener(this);
+        kmsDriven = findViewById(R.id.kmsdriven);
 
         HorizontalScrollView scrollView = findViewById(R.id.horizontalScrollView);
         scrollView.setOnClickListener(this);
@@ -120,16 +124,26 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
                         CarInfo carInfo = dataSnapshot.getValue(CarInfo.class);
 
-                        brand.setText(carInfo.getBrand_name());
-                        model.setText(carInfo.getModel_name());
+                        urlList = carInfo.getImage_uri_list();
+                        loadImages();
+
+                        brandmodel.setText(carInfo.getBrand_name() + " " + carInfo.getModel_name());
                         color.setText(carInfo.getColor());
                         locDetails.setText(carInfo.getLocation());
-                        locDetails.setCompoundDrawablesWithIntrinsicBounds(R.drawable.map_default_map_marker, 0, 0, 0);
-                        //availability.setText(carInfo.getAvailability());
+                        Drawable img = ContextCompat.getDrawable(getApplicationContext(), R.drawable.map_default_map_marker);
+                        img.setBounds(0, 0, img.getMinimumWidth()/2, img.getMinimumHeight()/2);
+                        locDetails.setCompoundDrawables(img, null, null, null);
                         price.setText(carInfo.getSellingprice());
-                        description.setText(carInfo.getDescription());
+                        if(carInfo.getDescription() !=null && !carInfo.getDescription().isEmpty()) {
+                            description.setText(carInfo.getDescription());
+                            description.setVisibility(View.VISIBLE);
+                        }else{
+                            description.setVisibility(View.GONE);
+                        }
                         fuel.setText(carInfo.getFuelType());
                         yearDetails.setText(carInfo.getYear());
+                        kmsDriven.setText(carInfo.getKmsDriven());
+                        ownerDetails.setText("Owner : " + carInfo.getOwner());
 
                         if(carInfo.getAvailability().equalsIgnoreCase("Sold"))  {
                             Log.i("soni-", "this model is sold!");
@@ -192,7 +206,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
             case R.id.editCarInfo:
 
-                if(!editmode) {
+                /*if(!editmode) {
                     editmode = true;
                     //makeEditable();
                     item.setTitle("Save");
@@ -200,7 +214,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                     editmode = false;
                     item.setTitle("Edit");
                     updateCarInfo();
-                }
+                }*/
                 break;
 
             case android.R.id.home:
@@ -258,55 +272,11 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
         return true;
     }
 
-    private void updateCarInfo() {
 
-        //vehicle_no	model_name	availability description    location	sellingprice    image_uri_list
+    /*
+    method to add images to imageGallery view at top of screen
 
-        //TODO update specific node with current vehicle number
-
-        //FirebaseDataFactory factory = new FirebaseDataFactory();
-        //vehicle_no	model_name	availability description	location	sellingprice
-        //whatever is updated, goes to hashmap, and only that is updated in the node in db
-
-        String vehicle = vehicleNum.getText().toString().replace(space, replacechar);
-        Timestamp timestamp = new Timestamp(new Date().getTime());
-        String timeStampStr = timestamp.toString().replace(space, replacechar).substring(0, 18);
-        Log.i("soni-timestamp", timeStampStr);
-
-        //description
-        /*if(!descEdit.getText().toString().equals(description.getText().toString())) {
-
-            updateRef.child(vehicle).child("description").child(timeStampStr).child("Old").setValue(description.getText().toString());
-            updateRef.child(vehicle).child("description").child(timeStampStr).child("New").setValue(descEdit.getText().toString());
-
-            description.setText(descEdit.getText());
-            description.setVisibility(View.VISIBLE);
-            descEdit.setVisibility(View.INVISIBLE);
-
-            carInfoReference.child("description").setValue(description.getText().toString());
-        }*/
-
-        //model
-        if(modelchanged)    {
-            updateRef.child(vehicle).child("model_name").child(timeStampStr).child("Old").setValue(oldModelVal);
-            updateRef.child(vehicle).child("model_name").child(timeStampStr).child("New").setValue(model.getText().toString());
-            carInfoReference.child("model_name").setValue(model.getText().toString());
-            modelchanged = false;
-        }
-
-        //price
-        if(pricechanged)    {
-            updateRef.child(vehicle).child("sellingprice").child(timeStampStr).child("Old").setValue(oldPriceVal);
-            updateRef.child(vehicle).child("sellingprice").child(timeStampStr).child("New").setValue(price.getText().toString());
-            carInfoReference.child("sellingprice").setValue(price.getText().toString());
-            pricechanged = false;
-        }
-
-        //availability
-
-
-        Log.i("soni-update", "info saved successfully!");
-    }
+     */
 
     private void loadImages() {
 
@@ -442,7 +412,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
     private void displayCarImages() {
         //TODO
         Intent displayIntent = new Intent(getApplicationContext(), DisplayImages.class);
-        displayIntent.putExtra("modelname", model.getText().toString());
+        displayIntent.putExtra("modelname", brandmodel.getText().toString());
         displayIntent.putExtra("urlList", urlList);
         displayIntent.putExtra("vehicle_no", vehicleNum.getText().toString().replace(space, replacechar));
         startActivity(displayIntent);

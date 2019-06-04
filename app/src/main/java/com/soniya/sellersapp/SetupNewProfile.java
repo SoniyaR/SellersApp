@@ -16,12 +16,14 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +33,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.storage.OnProgressListener;
+
+import org.apache.poi.util.StringUtil;
 
 public class SetupNewProfile extends AppCompatActivity implements View.OnClickListener {
 
@@ -40,7 +46,7 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
     String currentPassword = "";
     TextView emailVerfi;
     TextView mobileText;
-    Button nextButton;
+    Button doneButton;
     FirebaseAuth auth;
 
     LocationManager locationManager;
@@ -48,14 +54,6 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
     Location oldLocation;
 
     UserInformation userInfo;
-    /*PlacesClient placesClient;
-    String query;
-
-    AutocompleteSessionToken token;
-    RectangularBounds bounds;
-
-    FindAutocompletePredictionsRequest.Builder requestBuilder;
-    FindAutocompletePredictionsRequest request;*/
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -68,6 +66,14 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
             }
         }
 
+    }
+
+    private boolean isErrorFree(TextView view){
+        if(TextUtils.isEmpty(view.getError())){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     @Override
@@ -83,9 +89,9 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
         emailVerfi = findViewById(R.id.emailVerText);
         emailVerfi.setOnClickListener(this);
 
-        nextButton = (Button)  findViewById(R.id.nextButton);
-        nextButton.setOnClickListener(this);
-        nextButton.setVisibility(View.INVISIBLE);
+        doneButton = (Button)  findViewById(R.id.doneButton);
+        doneButton.setOnClickListener(this);
+        doneButton.setVisibility(View.INVISIBLE);
 
         mobileText = findViewById(R.id.editmobilenum);
 
@@ -143,6 +149,7 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
             }
         });
 */
+
         if(!currentEmailId.isEmpty() && currentEmailId.contains("@"))   {
             newUsername.setText(currentEmailId.split("@")[0]);
         }
@@ -195,8 +202,34 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if(newUsername.getText().toString().contains("@")) {
-                    Toast.makeText(SetupNewProfile.this, "@ not allowed in username", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SetupNewProfile.this, "@, * not allowed in username", Toast.LENGTH_SHORT).show();
                     newUsername.setError("Enter valid username");
+                }
+                if(newUsername.getText().toString().contains(" "))  {
+                    Toast.makeText(SetupNewProfile.this, "Space not allowed in username", Toast.LENGTH_SHORT).show();
+                    newUsername.setError("Space not allowed");
+                }
+                if(newUsername.getText().length() == 0) {
+                    newUsername.setError("Username cannot be empty");
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        mobileText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(mobileText.getText().length() != 10 || mobileText.getText().length() == 0){
+                    mobileText.setError("Enter valid mobile number");
                 }
             }
 
@@ -220,13 +253,15 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
                             //auth.signOut();
                             Toast.makeText(SetupNewProfile.this, "Email sent for verification.", Toast.LENGTH_SHORT).show();
                             Log.i("soni-", "Email sent for verification.");
-                            nextButton.setVisibility(View.VISIBLE);
-                            nextButton.setText("Proceed to Login");
+                            doneButton.setVisibility(View.VISIBLE);
+                            doneButton.setText("Done");
                         }
                         else{
                             Log.i("soni-", "task not successful-  " +  task.getException().getMessage());
                         }
                     }
+
+
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -241,57 +276,49 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
 
         switch(v.getId()){
 
-            case R.id.nextButton:
+            case R.id.doneButton:
                 if(auth.getCurrentUser() !=null) {
 
-                    String mobilenum = "";
+                        if (newUsername.getText() != null && !newUsername.getText().toString().isEmpty() && isErrorFree(newUsername)
+                                && locationTextView.getText() != null && !locationTextView.getText().toString().isEmpty()
+                                && mobileText.getText()!=null && isErrorFree(mobileText)) {
 
-                    if(mobilenum.length() != 10)    {
-                        mobileText.setError("Enter valid mobile number");
-                    }else{
-                        mobilenum = mobileText.getText().toString();
-                    }
+                            if (!currentEmailId.equals("") && !currentEmailId.isEmpty()) {
 
-                    if (newUsername.getText() != null && !newUsername.getText().toString().isEmpty() && newUsername.getError().toString().isEmpty()
-                            && locationTextView.getText() != null && !locationTextView.getText().toString().isEmpty()
-                            && !mobilenum.isEmpty() && mobileText.getError().toString().isEmpty() ){
+                                userInfo.setMobileNo(mobileText.getText().toString());
+                                userInfo.setLocation(locationTextView.getText().toString());
 
-                        if (!currentEmailId.equals("") && !currentEmailId.isEmpty()) {
+                                FirebaseDataFactory dataFactory = new FirebaseDataFactory();
+                                dataFactory.addNewProfileInfo(encodeString(newUsername.getText().toString()), userInfo);
 
-                            //userInfo.setUsername(newUsername.getText().toString());
-                            userInfo.setMobileNo(mobilenum);
-                            userInfo.setLocation(locationTextView.getText().toString());
+                                if (auth.getCurrentUser().isEmailVerified()) {
 
-                            FirebaseDataFactory dataFactory = new FirebaseDataFactory();
-                            dataFactory.addNewProfileInfo(newUsername.getText().toString(), userInfo);
+                                    Intent i = new Intent(getApplicationContext(), HomePage.class);
+                                    i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivity(i);
+                                } else {
+                                    auth.signOut();
+                                    new AlertDialog.Builder(this)
+                                            .setMessage("Login again after email verification.")
+                                            .setNeutralButton("Ok", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                                                    i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                    startActivity(i);
+                                                }
+                                            }).show();
+                                }
 
-                            if(auth.getCurrentUser().isEmailVerified()){
-                                Intent i = new Intent(getApplicationContext(), HomePage.class);
-                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(i);
                             } else {
-                                auth.signOut();
-                                new AlertDialog.Builder(this)
-                                        .setMessage("Login again after email verification.")
-                                        .setNeutralButton("Ok", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                startActivity(i);
-                                            }
-                                        }).show();
+                                Log.i("soni-", "Something went wrong! (In SetupNewProfile)");
                             }
-
-                        } else {
-                            Log.i("soni-", "Something went wrong! (In SetupNewProfile)");
+                        } else if (locationTextView.getText().toString().isEmpty()) {
+                            locationTextView.setError("Location is mandatory.");
+                        } else if (newUsername.getText().toString().isEmpty()) {
+                            newUsername.setError("Username is mandatory.");
                         }
-                    }else if(locationTextView.getText().toString().isEmpty()){
-                        locationTextView.setError("Location is mandatory.");
-                    }
-                    else if(newUsername.getText().toString().isEmpty()){
-                        newUsername.setError("Username is mandatory.");
-                    }
+
                 }else{
                     Intent i = new Intent(getApplicationContext(), MainActivity.class);
                     //Toast.makeText(this, "Please Login Again!", Toast.LENGTH_SHORT).show();
@@ -303,9 +330,6 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
             case R.id.location:
                 //find location suggestions
 
-
-
-
                 break;
 
             case R.id.setprofLayout:
@@ -316,28 +340,41 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
 
             case R.id.emailVerText:
                 //signup call, which will change the auth state
-                auth.createUserWithEmailAndPassword(currentEmailId, currentPassword).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
-//                            Intent intent = new Intent(getApplicationContext(), SetupNewProfile.class);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                            intent.putExtra("emailId", currentEmailId);
-//                            startActivity(intent);
-                            sendVerificationMail();
-                            Log.i("soni-setupnewprof", "Signup done!");
-                        }else{
-                            Log.i("soni-signup error", task.getException().getMessage());
-                        }
+                if(isErrorFree(mobileText) && isErrorFree(newUsername)) {
 
-                    }
-                });
+                    auth.createUserWithEmailAndPassword(currentEmailId, currentPassword).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                UserProfileChangeRequest changeRequest = new UserProfileChangeRequest.Builder()
+                                        .setDisplayName(newUsername.getText().toString().replace(".", ","))
+                                        .build();
+                                auth.getCurrentUser().updateProfile(changeRequest);
+                                sendVerificationMail();
+                                Log.i("soni-setupnewprof", "Sending verification email");
+                                Toast.makeText(SetupNewProfile.this, "Sending verification email!", Toast.LENGTH_LONG).show();
+                            } else {
+                                Log.i("soni-signup error", task.getException().getMessage());
+                            }
+
+                        }
+                    });
+                }
 
                 break;
 
             default:
                 break;
         }
+
+    }
+
+    public static String encodeString(String string) {
+        if(string == null || (string !=null && string.isEmpty())){
+            return "";
+        }
+        string = string.replace(".", ",");
+        return string.replace(" ", "_");
 
     }
 }

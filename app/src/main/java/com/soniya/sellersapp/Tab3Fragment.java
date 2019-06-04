@@ -21,6 +21,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Tab3Fragment extends Fragment {
 
@@ -28,6 +29,7 @@ public class Tab3Fragment extends Fragment {
     FloatingActionButton addLeadButton;
     DatabaseReference db = FirebaseDatabase.getInstance().getReference();
     ArrayList<LeadRequest> leads = new ArrayList<>();
+    FirebaseAdapter fbAdapter;
 
     @Nullable
     @Override
@@ -35,6 +37,7 @@ public class Tab3Fragment extends Fragment {
         View rootView =  inflater.inflate(R.layout.fragment_leads, container, false);
         leadListView = rootView.findViewById(R.id.leadsList);
         registerForContextMenu(leadListView);
+        fbAdapter = new FirebaseAdapter();
 
         addLeadButton = rootView.findViewById(R.id.addleadfab);
         addLeadButton.setOnClickListener(new View.OnClickListener() {
@@ -46,11 +49,19 @@ public class Tab3Fragment extends Fragment {
         });
 
         leads.clear();
-        DatabaseReference leadRef = db.child("LeadRequests");
+        DatabaseReference leadRef = db.child("LeadRequests").child(fbAdapter.getCurrentUser());
         leadRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot !=null && dataSnapshot.getValue() !=null)   {
+
+                    //test for object type
+                    /*if(dataSnapshot.getValue() instanceof HashMap)  {
+                        Log.i("soni-", "leadreqs in hashmap");
+                    }else{
+                        Log.i("soni-", "leadreqs in not hashmap");
+                    }*/
+
                     for(DataSnapshot data :  dataSnapshot.getChildren())    {
                         LeadRequest request = data.getValue(LeadRequest.class);
                         leads.add(request);

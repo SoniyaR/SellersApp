@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.InputType;
@@ -14,19 +15,23 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 
 
-public class SignupForm extends AppCompatActivity {
+public class SignupForm extends AppCompatActivity implements View.OnClickListener {
 
     EditText userEmailView;
     EditText passwordView;
     EditText repPassword;
     Button signupButton;
     String curr_pwd = "";
+    Button signupGoogleButton;
+    ScrollView signupbackscrolllayout;
+    ConstraintLayout signupback;
 
     FirebaseAdapter fbAdapter = new FirebaseAdapter();
     FirebaseDataFactory database = new FirebaseDataFactory();
@@ -36,6 +41,11 @@ public class SignupForm extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup_form);
 
+        signupbackscrolllayout = findViewById(R.id.signupLayout);
+        signupbackscrolllayout.setOnClickListener(this);
+        signupback = findViewById(R.id.signupback);
+        signupback.setOnClickListener(this);
+
         userEmailView = findViewById(R.id.newMailText);
         userEmailView.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
         passwordView = findViewById(R.id.newpassText);
@@ -43,25 +53,20 @@ public class SignupForm extends AppCompatActivity {
         passwordView.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
         repPassword.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
         repPassword.setTag("repeatPassword");
+        signupGoogleButton = findViewById(R.id.signupGoogle);
+        //TODO signin with google
 
         signupButton = findViewById(R.id.signupButton) ;
+        signupButton.setOnClickListener(this);
 
         Log.i("soni-", "in signupform class");
         userEmailView.addTextChangedListener(new TextValidation(userEmailView));
         passwordView.addTextChangedListener(new TextValidation(passwordView));
         repPassword.addTextChangedListener(new TextValidation(repPassword, this));
-
-        repPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                curr_pwd = passwordView.getText().toString();
-                SharedPreferences preferences = getSharedPreferences("com.soniya.sellersapp", MODE_PRIVATE);
-                preferences.edit().putString("curr_pwd", curr_pwd).apply();
-            }
-        });
+        repPassword.setOnClickListener(this);
     }
 
-    public void signupClicked(View view){
+    public void signupClicked(){
 
         boolean allgood=false;
         Editable emailText = userEmailView.getText();
@@ -87,23 +92,6 @@ public class SignupForm extends AppCompatActivity {
         }
 
         if(allgood && validateSignup()) {
-
-            /*Log.i("soni-signingup", emailText.toString()+ " " + passwordText.toString());
-            aAuth.createUserWithEmailAndPassword(emailText.toString(), passwordText.toString()).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if(task.isSuccessful()){
-                        Intent intent = new Intent(getApplicationContext(), SetupNewProfile.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        intent.putExtra("emailId", emailText.toString());
-                        startActivity(intent);
-                        //Log.i("soni-adapterclass", "Signup done!");
-                    }else{
-                         Log.i("soni-signup error", task.getException().getMessage());
-                    }
-
-                }
-            });*/
 
             Intent intent = new Intent(getApplicationContext(), SetupNewProfile.class);
             //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -192,5 +180,26 @@ public class SignupForm extends AppCompatActivity {
                 v.getWindowToken(), 0);
     }
 
+    @Override
+    public void onClick(View v) {
+
+        switch (v.getId())  {
+            case R.id.repPasswordText:
+                curr_pwd = passwordView.getText().toString();
+                SharedPreferences preferences = getSharedPreferences("com.soniya.sellersapp", MODE_PRIVATE);
+                preferences.edit().putString("curr_pwd", curr_pwd).apply();
+                break;
+
+            case R.id.signupButton:
+
+                signupClicked();
+                break;
+
+            case R.id.signupback:
+            case R.id.signupLayout:
+                hideKeyboard(v);
+                break;
+        }
+    }
 }
 

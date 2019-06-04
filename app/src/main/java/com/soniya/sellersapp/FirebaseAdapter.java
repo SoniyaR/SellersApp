@@ -66,8 +66,7 @@ public class FirebaseAdapter {
      */
     public boolean checkCurrentUser(){
         FirebaseUser user = mAuth.getCurrentUser();
-        if(user !=null) {
-            //Log.i("soni-",  user.getDisplayName()+ " " + user.getEmail() + " " + user.getUid());
+        if(user !=null && user.isEmailVerified()) {
             return true;
         }
         return false;
@@ -92,6 +91,7 @@ public class FirebaseAdapter {
     {
         return mAuth.getCurrentUser();
     }
+
     public boolean signupUser(Activity context, String email, String password)  {
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(context, new OnCompleteListener<AuthResult>() {
             @Override
@@ -139,6 +139,7 @@ public class FirebaseAdapter {
             infoSerial.setOwner(info.getOwner());
             infoSerial.setTransmission(info.getTransmission());
             infoSerial.setDescription(info.getDescription());
+            infoSerial.setThumbnailUriString(info.getThumbnailUriString());
 
             carsArrayList.add(infoSerial);
         }
@@ -166,6 +167,7 @@ public class FirebaseAdapter {
             info.setOwner(infoserial.getOwner());
             info.setTransmission(infoserial.getTransmission());
             info.setDescription(infoserial.getDescription());
+            info.setThumbnailUriString(infoserial.getThumbnailUriString());
             carsArrayList.add(info);
         }
         return carsArrayList;

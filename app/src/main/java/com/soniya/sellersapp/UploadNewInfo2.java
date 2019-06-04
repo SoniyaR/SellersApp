@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -18,17 +19,20 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -44,24 +48,28 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     char space = ' ';
     char replacechar = '_';
 
+//    ConstraintLayout uploadinfo2back;
+//    ScrollView uploadinfo2scroll;
+
     CarInfoSerial carInfoSerial ;
     Button uploadButton;
     ImageView selectedImages;
     public static final int PICK_IMAGE = 1;
     ArrayList<Uri> selectedUriList = new ArrayList<>();
     int current_img_index = 0;
+    //int prev_img_index;
     TextView skipText;
+    boolean skipImages=false;
 
     Button saveAllButton;
     boolean isImageSelected = false;
+    String thumbnailUrlStr ="";
+    int thumb_img_index = 0;
 
     Button prevButton;
     Button nextButton;
 
     EditText descriptionView;
-
-    DatabaseReference carInfoRef;
-
     Bitmap img = null;
 
     StorageReference storageReference = FirebaseStorage.getInstance().getReference();
@@ -70,16 +78,29 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     String curr_model = "";
 
     ProgressBar progressBar;
+    CheckBox checkBox;
 
     FirebaseDataFactory database = new FirebaseDataFactory();
 
     ArrayList<String> activeordersList;
+
+    public static String encodeString(String string) {
+        if(string == null || (string !=null && string.isEmpty())){
+            return "";
+        }
+        string = string.replace(".", ",");
+        return string.replace(" ", "_");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setTitle("Upload New Information");
+//        uploadinfo2back = (ConstraintLayout)findViewById(R.id.uploadinfo2back);
+//        uploadinfo2scroll = (ScrollView) findViewById(R.id.uploadinfo2SCroll);
+//        uploadinfo2back.setOnClickListener(this);
+//        uploadinfo2scroll.setOnClickListener(this);
 
         isImageSelected = false;
         current_img_index = 0;
@@ -93,6 +114,17 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         saveAllButton = findViewById(R.id.saveAllButton);
         saveAllButton.setOnClickListener(this);
         saveAllButton.setVisibility(View.INVISIBLE);
+        checkBox = findViewById(R.id.checkBox);
+        checkBox.setVisibility(View.INVISIBLE);
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked && selectedUriList !=null && !selectedUriList.isEmpty() && selectedUriList.size() > 0){
+                    //thumbnailUrlStr = selectedUriList.get(current_img_index).toString();
+                    thumb_img_index = current_img_index;
+                }
+            }
+        });
 
         selectedUriList.clear();
 
@@ -141,7 +173,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         }
         activeordersList = new ArrayList<>();
 
-        activeordersList=database.getactiveorders_List();
+        activeordersList=database.getactiveorders_List(null);
 
     }
 
@@ -152,12 +184,12 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
 
             CarInfo object = buildCarinfoObject(carInfoSerial);
 
-            CarInfo carinfoObj = new CarInfo(curr_vehicleNum, activeordersList);
-            carinfoObj.setCarInfoUploadListener(object, new CarInfo.CarInfoUploadListener() {
+            AppListeners listener = new AppListeners(curr_vehicleNum, activeordersList);
+            listener.setCarInfoUploadListener(object, new AppListeners.CarInfoUploadListener() {
                 @Override
                 public void onUploadComplete(String result) {
-                    if(result.equalsIgnoreCase(carinfoObj.result))  {
-                        if(selectedUriList != null && selectedUriList.size() > 0) {
+                    if(result.equalsIgnoreCase(listener.resultOk))  {
+                        if(!skipImages && selectedUriList != null && selectedUriList.size() > 0) {
 
                             if (img_ref != null) {
                                 index=0;
@@ -187,18 +219,15 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                     }
                 }
 
-                @Override
+                /*@Override
                 public void onUploadFail(String Error) {
 
                     Intent i = new Intent(getApplicationContext(), HomePage.class);
                     i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     Toast.makeText(UploadNewInfo2.this, "Something went wrong, Try again! " + Error, Toast.LENGTH_SHORT).show();
                     startActivity(i);
-                }
+                }*/
             });
-            //database.uploadData(carinfoObj, curr_vehicleNum.replace(space, replacechar), activeordersList);
-
-
 
         }else{
             Log.i("soni-", "uploadinfo2- something went wrong");
@@ -239,7 +268,14 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
             @Override
             public void onComplete(@NonNull Task<Uri> task) {
                 if(task.isSuccessful()) {
+
                     Uri uri = task.getResult();
+
+                    if(index == thumb_img_index)    {
+                        //update this uri as thumbnail uri in CarInfo
+                        database.updateThumbnailUri(curr_vehicleNum.replace(space, replacechar), String.valueOf(uri));
+                    }
+
                     index++;
                     database.updateUriList(curr_vehicleNum.replace(space, replacechar), String.valueOf(uri));
 
@@ -285,7 +321,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                 break;
 
             case R.id.prevButton:
-
+               // prev_img_index = current_img_index;
                 nextButton.setEnabled(true);
                 if(current_img_index > 0)   {
                     current_img_index -= 1;
@@ -299,10 +335,12 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                checkBox.setChecked(false);
 
                 break;
 
             case R.id.nextButton:
+               // prev_img_index = current_img_index;
                 current_img_index += 1;
                 if(current_img_index == selectedUriList.size()-1){
                     nextButton.setEnabled(false);
@@ -315,6 +353,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                 }
 
                 prevButton.setEnabled(true);
+                checkBox.setChecked(false);
 
                 break;
 
@@ -335,8 +374,18 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
 
 
             case R.id.skipText:
+                skipImages = true;
                 saveAllInformation();
                 break;
+
+//            case R.id.uploadinfo2back:
+//            case R.id.uploadinfo2SCroll:
+//
+//                //hide keyboard
+//                InputMethodManager ipMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+//                ipMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+//
+//                break;
 
         }
 
@@ -350,6 +399,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                     selectedImages.setVisibility(View.VISIBLE);
                     prevButton.setVisibility(View.VISIBLE);
                     nextButton.setVisibility(View.VISIBLE);
+                    checkBox.setVisibility(View.VISIBLE);
                     saveAllButton.setVisibility(View.VISIBLE);
                     int imgCount = data.getClipData().getItemCount();
                     if(imgCount < 6) {
@@ -386,7 +436,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
 
     public CarInfo buildCarinfoObject(CarInfoSerial obj)    {
 
-        CarInfo info = new CarInfo(obj.getBrand_name(), obj.getVehicle_no(), obj.getModel_name(), obj.getAvailability(), obj.getLocation(),
+        CarInfo info = new CarInfo(obj.getBrand_name(), encodeString(obj.getVehicle_no()), obj.getModel_name(), obj.getAvailability(), obj.getLocation(),
                 obj.getSellingprice(), obj.getImage_uri_list());
 
         info.setFuelType(obj.getFuelType());
@@ -397,6 +447,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         info.setOwner(obj.getOwner());
         info.setTransmission(obj.getTransmission());
         info.setDescription(obj.getDescription());
+        info.setThumbnailUriString(thumbnailUrlStr);
 
         return info;
 

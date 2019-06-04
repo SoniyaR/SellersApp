@@ -18,6 +18,7 @@ public class CarInfo {
     private String color;
     private String year;
     private String owner;
+    private String thumbnailUriString;
     //
     private String kmsDriven;
     private String transmission;
@@ -143,6 +144,13 @@ public class CarInfo {
         this.brand_name = brand_name;
     }
 
+    public String getThumbnailUriString() {
+        return thumbnailUriString;
+    }
+
+    public void setThumbnailUriString(String thumbnailUriString) {
+        this.thumbnailUriString = thumbnailUriString;
+    }
 
     public CarInfo(String brand, String vehicleNum, String modelName, String availability, String location, String sellingprice,
                    ArrayList<String> imgUriList)    {
@@ -159,68 +167,9 @@ public class CarInfo {
 
     //retrieval data into arraylist
 
-    String uname = "";
-    private DatabaseReference carInfoReference;
-    FirebaseDataFactory dataFactory;
-    FirebaseAdapter fbadapter;
+    public CarInfo(){
 
-    public interface CarInfoRetrieveListener    {
-
-        public void onDataRetrieved(ArrayList<CarInfo> data);
-        public void onProgress();
-        public void onRetrieveFailed(String error);
     }
 
-    public interface CarNumbersListener {
-
-        public void onRetrieve(ArrayList<String> data);
-        public void onProgress();
-    }
-
-    public CarInfoRetrieveListener carInfoListener;
-    public CarNumbersListener carNumbersListener;
-
-    public CarInfo() {
-        fbadapter = new FirebaseAdapter();
-        this.uname = fbadapter.getCurrentUser();
-        this.carInfoListener = null;
-        this.carNumbersListener = null;
-        dataFactory = new FirebaseDataFactory();
-    }
-
-    public void setCarInfoRetrieveListener(CarInfoRetrieveListener listener)    {
-        carInfoListener = listener;
-        dataFactory.retriveCarList(carInfoListener);
-    }
-
-    public void setCarNumbersListener(CarNumbersListener listener){
-        carNumbersListener = listener;
-        dataFactory.retrieveMyVehicleNumbers(carNumbersListener);
-    }
-
-    //uploading data into database one object of Carinfo at a time
-
-    String vehicleNum;
-    ArrayList<String> activeOrders;
-    String result = "OK";
-
-    public interface CarInfoUploadListener  {
-        public void onUploadComplete(String result);
-        public void onUploadFail(String Error);
-    }
-
-    public CarInfoUploadListener carInfoUploadListener;
-
-    public CarInfo(String vehicleNum, ArrayList<String> active_orders)    {
-        carInfoUploadListener = null;
-        this.vehicleNum = vehicleNum;
-        this.activeOrders = active_orders;
-    }
-
-    public void setCarInfoUploadListener( CarInfo carInfoObject, CarInfoUploadListener listener) {
-
-        carInfoUploadListener = listener;
-        dataFactory.uploadData(carInfoObject, vehicleNum, activeOrders, listener);
-    }
 
 }

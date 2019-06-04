@@ -1,21 +1,38 @@
 package com.soniya.sellersapp;
 
+import java.util.ArrayList;
+
 public class UserInformation {
 
     private String emailId;
     private String mobileNo;
     private String accountType;
     private String location;
+    private ArrayList<String> activeOrders;
+    private String paymentStatus;
+    private ArrayList<String> paidforUsers;
+    private ArrayList<String> paidforCarNumbers;
 
     public UserInformation(){
-
+        this.emailId = "";
+        this.mobileNo= "";
+        this.accountType = "";
+        this.location = "";
+        this.activeOrders = new ArrayList<>();
+        this.paymentStatus = "";
+        this.paidforUsers = new ArrayList<>();
+        this.paidforCarNumbers = new ArrayList<>();
     }
 
-    public UserInformation(String emailId, String mobileNo, String accountType, String location)   {
+    public UserInformation(String emailId, String location, String mobileNo)   {
         this.emailId = emailId;
         this.mobileNo = mobileNo;
-        this.accountType = accountType;
         this.location = location;
+        this.accountType = "";
+        this.activeOrders = new ArrayList<>();
+        this.paymentStatus = "";
+        this.paidforUsers = new ArrayList<>();
+        this.paidforCarNumbers = new ArrayList<>();
     }
 
     public String getEmailId() {
@@ -48,5 +65,37 @@ public class UserInformation {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public ArrayList<String> getActiveOrders() {
+        return activeOrders;
+    }
+
+    public void setActiveOrders(ArrayList<String> activeOrders) {
+        this.activeOrders = activeOrders;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public ArrayList<String> getPaidforUsers() {
+        return paidforUsers;
+    }
+
+    public void setPaidforUsers(ArrayList<String> paidforUsers) {
+        this.paidforUsers = paidforUsers;
+    }
+
+    public ArrayList<String> getPaidforCarNumbers() {
+        return paidforCarNumbers;
+    }
+
+    public void setPaidforCarNumbers(ArrayList<String> paidforCarNumbers) {
+        this.paidforCarNumbers = paidforCarNumbers;
     }
 }
