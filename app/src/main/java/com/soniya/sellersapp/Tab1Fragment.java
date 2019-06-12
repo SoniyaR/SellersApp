@@ -61,8 +61,9 @@ public class Tab1Fragment extends Fragment {
             //Log.i("soni-", "we have carsarraylist tab1frag , size = " + carsArraylist.size());
             AppListeners carInfoInstance = new AppListeners();
             carInfoInstance.setCarNumbersListener(new AppListeners.CarNumbersListener() {
+
                 @Override
-                public void onRetrieve(ArrayList<String> data, String paymentStatus) {
+                public void onRetrieve(ArrayList<String> data, ArrayList<String> paidforCars) {
                     if (data != null && data.size() > 0) {
                         activeOrders = data;
 
@@ -73,7 +74,6 @@ public class Tab1Fragment extends Fragment {
                         }
 
                         if (myCarslist != null && myCarslist.size() > 0) {
-                            //Log.i("soni-tab1frag", "we have mycarslist tab1frag");
                             carListAdapter = new CustomAdapter(context, myCarslist, R.layout.carslist_layout);
                             carsListView.setAdapter(carListAdapter);
                             carListAdapter.notifyDataSetChanged();
@@ -88,7 +88,6 @@ public class Tab1Fragment extends Fragment {
                         arrayAdapter.notifyDataSetChanged();
 
                     }
-
                 }
 
                 @Override

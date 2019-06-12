@@ -102,12 +102,11 @@ public class FirebaseDataFactory {
 
     }
 
-    String paymentStatus = "";
+    ArrayList<String> paidforCars = new ArrayList<>();
 
     public ArrayList<String> getactiveorders_List(AppListeners.CarNumbersListener listener ) {
-        //vehicleNumbers.clear();
+
         activeorders_List.clear();
-//        Log.i("soni-", "uname = " + encodeString(uname));
         DatabaseReference cur_UserRef =  db.child("userInfo").child(encodeString(uname));
         cur_UserRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -116,7 +115,7 @@ public class FirebaseDataFactory {
 
                     UserInformation userinfo = dataSnapshot.getValue(UserInformation.class);
                     activeorders_List = userinfo.getActiveOrders();
-                    paymentStatus = userinfo.getPaymentStatus();
+                    paidforCars = userinfo.getPaidforCarNumbers();
 
                     if(activeorders_List.isEmpty()) {
                         if(listener !=null){
@@ -131,7 +130,6 @@ public class FirebaseDataFactory {
                             HashMap<String, String> hm = (HashMap<String, String>) dataSnapshot.child("activeorders").getValue();
                             Set<String> keys = ((HashMap) hm).keySet();
                             for (String key : keys) {
-                                //vehicleNumbers.add(hm.get(key));
                                 activeorders_List.add(hm.get(key));
                             }
                             Log.i("soni-", "getactiveordersList , its hashmap ownerlist size=" + String.valueOf(activeorders_List.size()));
@@ -141,10 +139,6 @@ public class FirebaseDataFactory {
                         } else {
                             Log.i("soni-", "not able to get activeordersList");
                         }
-                    }
-
-                    if(paymentStatus.isEmpty()) {
-                        paymentStatus = (String)dataSnapshot.child("paymentStatus").getValue();
                     }
 
                     if (activeorders_List.size() > 0) {
@@ -160,7 +154,7 @@ public class FirebaseDataFactory {
                     }
 
                     if(listener !=null)   {
-                        listener.onRetrieve(activeorders_List, paymentStatus);
+                        listener.onRetrieve(activeorders_List, paidforCars);
                     }
 
 

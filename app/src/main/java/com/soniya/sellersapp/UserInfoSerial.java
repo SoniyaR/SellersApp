@@ -1,8 +1,9 @@
 package com.soniya.sellersapp;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class UserInformation {
+public class UserInfoSerial implements Serializable {
 
     private String emailId;
     private String mobileNo;
@@ -10,25 +11,24 @@ public class UserInformation {
     private String location;
     private ArrayList<String> activeOrders;
     private String paymentStatus;
-//    private ArrayList<String> paidforUsers;
+    //    private ArrayList<String> paidforUsers;
     private ArrayList<String> paidforCarNumbers;
 
-    public UserInformation(){
+    public UserInfoSerial(UserInformation info) {
+        this.emailId = info.getEmailId();
+        this.mobileNo= info.getMobileNo();
+        this.accountType = info.getAccountType();
+        this.location = info.getLocation();
+        this.activeOrders = info.getActiveOrders();
+        this.paymentStatus = info.getPaymentStatus();
+//        this.paidforUsers = new ArrayList<>();
+        this.paidforCarNumbers = info.getPaidforCarNumbers();
+    }
+    public UserInfoSerial(){
         this.emailId = "";
         this.mobileNo= "";
         this.accountType = "";
         this.location = "";
-        this.activeOrders = new ArrayList<>();
-        this.paymentStatus = "";
-//        this.paidforUsers = new ArrayList<>();
-        this.paidforCarNumbers = new ArrayList<>();
-    }
-
-    public UserInformation(String emailId, String location, String mobileNo)   {
-        this.emailId = emailId;
-        this.mobileNo = mobileNo;
-        this.location = location;
-        this.accountType = "";
         this.activeOrders = new ArrayList<>();
         this.paymentStatus = "";
 //        this.paidforUsers = new ArrayList<>();
@@ -82,14 +82,6 @@ public class UserInformation {
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
     }
-
-//    public ArrayList<String> getPaidforUsers() {
-//        return paidforUsers;
-//    }
-//
-//    public void setPaidforUsers(ArrayList<String> paidforUsers) {
-//        this.paidforUsers = paidforUsers;
-//    }
 
     public ArrayList<String> getPaidforCarNumbers() {
         return paidforCarNumbers;

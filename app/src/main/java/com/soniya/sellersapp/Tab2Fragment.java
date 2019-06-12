@@ -1,8 +1,11 @@
 package com.soniya.sellersapp;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -19,6 +22,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 
 public class Tab2Fragment extends Fragment implements View.OnClickListener {
@@ -30,12 +41,16 @@ public class Tab2Fragment extends Fragment implements View.OnClickListener {
 
     char space = ' ';
     char replacechar = '_';
-    String paymentStatusTab2 ="";
+    ArrayList<String> paidforUsrs = new ArrayList<>();
+    ArrayList<String> paidforCarNums = new ArrayList<>();
     ImageView dialogCarImage;
     TextView dialogModel;
     TextView dialogPrice;
     TextView dialogLocation;
     Button payButton;
+
+    Context context;
+    FirebaseAdapter fbadapter = new FirebaseAdapter();
 
     ArrayList<CarInfoSerial> carsArraylist = new ArrayList<>();
     ArrayList<String> activeOrders = new ArrayList<>();
@@ -47,6 +62,7 @@ public class Tab2Fragment extends Fragment implements View.OnClickListener {
         View rootView = inflater.inflate(R.layout.fragment_two, container, false);
         carsListView = rootView.findViewById(R.id.tab2listView);
         registerForContextMenu(carsListView);
+        context = getActivity();
 
         if(getArguments()!=null) {
 
@@ -70,10 +86,11 @@ public class Tab2Fragment extends Fragment implements View.OnClickListener {
             AppListeners carInfoInstance = new AppListeners();
             carInfoInstance.setCarNumbersListener(new AppListeners.CarNumbersListener() {
                 @Override
-                public void onRetrieve(ArrayList<String> data, String paymentStatus) {
+                public void onRetrieve(ArrayList<String> data, ArrayList<String> paidforCars) {
                     if (data != null && data.size() > 0) {
                         activeOrders = data;
-                        paymentStatusTab2 = paymentStatus;
+                       // paidforUsrs = paidforUsers;
+                        paidforCarNums = paidforCars;
 
                         for (CarInfoSerial carInfoSerial : carsArraylist) {
                             //Log.i("soni-", carInfoSerial.getVehicle_no() + paymentStatus);
@@ -84,12 +101,12 @@ public class Tab2Fragment extends Fragment implements View.OnClickListener {
 
                         if (otherCarslist != null && otherCarslist.size() > 0) {
                             //Log.i("soni-", "we have othercarslist tab2frag");
-                            CustomAdapter carListAdapter = new CustomAdapter(Tab2Fragment.this.getActivity(), otherCarslist, R.layout.carslist_layout);
+                            CustomAdapter carListAdapter = new CustomAdapter(context, otherCarslist, R.layout.carslist_layout);
                             carsListView.setAdapter(carListAdapter);
                         }
                     } else {
 
-                        CustomAdapter carListAdapter = new CustomAdapter(Tab2Fragment.this.getActivity(), carsArraylist, R.layout.carslist_layout);
+                        CustomAdapter carListAdapter = new CustomAdapter(context, carsArraylist, R.layout.carslist_layout);
                         carsListView.setAdapter(carListAdapter);
 
                     }
@@ -97,38 +114,41 @@ public class Tab2Fragment extends Fragment implements View.OnClickListener {
 
                 @Override
                 public void onProgress() {
-                    Toast.makeText(Tab2Fragment.this.getActivity(), "Retrieving Cars List", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Retrieving Cars List", Toast.LENGTH_SHORT).show();
                 }
             });
         }else {
 
-            ArrayAdapter arrayAdapter = new ArrayAdapter(Tab2Fragment.this.getActivity(), android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
+            ArrayAdapter arrayAdapter = new ArrayAdapter(context, android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
             carsListView.setAdapter(arrayAdapter);
 
         }
 
         carsListView.setOnItemClickListener((parent, view, position, id) -> {
 
-            if(paymentStatusTab2 != null && (paymentStatusTab2.isEmpty() || paymentStatusTab2.equalsIgnoreCase("Pending")))  {
+            CarInfoSerial selectedCarinfo = otherCarslist.get(position);
+            if(paidforCarNums !=null && !paidforCarNums.isEmpty() && paidforCarNums.contains(selectedCarinfo.getVehicle_no())
+                    /*|| (paidforUsrs!=null && !paidforUsrs.isEmpty() || paidforUsrs.contains(selectedCarinfo.getPostedBy()))*/)  {
+                Intent intent = new Intent(context, OrderDetails.class);
+                intent.putExtra("selVehicleNum", selectedCarinfo.getVehicle_no());
+                startActivity(intent);
+
+            }
+            else {
+
                 AlertDialog.Builder paymentAlert = new AlertDialog.Builder(getActivity());
                 LayoutInflater layoutInflater = getLayoutInflater();
                 View dialogView = layoutInflater.inflate(R.layout.payment_dialog_layout, null);
-                dialogCarImage= dialogView.findViewById(R.id.carimgdialog);
-                dialogModel= dialogView.findViewById(R.id.dialogmodel);
-                dialogPrice= dialogView.findViewById(R.id.dialogprice);
+//                dialogCarImage= dialogView.findViewById(R.id.carimgdialog);
+//                Picasso.with(context).load(Uri.parse(selectedCarinfo.getThumbnailUriString())).resize(0, 140).into(dialogCarImage);
+//                dialogModel= dialogView.findViewById(R.id.dialogmodel);
+//                dialogModel.setText(selectedCarinfo.getBrand_name() + " " + selectedCarinfo.getModel_name());
+//                dialogPrice= dialogView.findViewById(R.id.dialogprice);
+//                dialogPrice.setText(selectedCarinfo.getSellingprice());
                 payButton = dialogView.findViewById(R.id.payButtonDialog);
                 payButton.setOnClickListener(this);
                 paymentAlert.setView(dialogView);
                 paymentAlert.show();
-
-            }
-            else {
-                if(paymentStatusTab2.equalsIgnoreCase("Paid")) {
-                    Intent intent = new Intent(getActivity(), OrderDetails.class);
-
-                    intent.putExtra("selVehicleNum", otherCarslist.get(position).getVehicle_no());
-                    startActivity(intent);
-                }
             }
 
         });
@@ -168,6 +188,10 @@ public class Tab2Fragment extends Fragment implements View.OnClickListener {
 
     }
 
+    private String decodeUsername(String string)    {
+        return string.replace(",", ".");
+    }
+
     @Override
     public void onClick(View v) {
 
@@ -182,6 +206,32 @@ public class Tab2Fragment extends Fragment implements View.OnClickListener {
 
             case R.id.payButtonDialog:
                 Log.i("soni-", "pay button dialog selected!");
+
+                DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("userInfo").child(decodeUsername(fbadapter.getCurrentUser()));
+                db.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if(dataSnapshot !=null && dataSnapshot.getValue() !=null) {
+                            UserInformation userinfo = dataSnapshot.getValue(UserInformation.class);
+                            if (userinfo != null && userinfo.getEmailId() != null) {
+                                Log.i("soni-PaymentGateway", "email-" + userinfo.getEmailId());
+                                Log.i("soni-PaymentGateway", "mob-" + userinfo.getMobileNo());
+
+                                UserInfoSerial infoSerial = new UserInfoSerial(userinfo);
+                                Intent payIntent = new Intent(context, PaymentGateway.class);
+                                payIntent.putExtra("UserInfo", infoSerial);
+                                startActivity(payIntent);
+
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
                 break;
         }
 

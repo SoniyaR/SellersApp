@@ -1,5 +1,6 @@
 package com.soniya.sellersapp;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -30,6 +31,7 @@ public class Tab3Fragment extends Fragment {
     DatabaseReference db = FirebaseDatabase.getInstance().getReference();
     ArrayList<LeadRequest> leads = new ArrayList<>();
     FirebaseAdapter fbAdapter;
+    Context context;
 
     @Nullable
     @Override
@@ -38,12 +40,13 @@ public class Tab3Fragment extends Fragment {
         leadListView = rootView.findViewById(R.id.leadsList);
         registerForContextMenu(leadListView);
         fbAdapter = new FirebaseAdapter();
+        context = getActivity();
 
         addLeadButton = rootView.findViewById(R.id.addleadfab);
         addLeadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent newlead = new Intent(getActivity(), AddNewLead.class);
+                Intent newlead = new Intent(context, AddNewLead.class);
                 startActivity(newlead);
             }
         });
@@ -68,10 +71,10 @@ public class Tab3Fragment extends Fragment {
                     }
 
                     if(!leads.isEmpty() && leads.size() > 0) {
-                        CustomAdapter adapter = new CustomAdapter(getActivity(), leads, R.layout.leadslist_layout);
+                        CustomAdapter adapter = new CustomAdapter(context, leads, R.layout.leadslist_layout);
                         leadListView.setAdapter(adapter);
                     }else{
-                        ArrayAdapter arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
+                        ArrayAdapter arrayAdapter = new ArrayAdapter(context, android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
                         leadListView.setAdapter(arrayAdapter);
                     }
 

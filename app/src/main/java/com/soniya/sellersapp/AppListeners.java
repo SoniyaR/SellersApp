@@ -22,7 +22,7 @@ public class AppListeners {
 
     public interface CarNumbersListener {
 
-        public void onRetrieve(ArrayList<String> data, String paymentStatus);
+        public void onRetrieve(ArrayList<String> data, ArrayList<String> paidforCars);
         public void onProgress();
     }
 

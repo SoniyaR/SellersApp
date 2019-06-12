@@ -201,8 +201,8 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(newUsername.getText().toString().contains("@")) {
-                    Toast.makeText(SetupNewProfile.this, "@, * not allowed in username", Toast.LENGTH_SHORT).show();
+                if(newUsername.getText().toString().contains("@") || newUsername.getText().toString().contains(",")) {
+                    Toast.makeText(SetupNewProfile.this, "@, comma not allowed in username", Toast.LENGTH_SHORT).show();
                     newUsername.setError("Enter valid username");
                 }
                 if(newUsername.getText().toString().contains(" "))  {

@@ -6,4 +6,6 @@
     <color name="darkGrey">#5e5e5e</color>
     <color name="lightgrey">#DCDCDC</color>
     <color name="splashBackground">#240036</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
 </resources>

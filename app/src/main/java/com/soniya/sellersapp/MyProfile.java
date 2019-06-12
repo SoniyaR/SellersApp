@@ -22,11 +22,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.parse.FindCallback;
-import com.parse.ParseException;
-import com.parse.ParseFile;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -138,6 +133,7 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
         });
 
     }
+/*
 
     public void retrieveMyProfile(){
         ParseQuery<ParseObject> userinfo = ParseQuery.getQuery("userInfo");
@@ -181,8 +177,9 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
 
 
     }
+*/
 
-    public void retrieveFeedContent(){
+   /* public void retrieveFeedContent(){
 
         ParseQuery<ParseObject> feedObj = ParseQuery.getQuery("activeOrders");
         feedObj.whereEqualTo("username", encodeString(user));
@@ -262,7 +259,7 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
             }
         });
 
-    }
+    }*/
 /*
     public void addNewPost(){
 
