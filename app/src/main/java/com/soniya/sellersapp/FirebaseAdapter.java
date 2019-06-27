@@ -19,7 +19,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -43,6 +46,19 @@ public class FirebaseAdapter {
 
     public FirebaseAdapter(){
         mAuth = FirebaseAuth.getInstance();
+    }
+
+    public Date getSignupDate(){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String dateString= format.format(new Date(mAuth.getCurrentUser().getMetadata().getCreationTimestamp()));
+        Log.i("soni-adapter", dateString);
+        Date date = null;
+        try {
+            date =new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
     }
 
     public boolean loginUser(String email, String password) {

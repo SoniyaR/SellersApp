@@ -50,7 +50,6 @@ public class AppListeners {
     //uploading data into database one object of Carinfo at a time
 
     String vehicleNum;
-    ArrayList<String> activeOrders;
     String resultOk = "OK";
 
     public interface CarInfoUploadListener  {
@@ -60,17 +59,16 @@ public class AppListeners {
 
     public CarInfoUploadListener carInfoUploadListener;
 
-    public AppListeners(String vehicleNum, ArrayList<String> active_orders)    {
+    public AppListeners(String vehicleNum)    {
         carInfoUploadListener = null;
         this.vehicleNum = vehicleNum;
-        this.activeOrders = active_orders;
         dataFactory = new FirebaseDataFactory();
     }
 
     public void setCarInfoUploadListener( CarInfo carInfoObject, CarInfoUploadListener listener) {
 
         carInfoUploadListener = listener;
-        dataFactory.uploadData(carInfoObject, vehicleNum, activeOrders, listener);
+        dataFactory.uploadData(carInfoObject, vehicleNum, listener);
     }
 
 }

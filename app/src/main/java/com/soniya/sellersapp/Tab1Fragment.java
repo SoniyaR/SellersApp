@@ -3,6 +3,7 @@ package com.soniya.sellersapp;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -14,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -22,6 +24,7 @@ public class Tab1Fragment extends Fragment {
     ListView carsListView;
     int contextSelPosition= 0;
     String selVehicleNum = "";
+    FloatingActionButton addCarInfoButton;
 
     char space = ' ';
     char replacechar = '_';
@@ -42,11 +45,28 @@ public class Tab1Fragment extends Fragment {
         return tabfrag;
     }*/
 
+   //stats below
+    long unsoldWorth;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_one, container, false);
         context = getActivity();
+        addCarInfoButton = rootView.findViewById(R.id.addnewCarInfo);
+        addCarInfoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                Intent newlead = new Intent(context, AddNewLead.class);
+//                startActivity(newlead);
+                if (new FirebaseAdapter().getFirebaseUser().isEmailVerified()) {
+                    Intent i = new Intent(context, UploadNewInfo.class);
+                    startActivity(i);
+                } else {
+                    Log.i("soni-tab1", "cant add data, email not verified");
+                }
+            }
+        });
 
         carsListView = rootView.findViewById(R.id.tab1listView);
         registerForContextMenu(carsListView);
@@ -55,6 +75,7 @@ public class Tab1Fragment extends Fragment {
             carsArraylist = (ArrayList<CarInfoSerial>) getArguments().getSerializable("carsArrayList");
         }
 
+        unsoldWorth = 0;
 
         if(carsArraylist!=null && carsArraylist.size()>0) {
             myCarslist.clear();
@@ -70,6 +91,7 @@ public class Tab1Fragment extends Fragment {
                         for (CarInfoSerial carInfoSerial : carsArraylist) {
                             if (activeOrders.contains(carInfoSerial.getVehicle_no())) {
                                 myCarslist.add(carInfoSerial);
+                                unsoldWorth += Long.valueOf(carInfoSerial.getSellingprice());
                             }
                         }
 

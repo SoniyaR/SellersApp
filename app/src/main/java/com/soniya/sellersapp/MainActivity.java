@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -112,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                backLayout = (ConstraintLayout) findViewById(R.id.backLayout);
                backLayout.setOnClickListener(this);
                logo = (ImageView) findViewById(R.id.logoView);
-               logo.setImageResource(R.drawable.logo);
+               logo.setImageResource(R.drawable.logocar);
                logo.setOnClickListener(this);
                forgotPwd = findViewById(R.id.forgotpwd);
                forgotPwd.setOnClickListener(this);

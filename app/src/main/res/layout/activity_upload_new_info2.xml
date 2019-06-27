@@ -69,6 +69,7 @@
             android:layout_marginRight="8dp"
             android:layout_marginBottom="24dp"
             android:minHeight="300dp"
+            android:maxHeight="600dp"
             android:scaleType="fitCenter"
             app:layout_constraintBottom_toTopOf="@+id/prevButton"
             app:layout_constraintEnd_toEndOf="parent"

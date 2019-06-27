@@ -315,14 +315,31 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.soldButton:
-                if(availability.getText().toString().equalsIgnoreCase("Available")) {
-                    availability.setText("Sold");
-                    soldButton.setText("Sold");
-                    soldButton.setBackgroundColor(Color.GRAY);
-                    soldButton.setEnabled(false);
-                    carInfoReference.child("availability").setValue("sold");
-                    updateCarAvailability();
-                }
+                new AlertDialog.Builder(this)
+                        .setTitle("Mark as Sold")
+                        .setMessage("Do you really want to mark this car as sold?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if(availability.getText().toString().equalsIgnoreCase("Available")) {
+                                    availability.setText("Sold");
+                                    soldButton.setText("Sold");
+                                    soldButton.setBackgroundColor(Color.GRAY);
+                                    soldButton.setEnabled(false);
+                                    carInfoReference.child("availability").setValue("sold");
+                                    updateCarAvailability();
+                                }
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        })
+                        .show();
+
+
                 
                 break;
 

@@ -44,7 +44,7 @@ public class DisplayImageAdapter extends PagerAdapter {
 //                .into(imageView);
 
         Picasso.with(mContext)
-                .load(imageUrls.get(position)).fit().into(imageView);
+                .load(imageUrls.get(position)).into(imageView);
         container.addView(imageView);
         return imageView;
     }

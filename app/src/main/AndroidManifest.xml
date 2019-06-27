@@ -21,7 +21,13 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity android:name=".PaymentGateway"></activity>
-        <activity android:name=".SplashScreen" />
+        <activity android:name=".SplashScreen" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".AddNewLead"
             android:parentActivityName=".MainActivity" />
@@ -65,12 +71,6 @@
                 android:gravity="top"
                 android:minWidth="300dp"
                 android:minHeight="200dp" />
-
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".SignupForm"

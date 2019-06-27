@@ -16,6 +16,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -73,39 +74,13 @@ public class SoldHistory extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     //activeOrders.clear();
-                    if(dataSnapshot !=null && dataSnapshot.hasChild("soldorders")) {
-                        if(dataSnapshot.child("activeorders").getValue() instanceof List) {
-                            soldOrders = (List<String>) dataSnapshot.child("soldorders").getValue();
-
-                            if (soldOrders.size() > 0) {
-                                int index = -1;
-                                for (String order : (List<String>)soldOrders) {
-                                    if (order == null) {
-                                        index = soldOrders.indexOf(order);
-                                    }
-                                }
-                                if (index >= 0) {
-                                    soldOrders.remove(index);
-                                }
-                            }
-                        }else if(dataSnapshot.child("soldorders").getValue() instanceof HashMap){
-                            HashMap<String, List<String>> hashMap = (HashMap<String, List<String>>) dataSnapshot.child("soldorders").getValue();
-                            Log.i("soni-", "it is a hashmap " + hashMap.keySet().toString() );
-                            if(hashMap.keySet().size() == 1)    {
-                                for(String hmkey : hashMap.keySet()) {
-                                    soldOrders = (ArrayList<String>) hashMap.get(hmkey);
-                                }
-                                if (soldOrders.size() > 0) {
-                                    int index = -1;
-                                    for (String order : (List<String>)soldOrders) {
-                                        if (order == null) {
-                                            index = soldOrders.indexOf(order);
-                                        }
-                                    }
-                                    if (index >= 0) {
-                                        soldOrders.remove(index);
-                                    }
-                                }
+                    if(dataSnapshot !=null && dataSnapshot.getValue()!=null){
+                        soldOrders.clear();
+                        UserInformation userInfo = (UserInformation) dataSnapshot.getValue();
+                        if(userInfo.getSoldOrders() !=null && !userInfo.getSoldOrders().isEmpty()) {
+                            HashMap<String, Date> hm = userInfo.getSoldOrders();
+                            for (String key : hm.keySet()) {
+                                soldOrders.add(key);
                             }
                         }
                     }
@@ -129,7 +104,7 @@ public class SoldHistory extends AppCompatActivity {
 
     private void retriveSoldList() {
 
-        DatabaseReference soldRef = FirebaseDatabase.getInstance().getReference().child("SoldHistory");
+        DatabaseReference soldRef = FirebaseDatabase.getInstance().getReference().child("SoldHistory").child(encodeString(user));
 
         soldRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

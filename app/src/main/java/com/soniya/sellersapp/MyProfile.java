@@ -11,12 +11,17 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -40,10 +45,23 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
     ListView feedListView;
     ImageView profilePictureView;
     Bitmap currentPP = null;
-    TextView aboutmeTextView;
-    String currentAboutme = "";
+    TextView myname;
+    TextView mymobile;
+    TextView invWorth;
+    TextView invItems;
+    TextView soldWorth;
+    TextView soldItems;
+    TextView avgSellWorth;
+    TextView sellThisMonth;
+    BarChart chart;
+    Button showChart;
+    boolean chartDataAvailable = false;
+    HashMap<String, Date> hm;
+    ArrayList<Date> dateList;
+
 
     FirebaseAdapter fbAdapter = new FirebaseAdapter();
+    ProfileListener listenerObj;
 
     TextView followingTextView;
 
@@ -86,18 +104,50 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_profile);
-
         setTitle("My Profile");
+
         user = fbAdapter.getCurrentUser();
 
-        profilePictureView = findViewById(R.id.profilePicView) ;
+        profilePictureView = findViewById(R.id.profilePicView) ; //TODO use storage and set later
+        myname = findViewById(R.id.myname);
+        mymobile = findViewById(R.id.mymobilenum);
+
+        invWorth = findViewById(R.id.inventoryworth);
+        invItems = findViewById(R.id.inventoryitems);
+        soldWorth = findViewById(R.id.soldworth);
+        soldItems = findViewById(R.id.solditems);
+        avgSellWorth = findViewById(R.id.avgsoldworth);
+        sellThisMonth = findViewById(R.id.sellmonthVal);
+        showChart = findViewById(R.id.showChartButton);
+        showChart.setOnClickListener(this);
+
+        chart = findViewById(R.id.barchart);
+        hm = new HashMap<>();
 
         if(user !=null){
             TextView myname = findViewById(R.id.myname);
             myname.setText(user);
         }
 
-        retrieveProfile(); //firebase implementation
+        retrieveProfile();
+
+        listenerObj = new ProfileListener();
+        listenerObj.setRetrieveProfileStats(new ProfileListener.RetrieveStatsListener() {
+            @Override
+            public void onDataRetrieve(ProfileStats data) {
+                invWorth.setText(String.valueOf(data.getTotalWorth()));
+                invItems.setText(String.valueOf(data.getAvailableInventory()));
+                soldWorth.setText(String.valueOf(data.getSoldWorth()));
+                soldItems.setText(String.valueOf(data.getSoldInventory()));
+                avgSellWorth.setText(String.valueOf(data.getAvgSellperMonth()));
+                sellThisMonth.setText(String.valueOf(data.getAvgSellThisMonth()));
+            }
+
+            @Override
+            public void onDataCancelled() {
+
+            }
+        });
 
     }
 
@@ -115,14 +165,42 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
         return string.replace(",", ".");
     }
 
-    private void retrieveProfile() {
+
+    public void retrieveProfile(){
 
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("userInfo").child(encodeString(user));
+
         userRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot != null)    {
+                if (dataSnapshot != null && dataSnapshot.getValue() != null) {
                     Log.i("soni-profile", dataSnapshot.getValue().toString());
+                    myname.setText(user);
+
+                    if(dataSnapshot.getValue() instanceof UserInformation) {
+                        UserInformation userinfo = (UserInformation) dataSnapshot.getValue();
+
+                        mymobile.setText(userinfo.getMobileNo());
+                        hm = userinfo.getSoldOrders();
+                    }
+                    else if(dataSnapshot.getValue() instanceof HashMap){
+                        HashMap<String, Object> hashm = (HashMap<String, Object>) dataSnapshot.getValue();
+                        mymobile.setText(String.valueOf(hashm.get("mobileNo")));
+                        hm = (HashMap<String, Date>) hashm.get("soldorders");
+                    }
+
+
+                    BarDataSet dataSet = new BarDataSet(getBarChartData(), "Sales per month");
+                    chart.animateY(4000);
+
+                    ArrayList<String> months = new ArrayList<>();
+                    months.add("Jan");
+                    months.add("Feb");
+                    months.add("Mar");
+                    months.add("Apr");
+                    BarData data= new BarData( dataSet);
+                    chart.setData(data);
+
                 }
             }
 
@@ -132,7 +210,41 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
             }
         });
 
+
     }
+
+    public ArrayList<BarEntry> getBarChartData(){
+        ArrayList<BarEntry> entries = new ArrayList<>();
+       // entries.add(new BarEntry());
+        if(hm!=null && !hm.isEmpty()){
+            Date signup_date = fbAdapter.getSignupDate();
+            Date curr_date = new Date();
+            long dur = curr_date.getTime() - signup_date.getTime();
+            Log.i("soni-", "date diff is " + dur);
+            chartDataAvailable = true;
+            for(String key: hm.keySet()){
+                dateList.add(hm.get(key));
+                Log.i("soni-","barchart- " + hm.get(key).toString());
+            }
+            //if diff betn signup date and curr date is less than 30days
+            //show days data
+
+
+
+            //find num of cars sold in last 3 months
+
+        }
+
+        entries.add(new BarEntry(1, 13));
+        entries.add(new BarEntry(2, 10));
+        entries.add(new BarEntry(3, 8));
+        entries.add(new BarEntry(4, 14));
+
+        return entries;
+
+    }
+
+
 /*
 
     public void retrieveMyProfile(){
@@ -276,11 +388,24 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
 
         switch(v.getId())   {
 
+            case R.id.showChartButton:
 
+                if(chartDataAvailable){
+
+                    showChart.setVisibility(View.INVISIBLE);
+                    chart.setVisibility(View.VISIBLE);
+                    loadChart();
+
+                }
+
+                break;
 
             default:
                 break;
         }
 
+    }
+
+    private void loadChart() {
     }
 }

@@ -57,7 +57,6 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
     public static final int PICK_IMAGE = 1;
     ArrayList<Uri> selectedUriList = new ArrayList<>();
     int current_img_index = 0;
-    //int prev_img_index;
     TextView skipText;
     boolean skipImages=false;
 
@@ -82,7 +81,6 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
 
     FirebaseDataFactory database = new FirebaseDataFactory();
 
-    ArrayList<String> activeordersList;
 
     public static String encodeString(String string) {
         if(string == null || (string !=null && string.isEmpty())){
@@ -171,9 +169,6 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
             prevButton.setEnabled(false);
             nextButton.setEnabled(false);
         }
-        activeordersList = new ArrayList<>();
-
-        activeordersList=database.getactiveorders_List(null);
 
     }
 
@@ -184,11 +179,17 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
 
             CarInfo object = buildCarinfoObject(carInfoSerial);
 
-            AppListeners listener = new AppListeners(curr_vehicleNum, activeordersList);
+            AppListeners listener = new AppListeners(curr_vehicleNum);
             listener.setCarInfoUploadListener(object, new AppListeners.CarInfoUploadListener() {
                 @Override
                 public void onUploadComplete(String result) {
                     if(result.equalsIgnoreCase(listener.resultOk))  {
+
+                        ProfileStats stats = new ProfileStats();
+                        stats.setAvailableInventory(1);
+                        stats.setTotalWorth(Long.valueOf(object.getSellingprice()));
+                        database.updateStats(stats);
+
                         if(!skipImages && selectedUriList != null && selectedUriList.size() > 0) {
 
                             if (img_ref != null) {

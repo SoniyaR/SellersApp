@@ -33,7 +33,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -142,6 +144,7 @@ public class HomePage extends AppCompatActivity {
 
         setTitle("Active Orders");
 
+        Log.i("soni-date ", fbAdapter.getSignupDate().toString());
         carsArraylist = new ArrayList<>();
 
         //{model_name=qwe12_bb, sellingprice=90000, description=nnhh_ffgg, location=pune, availability=Available}

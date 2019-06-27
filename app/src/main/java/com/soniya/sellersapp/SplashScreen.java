@@ -20,7 +20,7 @@ public class SplashScreen extends AppCompatActivity {
                 startActivity(splashIntent);
                 finish();
             }
-        }, 4000);
+        }, 3000);
 
         ImageView steering = findViewById(R.id.splashicon);
         steering.animate().scaleX(0.1f).scaleY(0.1f);

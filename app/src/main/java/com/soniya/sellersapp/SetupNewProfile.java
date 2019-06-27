@@ -290,6 +290,7 @@ public class SetupNewProfile extends AppCompatActivity implements View.OnClickLi
 
                                 FirebaseDataFactory dataFactory = new FirebaseDataFactory();
                                 dataFactory.addNewProfileInfo(encodeString(newUsername.getText().toString()), userInfo);
+                                dataFactory.addNewStatsInfo();
 
                                 if (auth.getCurrentUser().isEmailVerified()) {
 

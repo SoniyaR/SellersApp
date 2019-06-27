@@ -1,6 +1,8 @@
 package com.soniya.sellersapp;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 
 public class UserInformation {
 
@@ -9,6 +11,7 @@ public class UserInformation {
     private String accountType;
     private String location;
     private ArrayList<String> activeOrders;
+    private HashMap<String, Date> soldOrders;
     private String paymentStatus;
 //    private ArrayList<String> paidforUsers;
     private ArrayList<String> paidforCarNumbers;
@@ -19,6 +22,7 @@ public class UserInformation {
         this.accountType = "";
         this.location = "";
         this.activeOrders = new ArrayList<>();
+        this.soldOrders = new HashMap<>();
         this.paymentStatus = "";
 //        this.paidforUsers = new ArrayList<>();
         this.paidforCarNumbers = new ArrayList<>();
@@ -30,6 +34,7 @@ public class UserInformation {
         this.location = location;
         this.accountType = "";
         this.activeOrders = new ArrayList<>();
+        this.soldOrders = new HashMap<>();
         this.paymentStatus = "";
 //        this.paidforUsers = new ArrayList<>();
         this.paidforCarNumbers = new ArrayList<>();
@@ -97,5 +102,13 @@ public class UserInformation {
 
     public void setPaidforCarNumbers(ArrayList<String> paidforCarNumbers) {
         this.paidforCarNumbers = paidforCarNumbers;
+    }
+
+    public HashMap<String, Date> getSoldOrders() {
+        return soldOrders;
+    }
+
+    public void setSoldOrders(HashMap<String, Date> soldOrders) {
+        this.soldOrders = soldOrders;
     }
 }

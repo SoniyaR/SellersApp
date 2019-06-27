@@ -51,7 +51,7 @@
         app:layout_constraintStart_toEndOf="@+id/profilePicView"
         app:layout_constraintTop_toBottomOf="@+id/myname" />
 
-    <ListView
+    <!--<ListView
         android:id="@+id/myfeedListView"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -64,7 +64,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
+-->
     <android.support.v7.widget.GridLayout
         android:id="@+id/profGridOne"
         android:layout_width="0dp"
@@ -85,7 +85,7 @@
             app:layout_row="0"
             app:layout_columnWeight="1"
             app:layout_rowWeight="1"
-            android:background="@android:color/tertiary_text_light">
+            android:background="@color/lightgrey">
 
             <TextView
                 android:id="@+id/title00"
@@ -114,7 +114,7 @@
             app:layout_row="0"
             app:layout_columnWeight="1"
             app:layout_rowWeight="1"
-            android:background="@android:color/tertiary_text_light">
+            android:background="@color/lightgrey">
 
             <TextView
                 android:id="@+id/title01"
@@ -143,7 +143,7 @@
             app:layout_row="1"
             app:layout_columnWeight="1"
             app:layout_rowWeight="1"
-            android:background="@android:color/tertiary_text_light">
+            android:background="@color/lightgrey">
 
             <TextView
                 android:id="@+id/title10"
@@ -172,7 +172,7 @@
             app:layout_row="1"
             app:layout_columnWeight="1"
             app:layout_rowWeight="1"
-            android:background="@android:color/tertiary_text_light">
+            android:background="@color/lightgrey">
 
             <TextView
                 android:id="@+id/title11"
@@ -198,24 +198,22 @@
     </android.support.v7.widget.GridLayout>
 
     <android.support.v7.widget.GridLayout
+        android:id="@+id/gridLayout3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
         app:columnCount="2"
+        app:layout_constraintTop_toBottomOf="@id/profGridOne"
         app:rowCount="1"
-        app:layout_constraintTop_toBottomOf="@id/profGridOne">
+        tools:layout_editor_absoluteX="16dp">
 
         <LinearLayout
+            android:background="@color/lightgrey"
             android:orientation="vertical"
             app:layout_column="0"
-            app:layout_row="0"
             app:layout_columnWeight="1"
-            app:layout_rowWeight="1"
-            android:background="@android:color/tertiary_text_light">
+            app:layout_row="0"
+            app:layout_rowWeight="1">
 
             <TextView
                 android:id="@+id/avgsell"
@@ -226,6 +224,7 @@
                 android:text="Avg. sell worth"
                 android:textColor="@android:color/black"
                 android:textSize="14sp" />
+
             <TextView
                 android:id="@+id/avgsoldworth"
                 android:layout_width="wrap_content"
@@ -235,16 +234,16 @@
                 android:layout_marginBottom="4dp"
                 android:text="0"
                 android:textColor="@android:color/black"
-                android:textSize="18sp"/>
+                android:textSize="18sp" />
         </LinearLayout>
 
         <LinearLayout
+            android:background="@color/lightgrey"
             android:orientation="vertical"
             app:layout_column="1"
-            app:layout_row="0"
             app:layout_columnWeight="1"
-            app:layout_rowWeight="1"
-            android:background="@android:color/tertiary_text_light">
+            app:layout_row="0"
+            app:layout_rowWeight="1">
 
             <TextView
                 android:id="@+id/sellmonth"
@@ -255,8 +254,9 @@
                 android:text="Sell this month"
                 android:textColor="@android:color/black"
                 android:textSize="14sp" />
+
             <TextView
-                android:id="@+id/sellmonth"
+                android:id="@+id/sellmonthVal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -264,9 +264,46 @@
                 android:layout_marginBottom="4dp"
                 android:text="0"
                 android:textColor="@android:color/black"
-                android:textSize="18sp"/>
+                android:textSize="18sp" />
         </LinearLayout>
 
 
     </android.support.v7.widget.GridLayout>
+
+    <Button
+        android:id="@+id/showChartButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/round_button"
+        android:gravity="center"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:text="Show Chart"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gridLayout3" />
+
+    <com.github.mikephil.charting.charts.BarChart
+        android:id="@+id/barchart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gridLayout3">
+
+    </com.github.mikephil.charting.charts.BarChart>
 </android.support.constraint.ConstraintLayout>

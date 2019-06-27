@@ -1,12 +1,16 @@
 package com.soniya.sellersapp;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -207,33 +211,69 @@ public class Tab2Fragment extends Fragment implements View.OnClickListener {
             case R.id.payButtonDialog:
                 Log.i("soni-", "pay button dialog selected!");
 
-                DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("userInfo").child(decodeUsername(fbadapter.getCurrentUser()));
-                db.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if(dataSnapshot !=null && dataSnapshot.getValue() !=null) {
-                            UserInformation userinfo = dataSnapshot.getValue(UserInformation.class);
-                            if (userinfo != null && userinfo.getEmailId() != null) {
-                                Log.i("soni-PaymentGateway", "email-" + userinfo.getEmailId());
-                                Log.i("soni-PaymentGateway", "mob-" + userinfo.getMobileNo());
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this.getActivity(), new String[]{Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS}, 101);
+                }else {
+                    //continue checkout process
+                    DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("userInfo").child(decodeUsername(fbadapter.getCurrentUser()));
+                    db.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot != null && dataSnapshot.getValue() != null) {
+                                UserInformation userinfo = dataSnapshot.getValue(UserInformation.class);
+                                if (userinfo != null && userinfo.getEmailId() != null) {
+                                    Log.i("soni-PaymentGateway", "email-" + userinfo.getEmailId());
+                                    Log.i("soni-PaymentGateway", "mob-" + userinfo.getMobileNo());
 
-                                UserInfoSerial infoSerial = new UserInfoSerial(userinfo);
-                                Intent payIntent = new Intent(context, PaymentGateway.class);
-                                payIntent.putExtra("UserInfo", infoSerial);
-                                startActivity(payIntent);
+                                    UserInfoSerial infoSerial = new UserInfoSerial(userinfo);
+                                    Intent payIntent = new Intent(context, PaymentGateway.class);
+                                    payIntent.putExtra("UserInfo", infoSerial);
+                                    startActivity(payIntent);
 
+                                }
                             }
                         }
-                    }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                    }
-                });
+                        }
+                    });
+                }
 
                 break;
         }
+
+    }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        //continue to checkout process
+
+        DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("userInfo").child(decodeUsername(fbadapter.getCurrentUser()));
+        db.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot != null && dataSnapshot.getValue() != null) {
+                    UserInformation userinfo = dataSnapshot.getValue(UserInformation.class);
+                    if (userinfo != null && userinfo.getEmailId() != null) {
+                        Log.i("soni-PaymentGateway", "email-" + userinfo.getEmailId());
+                        Log.i("soni-PaymentGateway", "mob-" + userinfo.getMobileNo());
+
+                        UserInfoSerial infoSerial = new UserInfoSerial(userinfo);
+                        Intent payIntent = new Intent(context, PaymentGateway.class);
+                        payIntent.putExtra("UserInfo", infoSerial);
+                        startActivity(payIntent);
+
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
     }
 }
