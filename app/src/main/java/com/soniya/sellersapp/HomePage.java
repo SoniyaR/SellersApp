@@ -50,36 +50,36 @@ public class HomePage extends AppCompatActivity {
     private boolean doubleBackToExitPressedOnce=false;
 
     List activeOrders ;
-
-    char space = ' ';
-    char replacechar = '_';
+//
+//    char space = ' ';
+//    char replacechar = '_';
 
     FirebaseAdapter fbAdapter = new FirebaseAdapter();
-    FirebaseDataFactory fbFactory = new FirebaseDataFactory();
+//    FirebaseDataFactory fbFactory = new FirebaseDataFactory();
 
     DatabaseReference carInfoReference;
     DatabaseReference userRef;
-
-    StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-
-    String selVehicleNum = "";
-    String uname = "";
-
-    int contextSelPosition = 0;
+//
+//    StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+//
+//    String selVehicleNum = "";
+//    String uname = "";
+//
+//    int contextSelPosition = 0;
 
     Fragment tab1frag;
     Fragment tab2frag;
     Fragment tab3frag;
     Bundle tabbundle = new Bundle();
-
-    boolean paidForOtherOrders = false;
-
-    public static String encodeString(String string) {
-        if(string == null || (string !=null && string.isEmpty())){
-            return "";
-        }
-        return string.replace(".", ",");
-    }
+//
+//    boolean paidForOtherOrders = false;
+//
+//    public static String encodeString(String string) {
+//        if(string == null || (string !=null && string.isEmpty())){
+//            return "";
+//        }
+//        return string.replace(".", ",");
+//    }
 
     ArrayList<CarInfoSerial> carsArraylist;
 
@@ -333,6 +333,7 @@ public class HomePage extends AppCompatActivity {
         return true;
     }
 
+/*
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -373,13 +374,14 @@ public class HomePage extends AppCompatActivity {
         return super.onContextItemSelected(item);
 
     }
+*/
 
 
     /*
     method to delete the car record from database
     identified by vehicle number
      */
-    private void deleteRecord(String vehicleNum) {
+   /* private void deleteRecord(String vehicleNum) {
 
         activeOrders.remove(vehicleNum);
 
@@ -463,7 +465,7 @@ public class HomePage extends AppCompatActivity {
 
     }
 
-
+*/
     @Override
     public void onBackPressed() {
 

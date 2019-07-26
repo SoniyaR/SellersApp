@@ -245,7 +245,9 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
      */
 
     public void uploadImage(Uri uri, String filename){
+
         progressBar.setVisibility(View.VISIBLE);
+        Log.i("soni-", " uploading image " + index);
 
         UploadTask uploadTask = img_ref.child("IMG_"+filename).putFile(uri);
         Task<Uri> uriTask = uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
@@ -314,9 +316,11 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
                     // Permission is not granted
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
                 } else {
-                    Intent intentImport = new Intent(Intent.ACTION_GET_CONTENT);
-                    intentImport.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                    Intent intentImport = new Intent();
                     intentImport.setType("image/*");
+                    intentImport.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                    intentImport.setAction(Intent.ACTION_GET_CONTENT);
+                    Log.i("soni-", " about to select picture/s from gallery");
                     startActivityForResult(Intent.createChooser(intentImport, "Select Picture"), PICK_IMAGE);
                 }
                 break;
@@ -397,6 +401,7 @@ public class UploadNewInfo2 extends AppCompatActivity  implements View.OnClickLi
         if(requestCode == PICK_IMAGE && resultCode== RESULT_OK )  {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 if(data.getClipData() !=null && data !=null) {
+                    Log.i("soni-", " got picture data");
                     selectedImages.setVisibility(View.VISIBLE);
                     prevButton.setVisibility(View.VISIBLE);
                     nextButton.setVisibility(View.VISIBLE);

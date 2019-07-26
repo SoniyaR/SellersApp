@@ -145,7 +145,7 @@ public class FirebaseDataFactory {
                         }
                     }
 
-                    if (activeorders_List.size() > 0) {
+                    /*if (activeorders_List.size() > 0) {
 
                         int index = -1;
                         for (String order : (List<String>) activeorders_List) {
@@ -155,7 +155,7 @@ public class FirebaseDataFactory {
                             }
                         }
 
-                    }
+                    }*/
 
                     if (listener != null) {
                         listener.onRetrieve(activeorders_List, paidforCars);
@@ -306,7 +306,7 @@ public class FirebaseDataFactory {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot !=null && dataSnapshot.getValue() !=null){
-                    UserInformation info = (UserInformation) dataSnapshot.getValue();
+                    UserInformation info = dataSnapshot.getValue(UserInformation.class);
                     ArrayList<String> list = info.getActiveOrders();
                     list.add(encodeString(vehicleNum));
                     info.setActiveOrders(list);
@@ -339,7 +339,7 @@ public class FirebaseDataFactory {
                         e.printStackTrace();
                     }*/
                     //get userinfo object
-                    UserInformation info = (UserInformation) dataSnapshot.getValue();
+                    UserInformation info = dataSnapshot.getValue(UserInformation.class);
 //                    if(date !=null) {
                         HashMap<String, Date> hm = new HashMap<>();
                         if (info.getSoldOrders() != null && !info.getSoldOrders().isEmpty()) {
@@ -460,7 +460,7 @@ public class FirebaseDataFactory {
                     moveInfoUpdatestoHistory(number);
 
                     //update stats in profile
-                    CarInfo carInfo = (CarInfo) dataSnapshot.getValue();
+                    CarInfo carInfo = dataSnapshot.getValue(CarInfo.class);
                     ProfileStats stats = new ProfileStats();
                     stats.setSoldInventory(1);
                     stats.setSoldWorth(Long.valueOf(carInfo.getSellingprice()));
@@ -582,7 +582,7 @@ public class FirebaseDataFactory {
     public void deleteRecord(String vehicleNum) {
 
         DatabaseReference fromRef = db.child("CarInfo").child(vehicleNum);
-        DatabaseReference toRef = db.child("DeletedRecords");
+        DatabaseReference toRef = db.child(encodeString(uname)).child("DeletedRecords");
         final String number = vehicleNum;
 
         fromRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -607,71 +607,7 @@ public class FirebaseDataFactory {
             }
         });
 
-        /*if(vehicleNum != null && !vehicleNum.isEmpty() && !vehicleNum.equalsIgnoreCase(""))   {
-
-            moveToSoldHistory(vehicleNum);
-
-            //remove vehicle number from userinfo -> username-> activeorders list
-            userRef.child(encodeString(uname)).child("activeorders").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.getValue() instanceof List) {
-                        List<String> numList = (ArrayList<String>) dataSnapshot.getValue();
-                        if (numList.size() > 0 && numList.contains(vehicleNum)) {
-                            numList.remove(vehicleNum);
-                            Log.i("soni-homepage", "deleterecord() ---> removed " + vehicleNum + " from userinfo");
-                            userRef.child(encodeString(uname)).child("activeorders").setValue(numList);
-                        }
-                    }
-                    else if(dataSnapshot.getValue() instanceof HashMap){
-                        HashMap<String, List<String>> hashMap = (HashMap<String, List<String>>) dataSnapshot.getValue();
-
-                        deleteOldActiveorders_List();
-
-                        List<String> vehicleList =  new ArrayList<>();
-                        if(hashMap.keySet().size() == 1)    {
-                            Set<String> keyset = hashMap.keySet();
-                            for(String key: keyset) {
-                                vehicleList = hashMap.get(key);
-                            }
-                        }
-                        if(vehicleList.contains(null)){
-                            Log.i("soni-homepage", "vehicleList has null elements");
-                            while(vehicleList.remove(null));
-                        }
-                        if(vehicleList.contains(vehicleNum)) {
-                            List<String> tempList  = new ArrayList<>();
-                            for(String num: vehicleList)   {
-                                if(!num.equalsIgnoreCase(vehicleNum))   {
-                                    tempList.add(num);
-                                }
-                            }
-
-                            userRef.child(encodeString(uname)).child("activeorders").setValue(tempList).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    Log.i("soni-", "updated activeorders list for deleteRecord");
-                                }
-                            });
-                        }
-
-                        Log.i("soni-deleterecord ", "its hashmap");
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-
-            //removeImagesFromStorage(vehicleNum);
-            moveInfoUpdatestoHistory(vehicleNum);
-        }*/
-
-
     }
-
 
     /*
 
@@ -737,13 +673,11 @@ public class FirebaseDataFactory {
         db.child("userInfo").child(encodeString(uname)).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
                 if(dataSnapshot !=null && dataSnapshot.getValue() != null*//*&& dataSnapshot.hasChild("activeorders") && dataSnapshot.hasChild("paymentStatus")*//*) {
 
      *//*if(dataSnapshot.child("paymentStatus").getValue() !=null)    {
                         paymentStatus = (String)dataSnapshot.child("paymentStatus").getValue();
                     }
-
                     if(dataSnapshot.child("activeorders").getValue() instanceof List) {
 
                         activeOrders = (ArrayList<String>) dataSnapshot.child("activeorders").getValue();
@@ -751,7 +685,6 @@ public class FirebaseDataFactory {
                         if(carNumbersListener !=null)   {
                             carNumbersListener.onProgress();
                         }
-
                     }else if(dataSnapshot.child("activeorders").getValue() instanceof HashMap){
 
                         HashMap<String, List<String>> hashMap = (HashMap<String, List<String>>) dataSnapshot.child("activeorders").getValue();
@@ -764,9 +697,7 @@ public class FirebaseDataFactory {
                         if(carNumbersListener !=null)   {
                             carNumbersListener.onProgress();
                         }
-
                     }*//*
-
                     UserInformation userInformation = dataSnapshot.getValue(UserInformation.class);
                     if(userInformation !=null && !userInformation.getActiveOrders().isEmpty()) {
                         Log.i("soni-", "retrieved info in userInformation");
@@ -782,7 +713,6 @@ public class FirebaseDataFactory {
                         }
 
                     }
-
                     if (activeOrders.size() > 0) {
 
                         int index = -1;
@@ -792,14 +722,11 @@ public class FirebaseDataFactory {
                                 activeOrders.remove(index);
                             }
                         }
-
                     }
-
                     if(carNumbersListener !=null)   {
                         carNumbersListener.onRetrieve(activeOrders, paymentStatus);
                     }
                 }
-
             }
 
             @Override
@@ -807,11 +734,9 @@ public class FirebaseDataFactory {
 
             }
         });
-
         return activeOrders;
     }
 */
-
 
     /*
     method to update stats like total worth, sold worth, available inventory etc
@@ -819,29 +744,52 @@ public class FirebaseDataFactory {
 
     public void updateStats(ProfileStats stats) {
 
+        Log.i("soni-", " updating profile stats for "+ uname);
+
         DatabaseReference statsDb = db.child("profileStats").child(encodeString(uname));
 
         statsDb.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot != null && dataSnapshot.getValue() != null) {
-                    ProfileStats s = (ProfileStats) dataSnapshot.getValue();
+                    ProfileStats s = dataSnapshot.getValue(ProfileStats.class);
+
+                    //check unit change for worth
+                    if((s.getTotalWorth()/10000 >= 1 || s.getSoldWorth()/10000 >= 1) && s.getWorthUnit().equalsIgnoreCase("K") ){
+                        s.setWorthUnit("M");
+                        s.setTotalWorth(s.getTotalWorth()/1000);
+                        s.setSoldWorth(s.getSoldWorth()/1000);
+                        if(s.getAvgSellWorthMonth()!=0){
+                        s.setAvgSellWorthMonth(s.getAvgSellWorthMonth()/1000);}
+                    }else if((s.getTotalWorth()/1000 >= 1 || s.getSoldWorth()/1000 >= 1) && s.getWorthUnit().isEmpty()){
+                        s.setWorthUnit("K");
+                        s.setTotalWorth(s.getTotalWorth()/1000);
+                        s.setSoldWorth(s.getSoldWorth()/1000);
+                        if(s.getAvgSellWorthMonth()!=0){
+                        s.setAvgSellWorthMonth(s.getAvgSellWorthMonth()/1000);}
+                    }
+
+                    if(s.getWorthUnit().equalsIgnoreCase("K"))  {
+                        if(stats.getSoldWorth()!=0){
+                        stats.setSoldWorth(stats.getSoldWorth()/1000);}
+                        if(stats.getTotalWorth()!=0){
+                        stats.setTotalWorth(stats.getTotalWorth()/1000);}
+                    }else if(s.getWorthUnit().equalsIgnoreCase("M"))    {
+                        if(stats.getSoldWorth()!=0){
+                            stats.setSoldWorth(stats.getSoldWorth()/1000000);}
+                        if(stats.getTotalWorth()!=0){
+                            stats.setTotalWorth(stats.getTotalWorth()/1000000);}
+                    }
+
                     if (stats.getAvailableInventory() != 0) {
                         s.setAvailableInventory(s.getAvailableInventory() + stats.getAvailableInventory());
                     }
-//                    if (stats.getAvgSellperMonth() != 0) {
-//                        s.setAvgSellperMonth((s.getAvgSellperMonth() + stats.getAvgSellperMonth()) / ());
-//                    }
-//                    if (stats.getAvgSellThisMonth() != 0) {
-//                        s.setAvgSellThisMonth(stats.getAvgSellThisMonth());
-//                    }
 
                     if (stats.getSoldWorth() != 0) {
                         //update sellthismonth
-                        s.setAvgSellThisMonth(((s.getAvgSellThisMonth() * s.getSoldInventory())+stats.getSoldWorth())/(s.getSoldInventory() + stats.getSoldInventory()));
-
+                        s.setAvgSellThisMonth(((s.getAvgSellThisMonth() * s.getSoldInventory())+stats.getSoldWorth())
+                                /(s.getSoldInventory() + stats.getSoldInventory()));
                         //calculate and update avgSell
-
                         s.setTotalWorth(s.getTotalWorth()-stats.getSoldWorth());
                         s.setSoldWorth(s.getSoldWorth() + stats.getSoldWorth());
                     }
@@ -853,6 +801,9 @@ public class FirebaseDataFactory {
                         s.setTotalWorth(s.getTotalWorth() + stats.getTotalWorth());
                     }
 
+
+
+                    statsDb.setValue(s);
 
                 } else {
                     Log.i("soni-", "updateStats- stats not found");
@@ -874,7 +825,7 @@ public class FirebaseDataFactory {
     /*
     method to retrieve stats like total worth, sold worth, available inventory etc
      */
-    public UserInformation retrieveStats(ProfileListener.RetrieveStatsListener listener) {
+    public ProfileStats retrieveStats(ProfileListener.RetrieveStatsListener listener) {
         ProfileStats stats = new ProfileStats();
 
 
@@ -884,13 +835,14 @@ public class FirebaseDataFactory {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot != null && dataSnapshot.getValue() != null) {
-                    ProfileStats s = (ProfileStats) dataSnapshot.getValue();
+                    ProfileStats s = dataSnapshot.getValue(ProfileStats.class);
                     stats.setAvailableInventory(s.getAvailableInventory());
                     stats.setAvgSellperMonth(s.getAvgSellperMonth());
                     stats.setAvgSellThisMonth(s.getAvgSellThisMonth());
                     stats.setSoldWorth(s.getSoldWorth());
                     stats.setTotalWorth(s.getTotalWorth());
                     stats.setSoldInventory(s.getSoldInventory());
+                    stats.setWorthUnit(s.getWorthUnit());
 
                     if (listener != null) {
                         listener.onDataRetrieve(stats);
@@ -908,7 +860,7 @@ public class FirebaseDataFactory {
             }
         });
 
-        return userinfo;
+        return stats;
 
     }
 

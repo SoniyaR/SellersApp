@@ -110,8 +110,11 @@ public class Tab2Fragment extends Fragment implements View.OnClickListener {
                         }
                     } else {
 
-                        CustomAdapter carListAdapter = new CustomAdapter(context, carsArraylist, R.layout.carslist_layout);
-                        carsListView.setAdapter(carListAdapter);
+//                        CustomAdapter carListAdapter = new CustomAdapter(context, carsArraylist, R.layout.carslist_layout);
+//                        carsListView.setAdapter(carListAdapter);
+
+                        ArrayAdapter arrayAdapter = new ArrayAdapter(context, android.R.layout.simple_list_item_1, new String[]{"Nothing to show"});
+                        carsListView.setAdapter(arrayAdapter);
 
                     }
                 }

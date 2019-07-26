@@ -3,8 +3,10 @@ package com.soniya.sellersapp;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -109,8 +111,14 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
         user = fbAdapter.getCurrentUser();
 
         profilePictureView = findViewById(R.id.profilePicView) ; //TODO use storage and set later
+        profilePictureView.setImageResource(R.drawable.noprofilepic);
+
         myname = findViewById(R.id.myname);
+
         mymobile = findViewById(R.id.mymobilenum);
+        Drawable img = ContextCompat.getDrawable(getApplicationContext(), android.R.drawable.sym_action_call);
+        img.setBounds(0, 0, img.getMinimumWidth(), 0);
+        mymobile.setCompoundDrawables(img, null, null, null);
 
         invWorth = findViewById(R.id.inventoryworth);
         invItems = findViewById(R.id.inventoryitems);
@@ -135,11 +143,11 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
         listenerObj.setRetrieveProfileStats(new ProfileListener.RetrieveStatsListener() {
             @Override
             public void onDataRetrieve(ProfileStats data) {
-                invWorth.setText(String.valueOf(data.getTotalWorth()));
+                invWorth.setText(String.valueOf(data.getTotalWorth()) + " " + data.getWorthUnit());
                 invItems.setText(String.valueOf(data.getAvailableInventory()));
-                soldWorth.setText(String.valueOf(data.getSoldWorth()));
+                soldWorth.setText(String.valueOf(data.getSoldWorth()) + " " + data.getWorthUnit());
                 soldItems.setText(String.valueOf(data.getSoldInventory()));
-                avgSellWorth.setText(String.valueOf(data.getAvgSellperMonth()));
+                avgSellWorth.setText(String.valueOf(data.getAvgSellperMonth()) + " " + data.getWorthUnit());
                 sellThisMonth.setText(String.valueOf(data.getAvgSellThisMonth()));
             }
 
@@ -170,36 +178,16 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
 
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("userInfo").child(encodeString(user));
 
-        userRef.addValueEventListener(new ValueEventListener() {
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot != null && dataSnapshot.getValue() != null) {
-                    Log.i("soni-profile", dataSnapshot.getValue().toString());
-                    myname.setText(user);
+//                    Log.i("soni-profile", dataSnapshot.getValue().toString());
+                    myname.setText(decodeString(user));
 
-                    if(dataSnapshot.getValue() instanceof UserInformation) {
-                        UserInformation userinfo = (UserInformation) dataSnapshot.getValue();
-
-                        mymobile.setText(userinfo.getMobileNo());
-                        hm = userinfo.getSoldOrders();
-                    }
-                    else if(dataSnapshot.getValue() instanceof HashMap){
-                        HashMap<String, Object> hashm = (HashMap<String, Object>) dataSnapshot.getValue();
-                        mymobile.setText(String.valueOf(hashm.get("mobileNo")));
-                        hm = (HashMap<String, Date>) hashm.get("soldorders");
-                    }
-
-
-                    BarDataSet dataSet = new BarDataSet(getBarChartData(), "Sales per month");
-                    chart.animateY(4000);
-
-                    ArrayList<String> months = new ArrayList<>();
-                    months.add("Jan");
-                    months.add("Feb");
-                    months.add("Mar");
-                    months.add("Apr");
-                    BarData data= new BarData( dataSet);
-                    chart.setData(data);
+                    UserInformation userinfo = dataSnapshot.getValue(UserInformation.class);
+                    mymobile.setText(userinfo.getMobileNo());
+                    hm = userinfo.getSoldOrders();
 
                 }
             }
@@ -239,6 +227,7 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
         entries.add(new BarEntry(2, 10));
         entries.add(new BarEntry(3, 8));
         entries.add(new BarEntry(4, 14));
+        chartDataAvailable = true;
 
         return entries;
 
@@ -389,12 +378,12 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
         switch(v.getId())   {
 
             case R.id.showChartButton:
-
+                Log.i("soni-", "showChart clicked " + chartDataAvailable);
+                loadChart();
                 if(chartDataAvailable){
 
                     showChart.setVisibility(View.INVISIBLE);
                     chart.setVisibility(View.VISIBLE);
-                    loadChart();
 
                 }
 
@@ -407,5 +396,15 @@ public class MyProfile extends AppCompatActivity implements View.OnClickListener
     }
 
     private void loadChart() {
+        BarDataSet dataSet = new BarDataSet(getBarChartData(), "Sales per month");
+                            chart.animateY(3000);
+
+            ArrayList<String> months = new ArrayList<>();
+                            months.add("Jan");
+                            months.add("Feb");
+                            months.add("Mar");
+                            months.add("Apr");
+            BarData data= new BarData( dataSet);
+                            chart.setData(data);
     }
 }

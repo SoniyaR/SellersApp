@@ -48,8 +48,10 @@ public class CustomAdapter extends ArrayAdapter{
             ImageView imgView = convertView.findViewById(R.id.carImageView);
             if(info.getThumbnailUriString() !=null && !info.getThumbnailUriString().isEmpty()) {
                 Picasso.with(context).load(Uri.parse(info.getThumbnailUriString())).resize(0, 140).into(imgView);
-            }else {
+            }else if(info.getImage_uri_list()!=null && info.getImage_uri_list().size()>0){
                 Picasso.with(context).load(Uri.parse(info.getImage_uri_list().get(0))).resize(0, 140).into(imgView);
+            }else   {
+                Picasso.with(context).load(R.drawable.nocarpicture).resize(0, 140).into(imgView);
             }
 
             TextView model = convertView.findViewById(R.id.modelName);

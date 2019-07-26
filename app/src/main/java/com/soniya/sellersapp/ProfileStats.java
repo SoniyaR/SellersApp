@@ -2,26 +2,27 @@ package com.soniya.sellersapp;
 
 public class ProfileStats {
 
-    private long totalWorth;
-    private long soldWorth;
+    private double totalWorth;
+    private double soldWorth;
     private int availableInventory;
     private int soldInventory;
     private int avgSellperMonth;
-    private long avgSellWorthMonth;
+    private double avgSellWorthMonth;
+    private String worthUnit;
 
-    public long getTotalWorth() {
+    public double getTotalWorth() {
         return totalWorth;
     }
 
-    public void setTotalWorth(long totalWorth) {
+    public void setTotalWorth(double totalWorth) {
         this.totalWorth = totalWorth;
     }
 
-    public long getSoldWorth() {
+    public double getSoldWorth() {
         return soldWorth;
     }
 
-    public void setSoldWorth(long soldWorth) {
+    public void setSoldWorth(double soldWorth) {
         this.soldWorth = soldWorth;
     }
 
@@ -41,11 +42,11 @@ public class ProfileStats {
         this.avgSellperMonth = avgSellperMonth;
     }
 
-    public long getAvgSellThisMonth() {
+    public double getAvgSellThisMonth() {
         return avgSellWorthMonth;
     }
 
-    public void setAvgSellThisMonth(long avgSellWorthMonth) {
+    public void setAvgSellThisMonth(double avgSellWorthMonth) {
         this.avgSellWorthMonth = avgSellWorthMonth;
     }
 
@@ -57,6 +58,22 @@ public class ProfileStats {
         this.soldInventory = soldInventory;
     }
 
+    public double getAvgSellWorthMonth() {
+        return avgSellWorthMonth;
+    }
+
+    public void setAvgSellWorthMonth(double avgSellWorthMonth) {
+        this.avgSellWorthMonth = avgSellWorthMonth;
+    }
+
+    public String getWorthUnit() {
+        return worthUnit;
+    }
+
+    public void setWorthUnit(String worthUnit) {
+        this.worthUnit = worthUnit;
+    }
+
     public ProfileStats(){
         this.totalWorth =0;
         this.soldWorth =0;
@@ -64,5 +81,6 @@ public class ProfileStats {
         this.avgSellperMonth =0;
         this.avgSellWorthMonth =0;
         this.soldInventory =0;
+        this.worthUnit="";
     }
 }

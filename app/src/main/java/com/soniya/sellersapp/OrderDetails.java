@@ -2,11 +2,13 @@ package com.soniya.sellersapp;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -33,7 +35,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class OrderDetails extends AppCompatActivity implements View.OnClickListener {
 
@@ -62,14 +63,6 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
     char space = ' ';
     char replacechar = '_';
 
-    List<Bitmap> carImagesList = new ArrayList<>();
-
-    boolean modelchanged = false;
-    boolean pricechanged = false;
-
-    String oldPriceVal= "";
-    String oldModelVal= "";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,7 +75,6 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
         locDetails = findViewById(R.id.locationdetails);
         price = findViewById(R.id.price);
         color = findViewById(R.id.colorDetails);
-        //brand = findViewById(R.id.brandDetails);
         fuel = findViewById(R.id.fuelEditDetails);
         yearDetails = findViewById(R.id.yearDetails);
         vehicleNum = findViewById(R.id.vehNumDetailsView);
@@ -104,8 +96,14 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
         updateRef = FirebaseDatabase.getInstance().getReference().child("InfoUpdates");
 
         Intent intent = getIntent();
+        if(intent.hasExtra("forEdit") && intent.getBooleanExtra("forEdit", false)) {
+            editmode = true;
+            Log.i("soni-", "edit mode is On");
 
-        if(intent.getExtras() != null && intent.hasExtra("selVehicleNum"))  {
+        }
+        else{
+
+        if(intent.getExtras() != null && intent.hasExtra("selVehicleNum")) {
             // call retrieve car info
             String vehicleNo = intent.getStringExtra("selVehicleNum").replace(space, replacechar);
             vehicleNum.setText(intent.getStringExtra("selVehicleNum"));
@@ -114,7 +112,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
             carInfoReference.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if( dataSnapshot != null && dataSnapshot.getValue()!=null)   {
+                    if (dataSnapshot != null && dataSnapshot.getValue() != null) {
 
                         CarInfo carInfo = dataSnapshot.getValue(CarInfo.class);
 
@@ -124,14 +122,14 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                         brandmodel.setText(carInfo.getBrand_name() + " " + carInfo.getModel_name());
                         color.setText(carInfo.getColor());
                         locDetails.setText(carInfo.getLocation());
-                        Drawable img = ContextCompat.getDrawable(getApplicationContext(), R.drawable.map_default_map_marker);
-                        img.setBounds(0, 0, img.getMinimumWidth()/2, img.getMinimumHeight()/2);
+                        Drawable img = ContextCompat.getDrawable(getApplicationContext(), R.drawable.ma);
+                        img.setBounds(0, 0, img.getMinimumWidth() / 2, img.getMinimumHeight() / 2);
                         locDetails.setCompoundDrawables(img, null, null, null);
                         price.setText(carInfo.getSellingprice());
-                        if(carInfo.getDescription() !=null && !carInfo.getDescription().isEmpty()) {
+                        if (carInfo.getDescription() != null && !carInfo.getDescription().isEmpty()) {
                             description.setText(carInfo.getDescription());
                             description.setVisibility(View.VISIBLE);
-                        }else{
+                        } else {
                             description.setVisibility(View.GONE);
                         }
                         fuel.setText(carInfo.getFuelType());
@@ -139,7 +137,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                         kmsDriven.setText(carInfo.getKmsDriven());
                         ownerDetails.setText("Owner : " + carInfo.getOwner());
 
-                        if(carInfo.getAvailability().equalsIgnoreCase("Sold"))  {
+                        if (carInfo.getAvailability().equalsIgnoreCase("Sold")) {
                             Log.i("soni-", "this model is sold!");
                             soldButton.setText("Sold");
                             soldButton.setBackgroundColor(Color.GRAY);
@@ -155,10 +153,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                 }
             });
 
-            if(intent.hasExtra("forEdit") && intent.getBooleanExtra("forEdit", false)) {
-                editmode = true;
-
-            }
+        }
         }
 
         /*pricedialog = new AlertDialog.Builder(this).create();
@@ -200,15 +195,15 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
             case R.id.editCarInfo:
 
-                /*if(!editmode) {
+                if(!editmode) {
                     editmode = true;
                     //makeEditable();
                     item.setTitle("Save");
                 }else{
                     editmode = false;
                     item.setTitle("Edit");
-                    updateCarInfo();
-                }*/
+//                    updateCarInfo();
+                }
                 break;
 
             case android.R.id.home:
@@ -349,7 +344,50 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                 displayCarImages();
                 break;
 
+            case R.id.brandModelDetails:
+                Log.i("soni-", "clicked on brand and model");
+                showDialog(this, "Enter brand and model", v);
+                break;
+
+            case R.id.priceLayout:
+                Log.i("soni-", "clicked price");
+                showDialog(this, "Enter new price", v);
+                break;
+
+            case R.id.mfgyearLayout:
+                Log.i("soni-", "clicked on mfg year");
+                showDialog(this, "Enter mfg year", v);
+                break;
+            case R.id.colorLayout:
+                showDialog(this, "Enter color", v);
+                break;
+            case R.id.kmsLayout:
+                showDialog(this, "Enter Kms driven", v);
+                break;
+            case R.id.transmissionLayout:
+                showDialog(this, "Transmission?", v);
+                break;
+            case R.id.ownerLayout:
+                showDialog(this, "Owner?", v);
+                break;
+            case R.id.fuelLayout:
+                showDialog(this, "Enter fuel", v);
+                break;
+            case R.id.insuranceLayout:
+                showDialog(this, "Insurance?", v);
+                break;
+
+            case R.id.locationdetails:
+                showDialog(this, "Enter new location", v);
+                break;
         }
+    }
+
+    private void showDialog(Context context, String message, View view)    {
+
+        AlertDialog dialog = new AlertDialog.Builder(context)
+                .setMessage(message).create();
+
     }
 
     public void expand()    {
@@ -367,29 +405,31 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
         ValueAnimator mAnimator = slideAnimator(finalHeight, 0);
 
-        mAnimator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            mAnimator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
 
-            }
+                }
 
-            @Override
-            public void onAnimationEnd(Animator animator) {
-                //Height=0, but it set visibility to GONE
-                collapseLinear.setVisibility(View.GONE);
-            }
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    //Height=0, but it set visibility to GONE
+                    collapseLinear.setVisibility(View.GONE);
+                }
 
-            @Override
-            public void onAnimationCancel(Animator animation) {
+                @Override
+                public void onAnimationCancel(Animator animation) {
 
-            }
+                }
 
-            @Override
-            public void onAnimationRepeat(Animator animation) {
+                @Override
+                public void onAnimationRepeat(Animator animation) {
 
-            }
+                }
 
-        });
+            });
+        }
         mAnimator.start();
     }
 
@@ -398,16 +438,18 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
         ValueAnimator animator = ValueAnimator.ofInt(start, end);
 
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                //Update Height
-                int value = (Integer) valueAnimator.getAnimatedValue();
-                ViewGroup.LayoutParams layoutParams = collapseLinear.getLayoutParams();
-                layoutParams.height = value;
-                collapseLinear.setLayoutParams(layoutParams);
-            }
-        });
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    //Update Height
+                    int value = (Integer) valueAnimator.getAnimatedValue();
+                    ViewGroup.LayoutParams layoutParams = collapseLinear.getLayoutParams();
+                    layoutParams.height = value;
+                    collapseLinear.setLayoutParams(layoutParams);
+                }
+            });
+        }
         return animator;
     }
 

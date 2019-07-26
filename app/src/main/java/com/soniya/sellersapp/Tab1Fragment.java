@@ -159,7 +159,7 @@ public class Tab1Fragment extends Fragment {
         switch(item.getItemId())   {
 
             case R.id.deleteRecord:
-                Log.i("soni-contextmenu", "deleteRecord selected");
+                Log.i("soni-contextmenu", "deleteRecord selected " + selVehicleNum);
                 new FirebaseDataFactory().deleteRecord(selVehicleNum);
                 return true;
 
