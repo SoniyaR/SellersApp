@@ -79,7 +79,6 @@ public class Tab1Fragment extends Fragment {
 
         if(carsArraylist!=null && carsArraylist.size()>0) {
             myCarslist.clear();
-            //Log.i("soni-", "we have carsarraylist tab1frag , size = " + carsArraylist.size());
             AppListeners carInfoInstance = new AppListeners();
             carInfoInstance.setCarNumbersListener(new AppListeners.CarNumbersListener() {
 
