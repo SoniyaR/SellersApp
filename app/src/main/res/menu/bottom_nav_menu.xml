@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/bottom_nav_orders"
+        android:icon="@drawable/ic_car_white"
+        android:title="My orders"/>
+
+    <item android:id="@+id/bottom_nav_other_orders"
+        android:icon="@drawable/ic_search_white"
+        android:title="All Orders"/>
+
+    <item android:id="@+id/bottom_nav_leads"
+        android:icon="@drawable/ic_note_add_white"
+        android:title="Leads" />
+
+</menu>

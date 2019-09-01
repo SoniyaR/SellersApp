@@ -9,11 +9,11 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.InputFilter;
 import android.util.Log;
 import android.view.View;
@@ -26,10 +26,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mapbox.api.geocoding.v5.models.CarmenFeature;
-import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete;
-
+import com.soniya.sellersapp.adapters.LocationAdapter;
+import com.soniya.sellersapp.pojo.CarInfoSerial;
 
 
 public class UploadNewInfo extends AppCompatActivity implements View.OnClickListener {
@@ -256,10 +254,10 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
 
                 Log.i("soni-", "clicked on locationEditText");
 
-                Intent intent = new PlaceAutocomplete.IntentBuilder()
+                /*Intent intent = new PlaceAutocomplete.IntentBuilder()
                         .accessToken(Mapbox.getAccessToken())
                         .build(this);
-                startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);
+                startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);*/
 
                 //showAutocomplete();
 
@@ -294,9 +292,9 @@ public class UploadNewInfo extends AppCompatActivity implements View.OnClickList
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_AUTOCOMPLETE && resultCode == Activity.RESULT_OK) {
-
-            CarmenFeature feature = PlaceAutocomplete.getPlace(data);
-            locationText.setText(feature.text());
+//
+//            CarmenFeature feature = PlaceAutocomplete.getPlace(data);
+//            locationText.setText(feature.text());
         }
     }
 

@@ -8,10 +8,19 @@
     android:layout_margin="8dp"
     tools:context=".SignupForm">
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/signupback"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:background="?android:attr/colorPrimary"
+            tools:targetApi="lollipop"
+            android:theme="@style/MyToolbarTheme"
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
             android:id="@+id/topText"
@@ -118,6 +127,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/Or" />
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </ScrollView>

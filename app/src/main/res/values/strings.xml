@@ -3,6 +3,7 @@
     <string name="testMerchantId">TtIKjC23738458476697</string>
     <string name="testPaytmSecretKey">wz@7#@@GI8MRnB6W</string>
     <string name="web_client_id">AIzaSyAoaTpL3mpT9gBtJB1DlUF9NYoAR90ssB4</string>
+    <string name="rupee">\u20B9</string>
 
     <!-- Facebook application ID and custom URL scheme (app ID prefixed by 'fb'). -->
     <!--string name="facebook_application_id" translatable="false">YOUR_APP_ID</-string>

@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
@@ -10,93 +8,90 @@
     android:layout_marginBottom="4dp"
     android:gravity="fill"
     android:orientation="vertical">
-<!--
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">-->
 
-        <ImageView
-            android:id="@+id/carImageView"
+    <ImageView
+        android:id="@+id/carImageView"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_gravity="center|fill"
+        android:scaleType="centerCrop"
+        android:src="@drawable/nocarpicture" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginLeft="8dp"
+        android:layout_gravity="center"
+        android:layout_marginRight="4dp"
+        android:gravity="fill"
+        android:orientation="vertical"
+        android:paddingLeft="8dp">
+
+        <TextView
+            android:id="@+id/modelName"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:layout_gravity="center|fill"
-            android:scaleType="centerCrop"
-            android:src="@drawable/nocarpicture" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center|left"
+            android:padding="2dp"
+            android:text="name"
+            android:textColor="@android:color/black"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center|left"
+            android:padding="2dp"
+            android:text="location"
+            android:textColor="@android:color/black"
+            android:textSize="16sp" />
 
         <LinearLayout
-            android:id="@+id/linearLayout"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_gravity="center"
-            android:layout_marginRight="4dp"
-            android:gravity="fill"
-            android:orientation="vertical"
-            android:paddingLeft="8dp">
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/rupeeImage"
+                android:layout_width="10dp"
+                android:layout_height="12dp"
+                android:layout_gravity="center"
+                android:scaleType="fitCenter"
+                android:src="@drawable/rupee" />
 
             <TextView
-                android:id="@+id/modelName"
+                android:id="@+id/sellingprice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginLeft="4dp"
                 android:gravity="center|left"
                 android:padding="2dp"
-                android:text="name"
-                android:textColor="@android:color/black"
-                android:textSize="20sp" />
-
-            <TextView
-                android:id="@+id/location"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center|left"
-                android:padding="2dp"
-                android:text="location"
+                android:text="selling price"
                 android:textColor="@android:color/black"
                 android:textSize="16sp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/rupeeImage"
-                    android:layout_width="10dp"
-                    android:layout_height="12dp"
-                    android:layout_gravity="center"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/rupee" />
-
-                <TextView
-                    android:id="@+id/sellingprice"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="4dp"
-                    android:gravity="center|left"
-                    android:padding="2dp"
-                    android:text="selling price"
-                    android:textColor="@android:color/black"
-                    android:textSize="16sp" />
-            </LinearLayout>
-
-            <!--<TextView
-                android:id="@+id/availabilityText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="fill"
-                android:layout_weight="1"
-                android:gravity="center|right"
-                android:padding="4dp"
-                android:text="Available"
-                android:textColor="@color/colorPrimary"
-                android:textSize="20sp"
-                android:textStyle="bold" />
--->
         </LinearLayout>
+
+        <!--<TextView
+            android:id="@+id/availabilityText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill"
+            android:layout_weight="1"
+            android:gravity="center|right"
+            android:padding="4dp"
+            android:text="Available"
+            android:textColor="@color/colorPrimary"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+-->
+    </LinearLayout>
     <!--</LinearLayout>-->
 
 

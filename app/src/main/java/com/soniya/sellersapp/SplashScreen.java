@@ -2,7 +2,7 @@ package com.soniya.sellersapp;
 
 import android.content.Intent;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
 
@@ -20,7 +20,7 @@ public class SplashScreen extends AppCompatActivity {
                 startActivity(splashIntent);
                 finish();
             }
-        }, 3000);
+        }, 2500);
 
         ImageView steering = findViewById(R.id.splashicon);
         steering.animate().scaleX(0.1f).scaleY(0.1f);

@@ -1,8 +1,8 @@
 package com.soniya.sellersapp;
 
-import android.net.Uri;
-
 import com.google.firebase.database.DatabaseReference;
+import com.soniya.sellersapp.adapters.FirebaseAdapter;
+import com.soniya.sellersapp.pojo.CarInfo;
 
 import java.util.ArrayList;
 

@@ -1,6 +1,6 @@
 package com.soniya.sellersapp;
 
-import java.util.ArrayList;
+import com.soniya.sellersapp.pojo.ProfileStats;
 
 public class ProfileListener {
 

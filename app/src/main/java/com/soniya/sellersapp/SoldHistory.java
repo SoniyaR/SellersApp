@@ -1,8 +1,7 @@
 package com.soniya.sellersapp;
 
-import android.graphics.BitmapFactory;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -14,17 +13,20 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.soniya.sellersapp.adapters.OrdersFragmentAdapter;
+import com.soniya.sellersapp.adapters.FirebaseAdapter;
+import com.soniya.sellersapp.pojo.CarInfo;
+import com.soniya.sellersapp.pojo.UserInformation;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 public class SoldHistory extends AppCompatActivity {
 
     ListView soldList;
-    CustomAdapter adapter;
+    OrdersFragmentAdapter adapter;
 
     DatabaseReference userRef;
 
@@ -59,7 +61,7 @@ public class SoldHistory extends AppCompatActivity {
         setTitle("Sold History");
 
         soldList = (ListView) findViewById(R.id.soldList);
-        //adapter = new CustomAdapter(this, hmList, R.layout.carslist_layout, from, to);
+        //adapter = new OrdersFragmentAdapter(this, hmList, R.layout.carslist_layout, from, to);
         //soldList.setAdapter(adapter);
 
         userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
@@ -125,7 +127,7 @@ public class SoldHistory extends AppCompatActivity {
 
                     //ArrayList<CarInfoSerial> soldCarsSeriallist= new FirebaseAdapter().buildInfoSerializable(soldCarInfoList);
                     Log.i("soni-", "datasnapshot sold history retrieved");
-                    adapter = new CustomAdapter(getApplicationContext(), soldCarInfoList, R.layout.carslist_layout);
+                    adapter = new OrdersFragmentAdapter(getApplicationContext(), soldCarInfoList, R.layout.carslist_layout);
                     soldList.setAdapter(adapter);
                 }
             }

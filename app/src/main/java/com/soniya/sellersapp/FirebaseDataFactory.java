@@ -1,6 +1,6 @@
 package com.soniya.sellersapp;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -13,10 +13,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.soniya.sellersapp.adapters.FirebaseAdapter;
+import com.soniya.sellersapp.pojo.CarInfo;
+import com.soniya.sellersapp.pojo.CarInfoSerial;
+import com.soniya.sellersapp.pojo.ProfileStats;
+import com.soniya.sellersapp.pojo.UserInformation;
 
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -144,18 +147,6 @@ public class FirebaseDataFactory {
                             Log.i("soni-", "not able to get activeordersList");
                         }
                     }
-
-                    /*if (activeorders_List.size() > 0) {
-
-                        int index = -1;
-                        for (String order : (List<String>) activeorders_List) {
-                            if (order == null) {
-                                index = activeorders_List.indexOf(order);
-                                activeorders_List.remove(index);
-                            }
-                        }
-
-                    }*/
 
                     if (listener != null) {
                         listener.onRetrieve(activeorders_List, paidforCars);

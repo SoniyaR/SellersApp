@@ -1,17 +1,17 @@
 package com.soniya.sellersapp;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
-import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -25,8 +25,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -35,19 +33,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-/*import com.parse.FindCallback;
-import com.parse.LogInCallback;
-import com.parse.Parse;
-import com.parse.ParseACL;
-import com.parse.ParseException;
-import com.parse.ParseQuery;
-import com.parse.ParseUser;
-import com.parse.SignUpCallback;*/
-
-import org.apache.commons.collections4.map.HashedMap;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.soniya.sellersapp.adapters.FirebaseAdapter;
+import com.soniya.sellersapp.pojo.UserInformation;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -59,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ConstraintLayout backLayout;
     ImageView logo;
     TextView forgotPwd;
+    Context context;
 
     //in case of username login
     String emailId = "";
@@ -85,6 +73,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        context = this;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             if (isInMultiWindowMode()) {
@@ -278,6 +268,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         FirebaseUser user = mAuth.getCurrentUser();
         if(user.isEmailVerified())  {
+
+            context.getSharedPreferences("LoginInfo", MODE_PRIVATE).edit()
+                    .putString("userId", user.getUid())
+                    .putString("userName", user.getDisplayName())
+                    .putString("userEmail", user.getEmail())
+                    .apply();
             Toast.makeText(this, "Successfully Logged in!", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(getApplicationContext(), HomePage.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);

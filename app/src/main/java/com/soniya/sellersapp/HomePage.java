@@ -1,44 +1,48 @@
 package com.soniya.sellersapp;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.tabs.TabLayout;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
+import com.soniya.sellersapp.adapters.FirebaseAdapter;
+import com.soniya.sellersapp.adapters.TabAdapter;
+import com.soniya.sellersapp.fragments.OrdersFragment;
+import com.soniya.sellersapp.fragments.AllOrdersFragment;
+import com.soniya.sellersapp.fragments.LeadsFragment;
+import com.soniya.sellersapp.pojo.CarInfo;
+import com.soniya.sellersapp.pojo.CarInfoSerial;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 public class HomePage extends AppCompatActivity {
 
@@ -46,53 +50,157 @@ public class HomePage extends AppCompatActivity {
     private TabLayout tabLayout;
     private ViewPager viewPager;
     int gotoTab = 0;
+    Context context;
 
     private boolean doubleBackToExitPressedOnce=false;
 
     List activeOrders ;
-//
-//    char space = ' ';
-//    char replacechar = '_';
 
     FirebaseAdapter fbAdapter = new FirebaseAdapter();
-//    FirebaseDataFactory fbFactory = new FirebaseDataFactory();
 
     DatabaseReference carInfoReference;
     DatabaseReference userRef;
-//
-//    StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-//
-//    String selVehicleNum = "";
-//    String uname = "";
-//
-//    int contextSelPosition = 0;
 
     Fragment tab1frag;
     Fragment tab2frag;
     Fragment tab3frag;
     Bundle tabbundle = new Bundle();
-//
-//    boolean paidForOtherOrders = false;
-//
-//    public static String encodeString(String string) {
-//        if(string == null || (string !=null && string.isEmpty())){
-//            return "";
-//        }
-//        return string.replace(".", ",");
-//    }
 
     ArrayList<CarInfoSerial> carsArraylist;
 
+    DrawerLayout homeDrawerLayout;
+    NavigationView navigationView;
+    BottomNavigationView bottomNavigationView;
+
     @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_home_page);
+        setTitle("Active Orders");
+        context = this;
+
+        homeDrawerLayout = findViewById(R.id.main_drawer);
+        bottomNavigationView = findViewById(R.id.bottom_nav_bar);
+
+        navigationView = findViewById(R.id.navigation);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                switch (menuItem.getItemId()){
+
+                    case R.id.myprofile:
+                        gotoProfile();
+                        break;
+
+                    case R.id.settings:
+                        gotoSettings();
+                        break;
+
+                    case R.id.privacypolicy:
+                        openPolicy();
+                        break;
+
+                    case R.id.logout:
+                        fbAdapter.logoutUser();
+                        context.getSharedPreferences("LoginInfo",MODE_PRIVATE).edit().clear().apply();
+                        Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                        startActivity(i);
+                        finish();
+                        break;
+
+                        default:
+                            Log.i("soni-", "default case on navigation change...");
+
+                }
+                menuItem.setChecked(true);
+                homeDrawerLayout.closeDrawer(GravityCompat.START);
+
+                return true;
+            }
+        });
+
+        bottomNavigationView.setSelectedItemId(R.id.bottom_nav_orders);
+        loadFragment(new OrdersFragment());
+
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+                Fragment fragment = null;
+                switch(item.getItemId()){
+
+                    case R.id.bottom_nav_orders:
+                        fragment = new OrdersFragment();
+                        break;
+
+                    case R.id.bottom_nav_other_orders:
+                        fragment = new AllOrdersFragment();
+                        break;
+
+                    case R.id.bottom_nav_leads:
+                        fragment = new LeadsFragment();
+                        break;
+                }
+                item.setChecked(true);
+                if(fragment!=null)
+                loadFragment(fragment);
+
+                return true;
+            }
+        });
+
+        View headerView = navigationView.getHeaderView(0);
+        TextView nameNav = headerView.findViewById(R.id.nav_name);
+        nameNav.setText(getSharedPreferences("LoginInfo", MODE_PRIVATE).getString("userName", ""));
+        TextView emailNav = headerView.findViewById(R.id.nav_email);
+        emailNav.setText(getSharedPreferences("LoginInfo", MODE_PRIVATE).getString("userEmail", ""));
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        final ActionBar actionbar = getSupportActionBar();
+        if(actionbar != null) {
+            actionbar.setDisplayHomeAsUpEnabled(true);
+            actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        }
+
+        Log.i("soni-date ", fbAdapter.getSignupDate().toString());
+        carsArraylist = new ArrayList<>();
+
+        //{model_name=qwe12_bb, sellingprice=90000, description=nnhh_ffgg, location=pune, availability=Available}
+
+    }
+
+    private void loadFragment(Fragment fragment) {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.list_container, fragment)
+                .commit();
+
+    }
+
+    private void openPolicy() {
+    }
+
+  /*  @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.home_menu, menu);
+        menuInflater.inflate(R.menu.nav_items, menu);
 
         return super.onCreateOptionsMenu(menu);
     }
-
+*/
+    //handles click on toolbar buttons
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                homeDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+   /* @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
 
@@ -102,7 +210,7 @@ public class HomePage extends AppCompatActivity {
                 break;
 
             case R.id.myprofile:
-                gotoProfile();
+
                 break;
 
             case R.id.importexcel:
@@ -118,10 +226,6 @@ public class HomePage extends AppCompatActivity {
                 finish();
                 break;
 
-            /*case R.id.refreshList:
-                refreshList();
-                break;*/
-
             case R.id.soldhistory:
                 showSoldHistory();
                 break;
@@ -130,86 +234,18 @@ public class HomePage extends AppCompatActivity {
         }
 
         return true;
-    }
+    }*/
 
     private void showSoldHistory() {
         Intent soldIntent = new Intent(getApplicationContext(), SoldHistory.class);
         startActivity(soldIntent);
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home_page);
-
-        setTitle("Active Orders");
-
-        Log.i("soni-date ", fbAdapter.getSignupDate().toString());
-        carsArraylist = new ArrayList<>();
-
-        //{model_name=qwe12_bb, sellingprice=90000, description=nnhh_ffgg, location=pune, availability=Available}
-
-        if (isOnline()) {
-
-            if (!fbAdapter.checkCurrentUser()) {
-                //goto login screen
-                Log.i("soni-", "Not logged in, back to mainActivity classs");
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            } else {
-                if(getIntent() !=null && getIntent().getExtras() !=null)    {
-                    Intent intent = getIntent();
-                    if(intent.hasExtra("gotoTab"))    {
-                        gotoTab = intent.getIntExtra("gotoTab", 0);
-                    }
-                }
-                setupTabFragments();
-            }
-
-        }
-        else {
-            try {
-                AlertDialog.Builder alert = new AlertDialog.Builder(this)
-                        .setMessage("Not connected to Internet!")
-                        .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                finish();
-                            }
-                        });
-                alert.show();
-            }
-            catch (Exception e) {
-                Log.i("soni-", "homepage-alertdialog exc - "+ e.getMessage());
-            }
-        }
-
-
-        /*
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int i, float v, int i1) {
-
-            }
-
-            @Override
-            public void onPageSelected(int i) {
-                Log.i("soni-", "onPageSelected = " + String.valueOf(i));
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int i) {
-
-            }
-        });*/
-    }
-
     private void setupTabFragments()    {
 
-        tab1frag = new Tab1Fragment();
-        tab2frag = new Tab2Fragment();
-        tab3frag = new Tab3Fragment();
+        tab1frag = new OrdersFragment();
+        tab2frag = new AllOrdersFragment();
+        tab3frag = new LeadsFragment();
 
         activeOrders = null;
         carsArraylist = new ArrayList<>();
@@ -217,42 +253,6 @@ public class HomePage extends AppCompatActivity {
         carInfoReference = FirebaseDatabase.getInstance().getReference().child("CarsInfo");
         userRef = FirebaseDatabase.getInstance().getReference().child("userInfo");
 
-        viewPager = findViewById(R.id.viewPagerHome);
-        tabLayout = findViewById(R.id.tabLayout);
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                //Log.i("soni-", "tab selected " + String.valueOf(tab.getPosition()));
-                switch (tab.getPosition()) {
-                    case 0:
-                        replaceFragment(tab1frag);
-                        break;
-
-                    case 1:
-                        Log.i("soni-", "tab2- other orders is selected!");
-
-                        //if user paid to see other orders, open tab with list of all other orders
-                        //else show text as user needs to subscribe with some pay plan
-                        //if(paidForOtherOrders) {
-                            replaceFragment(tab2frag);
-//                        }else{
-//                            paymentPendingFragment(tab2frag);
-//                        }
-
-                        break;
-                }
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
 
         AppListeners listenerInstance = new AppListeners();
 
@@ -265,7 +265,7 @@ public class HomePage extends AppCompatActivity {
 
                     adapter = new TabAdapter(getSupportFragmentManager());
 
-                    replaceFragment(tab1frag);
+//                    replaceFragment(tab1frag);
 
                     adapter.addFragment(tab1frag, "My Orders");
                     adapter.addFragment(tab2frag, "Other Orders");
@@ -293,18 +293,17 @@ public class HomePage extends AppCompatActivity {
         });
 
     }
+/*
 
     private void replaceFragment(Fragment fragment) {
 
         tabbundle.putSerializable("carsArrayList", carsArraylist);
-        if (!isFinishing()) {
+        if (!isFinishing() && fragment !=null) {
             FragmentManager fm = getSupportFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
             fragment.setArguments(tabbundle);
             ft.replace(R.id.viewPagerHome, fragment);
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            //ft.addToBackStack(null);
-            //Log.i("soni-hompage", "replace fragment");
             ft.commit();
         }
     }
@@ -324,14 +323,8 @@ public class HomePage extends AppCompatActivity {
         }
     }
 
-    public boolean isOnline()   {
-        ConnectivityManager manager = (ConnectivityManager) getApplicationContext().getSystemService(CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = manager.getActiveNetworkInfo();
-        if(netInfo == null || !netInfo.isConnected())   {
-            return false;
-        }
-        return true;
-    }
+*/
+
 
 /*
 
@@ -469,21 +462,26 @@ public class HomePage extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        if (doubleBackToExitPressedOnce) {
-            super.onBackPressed();
-            finish();
-        }
+        if(homeDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            homeDrawerLayout.closeDrawer(GravityCompat.START);
+        } else {
 
-        this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Please click BACK again to exit!", Toast.LENGTH_SHORT).show();
-
-        new Handler().postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                doubleBackToExitPressedOnce = false;
+            if (doubleBackToExitPressedOnce) {
+                super.onBackPressed();
+                finish();
             }
-        }, 2000);
+
+            this.doubleBackToExitPressedOnce = true;
+            Toast.makeText(this, "Please click BACK again to exit!", Toast.LENGTH_SHORT).show();
+
+            new Handler().postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    doubleBackToExitPressedOnce = false;
+                }
+            }, 2000);
+        }
 
     }
 
@@ -507,6 +505,10 @@ public class HomePage extends AppCompatActivity {
     private void gotoProfile()  {
         Intent intentProfile = new Intent(getApplicationContext(), MyProfile.class);
         startActivity(intentProfile);
+    }
+
+    private void gotoSettings(){
+
     }
 
   /*  public void refreshList()   {

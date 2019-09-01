@@ -40,12 +40,7 @@ public class ReadExcelDemo {
 				HashMap<String, String> hm = new HashMap<>();
 				
 				Row row = rowIterator.next();
-				
-				//System.out.println(row.getRowNum());
-				//if(row.getRowNum() == 1) {
-				//	continue;
-				//}
-				
+
 				Iterator<Cell> cellIterator = row.cellIterator();
 
 				String val="";

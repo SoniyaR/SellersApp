@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:title="Edit"
-        android:id="@+id/editCarInfo"
-        app:showAsAction="always"/>
+        android:id="@+id/editCarInfo"/>
+    
     <item android:title="Mark Available"
         android:id="@+id/markAvailable" />
 

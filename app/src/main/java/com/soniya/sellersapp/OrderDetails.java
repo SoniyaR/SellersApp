@@ -2,18 +2,20 @@ package com.soniya.sellersapp;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -32,6 +34,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.soniya.sellersapp.pojo.CarInfo;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -95,6 +98,14 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
         updateRef = FirebaseDatabase.getInstance().getReference().child("InfoUpdates");
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionbar = getSupportActionBar();
+        if(actionbar != null) {
+            actionbar.setDisplayHomeAsUpEnabled(true);
+            actionbar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
+        }
+
         Intent intent = getIntent();
         if(intent.hasExtra("forEdit") && intent.getBooleanExtra("forEdit", false)) {
             editmode = true;
@@ -117,14 +128,20 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
                         CarInfo carInfo = dataSnapshot.getValue(CarInfo.class);
 
                         urlList = carInfo.getImage_uri_list();
-                        loadImages();
+                        if(urlList!=null && urlList.size()>0) {
+                            loadImages();
+                            scrollView.setClickable(true);
+                        }else{
+                            ImageView img = new ImageView(getApplicationContext());
+                            img.setImageResource(R.drawable.nocarpicture);
+                            img.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                            gallery.addView(img);
+                            scrollView.setClickable(false);
+                        }
 
                         brandmodel.setText(carInfo.getBrand_name() + " " + carInfo.getModel_name());
                         color.setText(carInfo.getColor());
                         locDetails.setText(carInfo.getLocation());
-                        Drawable img = ContextCompat.getDrawable(getApplicationContext(), R.drawable.ma);
-                        img.setBounds(0, 0, img.getMinimumWidth() / 2, img.getMinimumHeight() / 2);
-                        locDetails.setCompoundDrawables(img, null, null, null);
                         price.setText(carInfo.getSellingprice());
                         if (carInfo.getDescription() != null && !carInfo.getDescription().isEmpty()) {
                             description.setText(carInfo.getDescription());
@@ -174,6 +191,7 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
     }
 
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -210,6 +228,13 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
                 onBackPressed();
                 break;
+
+            /*case android.R.id.home:
+                Intent returnIntent = new Intent();
+                setResult(Activity.RESULT_OK,returnIntent);
+                finish();
+                return true;*/
+
 
             case R.id.markAvailable:
 
@@ -273,26 +298,19 @@ public class OrderDetails extends AppCompatActivity implements View.OnClickListe
 
         LayoutInflater inflater = LayoutInflater.from(this);
 
-        for(int i = 0; i < urlList.size(); i++)  {
+        for(String url : urlList)  {
 
             View view = inflater.inflate(R.layout.imgitem, gallery, false);
             ImageView imageView = view.findViewById(R.id.imageView);
-            imageView.setImageResource(R.mipmap.ic_launcher);
-            //Glide.with(getApplicationContext()).load(urlList.get(i)).into(imageView);
-            Picasso.with(getApplicationContext()).load(urlList.get(i)).into(imageView);
+            imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            Picasso.get().load(url).into(imageView);
+            /*if(view.getParent()!=null){
+                ((ViewGroup)view.getParent()).removeView(view);
+            }*/
             gallery.addView(view);
         }
 
     }
-
-   /* private void loadImagesToList() {
-        //retrieve images from urls to list of bitmap
-        ArrayList<Uri> uriArrayList = new ArrayList<>();
-        for(String uri : urlList)   {
-            uriArrayList.add(Uri.parse(uri));
-        }
-
-    }*/
 
     @Override
     public void onClick(View v) {
